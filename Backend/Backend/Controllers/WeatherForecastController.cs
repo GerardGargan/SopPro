@@ -1,4 +1,6 @@
+using Backend.Models.Settings;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace Backend.Controllers
 {
@@ -11,11 +13,15 @@ namespace Backend.Controllers
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
 
+        private readonly ApplicationSettings _appSettings;
+
+
         private readonly ILogger<WeatherForecastController> _logger;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, IOptions<ApplicationSettings> appSettings)
         {
             _logger = logger;
+            _appSettings = appSettings.Value;
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
@@ -28,6 +34,8 @@ namespace Backend.Controllers
                 Summary = Summaries[Random.Shared.Next(Summaries.Length)]
             })
             .ToArray();
+            //return Ok(_appSettings.JwtSecret);
+
         }
     }
 }
