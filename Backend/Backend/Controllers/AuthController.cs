@@ -55,47 +55,24 @@ namespace Backend.Controllers
         }
 
 
-        //[HttpPost("inviteuser")]
-        ////[Authorize(Roles = StaticDetails.Role_Admin)]
-        //public async Task<IActionResult> InviteUser([FromBody] InviteRequestDTO model)
-        //{
-            
-        //    // Perform validation and error handling
-        //    ApplicationUser userFromDb = await _db.ApplicationUsers.FirstOrDefaultAsync(u => u.UserName.ToLower() == model.Email.ToLower());
-            
-        //    var isError = false;
+        [HttpPost("inviteuser")]
+        //[Authorize(Roles = StaticDetails.Role_Admin)]
+        [ProducesResponseType(200, Type = typeof(ApiResponse))]
+        public async Task<IActionResult> InviteUser([FromBody] InviteRequestDTO model)
+        {
 
-        //    if (userFromDb != null)
-        //    {
-        //        _response.ErrorMessages.Add("User already exists");
-        //        isError = true;
-        //    }
-            
-        //    if(!ModelState.IsValid)
-        //    {
-        //        var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-        //        _response.ErrorMessages.AddRange(errors);
-        //        isError = true;
-        //    }
+            var apiResponse = await _authService.InviteUser(model, ModelState);
 
-        //    // If an error has occurred return a bad response with the ApiResponse object populated
-        //    if(isError)
-        //    {
-        //        _response.StatusCode = HttpStatusCode.BadRequest;
-        //        _response.IsSuccess = false;
-        //        return BadRequest(_response);
-        //    }
+            if (apiResponse.IsSuccess)
+            {
+                return Ok(apiResponse);
+            }
+            else
+            {
+                return BadRequest(apiResponse);
+            }
 
-        //    // Data is validated at this point, proceed to generate a token and store it in the database, send the user an invitation email
-        //    string token = _jwtService.GenerateToken(model.Email, model.Role);
-
-        //    // Store the token and relevant info in the database
-
-        //    // Send the user an email with the token embedded in the link
-
-
-        //    return Ok(new { test = "test" });
-        //}
+        }
 
         [HttpGet("test")]
         public string Test()

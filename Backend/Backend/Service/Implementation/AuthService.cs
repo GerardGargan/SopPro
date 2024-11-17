@@ -121,6 +121,48 @@ namespace Backend.Service.Implementation
 
         }
 
+        public async Task<ApiResponse> InviteUser(InviteRequestDTO model, ModelStateDictionary modelState)
+        {
+            ApiResponse apiResponse = new ApiResponse();
+            // Perform validation and error handling
+            ApplicationUser userFromDb = await _unitOfWork.ApplicationUser.GetAsync(u => u.UserName.ToLower() == model.Email.ToLower());
+
+            var isError = false;
+
+            if (userFromDb != null)
+            {
+                apiResponse.ErrorMessages.Add("User already exists");
+                isError = true;
+            }
+
+            if (!modelState.IsValid)
+            {
+                var errors = modelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                apiResponse.ErrorMessages.AddRange(errors);
+                isError = true;
+            }
+
+            // If an error has occurred return a bad response with the ApiResponse object populated
+            if (isError)
+            {
+                apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                apiResponse.IsSuccess = false;
+                return apiResponse;
+            }
+
+            // Data is validated at this point, proceed to generate a token and store it in the database, send the user an invitation email
+            string token = _jwtService.GenerateToken(model.Email, model.Role);
+
+            // Store the token and relevant info in the database
+
+            // Send the user an email with the token embedded in the link
+
+            // return an api response
+            Console.WriteLine(token);
+
+            return apiResponse;
+        }
+
         public bool ValidatePassword(string password)
         {
             // Check if the password length is sufficient
