@@ -40,49 +40,43 @@ namespace Backend.Service.Implementation
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public ClaimsPrincipal ValidateToken(string token)
+        public ClaimsPrincipal ValidateToken(string token, string secret, string issuer, string audiece)
         {
-            //var securityKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_appSettings.JwtSecret));
-            //var tokenHandler = new JwtSecurityTokenHandler();
+            var securityKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(secret));
+            var tokenHandler = new JwtSecurityTokenHandler();
 
-            //var validationParameters = new TokenValidationParameters
-            //{
-            //    ValidateIssuer = true,
-            //    ValidateAudience = true,
-            //    ValidateLifetime = true,
-            //    ValidIssuer = _appSettings.JwtIssuer,
-            //    ValidAudience = _appSettings.JwtAudience,
-            //    IssuerSigningKey = securityKey,
-            //    ClockSkew = TimeSpan.Zero
-            //};
+            var validationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidIssuer = issuer,
+                ValidAudience = audiece,
+                IssuerSigningKey = securityKey,
+                ClockSkew = TimeSpan.Zero
+            };
 
-            //try
-            //{
-            //    // Check if the token exists in the database and is valid
-            //    var invitation = _dbContext.Invitations.SingleOrDefault(i => i.Token == token);
-            //    if (invitation == null || invitation.Status != "Pending" || invitation.Expiry < DateTime.UtcNow)
-            //    {
-            //        throw new SecurityTokenException("Invalid or expired token.");
-            //    }
+            try
+            {
 
-            //    var principal = tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);
+                var principal = tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);
 
-            //    // Ensure the token is a JWT
-            //    if (validatedToken is JwtSecurityToken jwtToken &&
-            //        jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
-            //    {
-            //        return principal;
-            //    }
-            //}
-            //catch (SecurityTokenException ex)
-            //{
-            //    // Log exception if needed
-            //    throw new SecurityTokenException("Invalid token.", ex);
-            //}
-            //catch (Exception ex)
-            //{
-            //    throw new Exception("An error occurred while validating the token.", ex);
-            //}
+                // Ensure the token is a JWT
+                if (validatedToken is JwtSecurityToken jwtToken &&
+                    jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return principal;
+                }
+            }
+            catch (SecurityTokenException ex)
+            {
+                // Log exception if needed
+                throw new SecurityTokenException("Invalid token.", ex);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while validating the token.", ex);
+            }
 
             return null;
         }

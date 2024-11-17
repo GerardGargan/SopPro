@@ -6,16 +6,16 @@ namespace Backend.Repository.Implementation
     public class UnitOfWork : IUnitOfWork
     {
         private readonly ApplicationDbContext _db;
-        public IApplicationUserRepository ApplicationUser { get; private set; }
-        public IOrganisationRepository Organisation { get; private set; }
-        public IInvitationRepository Invitation { get; private set; }
+        public IApplicationUserRepository ApplicationUsers { get; private set; }
+        public IOrganisationRepository Organisations { get; private set; }
+        public IInvitationRepository Invitations { get; private set; }
 
         public UnitOfWork(ApplicationDbContext db)
         {
             _db = db;
-            ApplicationUser = new ApplicationUserRepository(_db);
-            Organisation = new OrganisationRepository(_db);
-            Invitation = new InvitationRepository(_db);
+            ApplicationUsers = new ApplicationUserRepository(_db);
+            Organisations = new OrganisationRepository(_db);
+            Invitations = new InvitationRepository(_db);
         }
         public async Task SaveAsync()
         {

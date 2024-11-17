@@ -6,7 +6,7 @@ namespace Backend.Service.Interface
 {
     public interface IAuthService
     {
-        Task<ApiResponse> RegisterUser(RegisterRequestDTO model, ModelStateDictionary modelState);
+        Task<ApiResponse> RegisterInvitedUser(RegisterInviteRequestDTO model, ModelStateDictionary modelState);
         Task<ApiResponse> InviteUser(InviteRequestDTO model, ModelStateDictionary modelState);
     }
 }

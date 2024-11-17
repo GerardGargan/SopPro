@@ -2,9 +2,9 @@
 {
     public interface IUnitOfWork
     {
-        IApplicationUserRepository ApplicationUser { get; }
-        IOrganisationRepository Organisation { get; }
-        IInvitationRepository Invitation { get; }
+        IApplicationUserRepository ApplicationUsers { get; }
+        IOrganisationRepository Organisations { get; }
+        IInvitationRepository Invitations { get; }
         public Task SaveAsync();
     }
 }

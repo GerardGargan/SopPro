@@ -10,7 +10,10 @@ using Backend.Utility;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json.Linq;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
+using System.Security.Claims;
 
 namespace Backend.Service.Implementation
 {
@@ -36,23 +39,10 @@ namespace Backend.Service.Implementation
             _unitOfWork = unitOfWork;
             _appSettings = appSettings.Value;
         }
-        public async Task<ApiResponse> RegisterUser(RegisterRequestDTO model, ModelStateDictionary modelState)
+        public async Task<ApiResponse> RegisterInvitedUser(RegisterInviteRequestDTO model, ModelStateDictionary modelState)
         {
             var apiResponse = new ApiResponse();
             var isError = false;
-
-            // Attempt to fetch a user to check if they already exist
-            ApplicationUser userFromDb = await _unitOfWork.ApplicationUser.GetAsync(u => u.UserName.ToLower() == model.Email.ToLower());
-
-            // User with that email exists
-            if (userFromDb != null)
-            {
-                apiResponse.ErrorMessages.Add("Email is already in use");
-                apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                apiResponse.IsSuccess = false;
-                isError = true;
-                return apiResponse;
-            }
 
             if (!modelState.IsValid)
             {
@@ -74,13 +64,99 @@ namespace Backend.Service.Implementation
                 return apiResponse;
             }
 
+            // Validate the token
+            if(model.Token == null)
+            {
+                apiResponse.ErrorMessages.Add("Token is required");
+                apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                apiResponse.IsSuccess = false;
+                return apiResponse;
+            }
+
+            // Validate token exists in the invitations table
+            Invitation invitationFromDb = await _unitOfWork.Invitations.GetAsync(invitation => invitation.Token == model.Token, tracked: true);
+            
+            if (invitationFromDb == null)
+            {
+                apiResponse.ErrorMessages.Add("Invitation not found");
+                apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                apiResponse.IsSuccess = false;
+                return apiResponse;
+            } 
+            else if (invitationFromDb.ExpiryDate < DateTime.UtcNow)
+            {
+                apiResponse.ErrorMessages.Add("Invitation has expired, please contact an administrator");
+                apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                apiResponse.IsSuccess = false;
+                return apiResponse;
+            } 
+            else if(invitationFromDb.Status == Status.Accepted)
+            {
+                apiResponse.ErrorMessages.Add("Invitation has already been accepted");
+                apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                apiResponse.IsSuccess = false;
+                return apiResponse;
+            }
+
+            ClaimsPrincipal claimsPrincipal = null;
+
+            try
+            {
+                claimsPrincipal = _jwtService.ValidateToken(model.Token, _appSettings.JwtSecret, _appSettings.JwtIssuer, _appSettings.JwtAudience);
+            }
+            catch (Exception e)
+            {
+                apiResponse.ErrorMessages.Add("Error processing token");
+                apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                apiResponse.IsSuccess = false;
+                return apiResponse;
+            }
+
+            //var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(model.Token);
+
+            //// Get token claims
+            //var tokenEmail = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
+            //var tokenRole = jwtToken.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
+            //var organisationIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "organisationId")?.Value;
+
+            //if (!int.TryParse(organisationIdClaim, out var tokenOrganisationId))
+            //{
+            //    apiResponse.ErrorMessages.Add("Error parsing organisation");
+            //    apiResponse.StatusCode = HttpStatusCode.BadRequest;
+            //    apiResponse.IsSuccess = false;
+            //    return apiResponse;
+            //}
+
+            // Attempt to fetch a user to check if they already exist
+            ApplicationUser userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(u => u.UserName.ToLower() == invitationFromDb.Email.ToLower());
+
+            // User with that email exists
+            if (userFromDb != null)
+            {
+                apiResponse.ErrorMessages.Add("Email is already in use");
+                apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                apiResponse.IsSuccess = false;
+                isError = true;
+                return apiResponse;
+            }
+
+            // Validate that the organisation exists in the DB
+            Organisation organisationFromDb = await _unitOfWork.Organisations.GetAsync(organisation => organisation.Id == invitationFromDb.OrganisationId);
+            if (organisationFromDb == null) {
+                apiResponse.ErrorMessages.Add("Organisation not found");
+                apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                apiResponse.IsSuccess = false;
+                return apiResponse;
+            }
+
             ApplicationUser newUser = new ApplicationUser
             {
                 Forename = model.Forename,
                 Surname = model.Surname,
-                UserName = model.Email,
-                Email = model.Email,
-                NormalizedEmail = model.Email.ToUpper(),
+                UserName = invitationFromDb.Email.ToLower(),
+                Email = invitationFromDb.Email.ToLower(),
+                OrganisationId = invitationFromDb.OrganisationId,
+                NormalizedEmail = invitationFromDb.Email.ToUpper(),
             };
 
 
@@ -102,7 +178,7 @@ namespace Backend.Service.Implementation
                 }
 
                 // assign user role, default to user if not admin
-                if (model.Role == StaticDetails.Role_Admin)
+                if (invitationFromDb.Role.ToLower() == StaticDetails.Role_Admin)
                 {
                     await _userManager.AddToRoleAsync(newUser, StaticDetails.Role_Admin);
                 }
@@ -111,12 +187,18 @@ namespace Backend.Service.Implementation
                     await _userManager.AddToRoleAsync(newUser, StaticDetails.Role_User);
                 }
 
-                return new ApiResponse<ApplicationUser>
+                // Update invitation to accepted
+                invitationFromDb.Status = Status.Accepted;
+                
+                await _unitOfWork.SaveAsync();
+
+                return new ApiResponse
                 {
                     StatusCode = HttpStatusCode.OK,
                     IsSuccess = true,
-                    Result = newUser
+                    SuccessMessage = "User registration successful"
                 };
+
             }
             else
             {
@@ -130,7 +212,7 @@ namespace Backend.Service.Implementation
             ApiResponse apiResponse = new ApiResponse();
 
             // Perform validation and error handling
-            ApplicationUser userFromDb = await _unitOfWork.ApplicationUser.GetAsync(u => u.UserName.ToLower() == model.Email.ToLower());
+            ApplicationUser userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(u => u.UserName.ToLower() == model.Email.ToLower());
 
             var isError = false;
 
@@ -163,7 +245,7 @@ namespace Backend.Service.Implementation
             string token = _jwtService.GenerateToken(model.Email, model.Role, model.OrganisationId, _appSettings.JwtIssuer, _appSettings.JwtAudience, _appSettings.JwtExpireHours, _appSettings.JwtSecret);
 
             // Store the token and relevant info in the database
-            await _unitOfWork.Invitation.AddAsync(new Invitation
+            await _unitOfWork.Invitations.AddAsync(new Invitation
             {
                 Email = model.Email,
                 Role = model.Role,
@@ -180,6 +262,9 @@ namespace Backend.Service.Implementation
 
             // return an api response with a success
 
+            apiResponse.IsSuccess = true;
+            apiResponse.StatusCode = HttpStatusCode.OK;
+            apiResponse.SuccessMessage = "User invited successfully";
 
             return apiResponse;
         }

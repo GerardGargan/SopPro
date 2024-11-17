@@ -2,10 +2,8 @@
 
 namespace Backend.Models.Dto
 {
-    public class RegisterRequestDTO
+    public class RegisterInviteRequestDTO
     {
-        [EmailAddress]
-        public string Email { get; set; }
         [Required]
         public string Forename { get; set; }
         [Required]
@@ -13,7 +11,6 @@ namespace Backend.Models.Dto
         [Required]
         public string Password { get; set; }
         [Required]
-        public string Role { get; set; }
         public string Token { get; set; }
     }
 }

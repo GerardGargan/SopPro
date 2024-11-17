@@ -29,23 +29,23 @@ namespace Backend.Controllers
         /// </summary>
         /// <param name="ReguesterRequestDTO">A model representing a user and a token containing the users role and organisation</param>
         /// <returns>A confirmation of the created item.</returns>
-        [HttpPost("register")]
-        [ProducesResponseType(200, Type = typeof(ApiResponse<ApplicationUser>))]
-        public async Task<IActionResult> Register([FromBody] RegisterRequestDTO model)
+        [HttpPost("registerinvite")]
+        [ProducesResponseType(200, Type = typeof(ApiResponse))]
+        public async Task<IActionResult> RegisterInvite([FromBody] RegisterInviteRequestDTO model)
         {
-            var apiResponse = await _authService.RegisterUser(model, ModelState);
+            var apiResponse = await _authService.RegisterInvitedUser(model, ModelState);
 
             if(apiResponse.IsSuccess)
             {
                 return Ok(apiResponse);
             } else
             {
-                return BadRequest(apiResponse);
+                return StatusCode((int)apiResponse.StatusCode, apiResponse);
             }
         }
 
         /// <summary>
-        /// Invites a user to the system.
+        /// Invites a user to the system, encode email, role and organisation in a token.
         /// </summary>
         /// <param name="model"></param>
         /// <returns>A success status</returns>
@@ -64,7 +64,7 @@ namespace Backend.Controllers
             }
             else
             {
-                return BadRequest(apiResponse);
+                return StatusCode((int)apiResponse.StatusCode, apiResponse);
             }
 
         }
