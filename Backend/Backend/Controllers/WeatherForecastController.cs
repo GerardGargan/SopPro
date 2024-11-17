@@ -1,4 +1,6 @@
+using Backend.Models.DatabaseModels;
 using Backend.Models.Settings;
+using Backend.Repository.Interface;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -17,24 +19,28 @@ namespace Backend.Controllers
 
 
         private readonly ILogger<WeatherForecastController> _logger;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger, IOptions<ApplicationSettings> appSettings)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, IOptions<ApplicationSettings> appSettings, IUnitOfWork unitOfWork)
         {
             _logger = logger;
             _appSettings = appSettings.Value;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
+        public async Task<IEnumerable<ApplicationUser>> Get()
         {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+            //return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            //{
+            //    Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
+            //    TemperatureC = Random.Shared.Next(-20, 55),
+            //    Summary = Summaries[Random.Shared.Next(Summaries.Length)]
+            //})
+            //.ToArray();
             //return Ok(_appSettings.JwtSecret);
+
+            return await _unitOfWork.ApplicationUser.GetAllAsync(x => x.Email == "user@example.com");
 
         }
     }

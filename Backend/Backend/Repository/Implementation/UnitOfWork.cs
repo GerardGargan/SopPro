@@ -12,9 +12,9 @@ namespace Backend.Repository.Implementation
             _db = db;
             ApplicationUser = new ApplicationUserRepository(_db);
         }
-        public void Save()
+        public async Task Save()
         {
-            _db.SaveChanges();
+            await _db.SaveChangesAsync();
         }
     }
 }
