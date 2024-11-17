@@ -127,7 +127,6 @@ namespace Backend.Service.Implementation
                 return apiResponse;
             }
 
-            // Validate that the organisation exists in the DB
             Organisation organisationFromDb = await _unitOfWork.Organisations.GetAsync(organisation => organisation.Id == invitationFromDb.OrganisationId);
             if (organisationFromDb == null)
             {
@@ -137,25 +136,36 @@ namespace Backend.Service.Implementation
                 return apiResponse;
             }
 
-            ApplicationUser newUser = CreateApplicationUser(model.Forename, model.Surname, invitationFromDb.Email, invitationFromDb.OrganisationId);
-            var result = await CreateUserWithRole(newUser, model.Password, invitationFromDb.Role);
-
-            if (!result.Succeeded)
+            using var transaction = _db.Database.BeginTransaction();
+            try
             {
+
+                ApplicationUser newUser = CreateApplicationUser(model.Forename, model.Surname, invitationFromDb.Email, invitationFromDb.OrganisationId);
+                var result = await CreateUserWithRole(newUser, model.Password, invitationFromDb.Role);
+
+                if (!result.Succeeded)
+                {
+                    await transaction.RollbackAsync();
+                    throw new Exception("Failed to create user, unexpected error");
+                }
+
+                // Update invitation to accepted
+                invitationFromDb.Status = Status.Accepted;
+
+                await transaction.CommitAsync();
+
+                return new ApiResponse
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    IsSuccess = true,
+                    SuccessMessage = "User registration successful"
+                };
+            }
+            catch(Exception e)
+            {
+                await transaction.RollbackAsync();
                 throw new Exception("Failed to create user, unexpected error");
             }
-
-            // Update invitation to accepted
-            invitationFromDb.Status = Status.Accepted;
-
-            await _unitOfWork.SaveAsync();
-
-            return new ApiResponse
-            {
-                StatusCode = HttpStatusCode.OK,
-                IsSuccess = true,
-                SuccessMessage = "User registration successful"
-            };
 
         }
 
@@ -229,72 +239,91 @@ namespace Backend.Service.Implementation
             model.Forename = model.Forename.Trim();
             model.Surname = model.Surname.Trim();
 
-            ApiResponse apiResponse = new ApiResponse();
-            bool isError = false;
-
             // Perform validation and error handling
             if (!modelState.IsValid)
             {
+                
                 var errors = modelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                apiResponse.ErrorMessages.AddRange(errors);
-                isError = true;
+                return new ApiResponse()
+                {
+                    StatusCode = HttpStatusCode.BadRequest,
+                    IsSuccess = false,
+                    ErrorMessages = errors
+                };
             }
 
             if (!ValidatePassword(model.Password))
             {
-                apiResponse.ErrorMessages.Add("Password does not meet minimum requirements");
-                isError = true;
+                return new ApiResponse()
+                {
+                    StatusCode = HttpStatusCode.BadRequest,
+                    IsSuccess = false,
+                    ErrorMessages = new List<string> { "Password does not meet minimum requirements" }
+                };
             }
 
-            // check is user already exists
-            ApplicationUser userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(user => user.UserName.ToLower() == model.Email);
 
-            if (userFromDb != null)
+            using var transaction = _db.Database.BeginTransaction();
+            try
             {
-                apiResponse.ErrorMessages.Add("User already exists");
-                isError = true;
-            }
+                var apiResponse = new ApiResponse();
 
-            // check if organisation already exists
+                // check is user already exists
+                ApplicationUser userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(user => user.UserName.ToLower() == model.Email);
 
-            Organisation organisationFromDb = await _unitOfWork.Organisations.GetAsync(organisation => organisation.Name.ToLower() == model.OrganisationName.Trim().ToLower());
-            if (organisationFromDb != null)
-            {
-                apiResponse.ErrorMessages.Add("Organisation already exists");
-                isError = true;
-            }
+                if (userFromDb != null)
+                {
+                    apiResponse.ErrorMessages.Add("User already exists");
+                }
 
-            if (isError)
-            {
-                apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                apiResponse.IsSuccess = false;
-                return apiResponse;
-            }
+                // check if organisation already exists
 
-            // Passed validation checks, create user and organisation
+                Organisation organisationFromDb = await _unitOfWork.Organisations.GetAsync(organisation => organisation.Name.ToLower() == model.OrganisationName.Trim().ToLower());
+                if (organisationFromDb != null)
+                {
+                    apiResponse.ErrorMessages.Add("Organisation already exists");
+                }
 
-            Organisation newOrganisation = new Organisation
-            {
-                Name = model.OrganisationName,
-            };
+                if (apiResponse.ErrorMessages.Count > 0)
+                {
+                    await transaction.RollbackAsync();
+                    apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                    apiResponse.IsSuccess = false;
+                    return apiResponse;
+                }
 
-            await _unitOfWork.Organisations.AddAsync(newOrganisation);
-            await _unitOfWork.SaveAsync();
+                // Passed validation checks, create user and organisation
+                Organisation newOrganisation = new Organisation
+                {
+                    Name = model.OrganisationName,
+                };
 
-            ApplicationUser newAdminUser = CreateApplicationUser(model.Forename, model.Surname, model.Email, newOrganisation.Id);
+                await _unitOfWork.Organisations.AddAsync(newOrganisation);
+                await _unitOfWork.SaveAsync();
+
+                ApplicationUser newAdminUser = CreateApplicationUser(model.Forename, model.Surname, model.Email, newOrganisation.Id);
             
-            var result = await CreateUserWithRole(newAdminUser, model.Password, StaticDetails.Role_Admin);
-            if(!result.Succeeded)
+                var result = await CreateUserWithRole(newAdminUser, model.Password, StaticDetails.Role_Admin);
+                if(!result.Succeeded)
+                {
+                    throw new Exception("Failed to create user, unexpected error");
+                }
+                await _unitOfWork.SaveAsync();
+                await transaction.CommitAsync();
+
+                return new ApiResponse
+                {
+                    StatusCode = HttpStatusCode.OK,
+                    IsSuccess = true,
+                    SuccessMessage = "Organisation and user created successfully"
+                };
+            }
+            catch(Exception e)
             {
-                throw new Exception("Failed to create user, unexpected error");
+                await transaction.RollbackAsync();
+                throw new Exception("Failed to create user and organisation, unexpected error");
             }
 
-            return new ApiResponse
-            {
-                StatusCode = HttpStatusCode.OK,
-                IsSuccess = true,
-                SuccessMessage = "Organisation and user created successfully"
-            };
         }
         
         public bool ValidatePassword(string password)

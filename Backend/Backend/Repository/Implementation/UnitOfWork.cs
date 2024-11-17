@@ -1,5 +1,6 @@
 ﻿using Backend.Data;
 using Backend.Repository.Interface;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Backend.Repository.Implementation
 {
@@ -17,9 +18,20 @@ namespace Backend.Repository.Implementation
             Organisations = new OrganisationRepository(_db);
             Invitations = new InvitationRepository(_db);
         }
+
+        public async Task<IDbContextTransaction> BeginTransactionAsync()
+        {
+            return await _db.Database.BeginTransactionAsync();
+        }
+
         public async Task SaveAsync()
         {
             await _db.SaveChangesAsync();
+        }
+
+        public void Dispose()
+        {
+            _db.Dispose();
         }
     }
 }
