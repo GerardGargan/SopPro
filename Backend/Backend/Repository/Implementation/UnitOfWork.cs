@@ -7,6 +7,9 @@ namespace Backend.Repository.Implementation
     {
         private readonly ApplicationDbContext _db;
         public IApplicationUserRepository ApplicationUser { get; private set; }
+        public IOrganisationRepository Organisation { get; private set; }
+        public IInvitationRepository Invitation { get; private set; }
+
         public UnitOfWork(ApplicationDbContext db)
         {
             _db = db;

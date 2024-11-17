@@ -10,6 +10,6 @@ namespace Backend.Models.Dto
         [Required]
         public string Role { get; set; }
         [Required]
-        public string Organisation { get; set; }
+        public int OrganisationId { get; set; }
     }
 }

@@ -17,20 +17,10 @@ namespace Backend.Controllers
     [ApiController]
     public class AuthController : BaseApiController
     {
-        private readonly ApplicationDbContext _db;
         private readonly IAuthService _authService;
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
-        private readonly IJwtService _jwtService;
-        public string secretKey;
 
-        public AuthController(ApplicationDbContext db, IConfiguration configuration, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IJwtService jwtService, IAuthService authService)
+        public AuthController(IAuthService authService)
         {
-            _db = db;
-            secretKey = configuration.GetValue<string>("ApplicationSettings:JwtSecret");
-            _userManager = userManager;
-            _roleManager = roleManager;
-            _jwtService = jwtService;
             _authService = authService;
         }
 
@@ -54,6 +44,11 @@ namespace Backend.Controllers
             }
         }
 
+        /// <summary>
+        /// Invites a user to the system.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns>A success status</returns>
 
         [HttpPost("inviteuser")]
         //[Authorize(Roles = StaticDetails.Role_Admin)]
@@ -74,10 +69,5 @@ namespace Backend.Controllers
 
         }
 
-        [HttpGet("test")]
-        public string Test()
-        {
-            return _jwtService.GenerateToken("","");
-        }
     }
 }

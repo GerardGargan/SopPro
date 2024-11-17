@@ -15,7 +15,7 @@ namespace Backend.Service.Implementation
         {
             _appSettings = appSettings.Value;
         }
-        public string GenerateToken(string email, string role)
+        public string GenerateToken(string email, string role, int organisationId)
         {
             var securityKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_appSettings.JwtSecret));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -24,6 +24,7 @@ namespace Backend.Service.Implementation
         {
             new Claim(JwtRegisteredClaimNames.Sub, email),
             new Claim("role", role),
+            new Claim("organisationId", organisationId.ToString()),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 

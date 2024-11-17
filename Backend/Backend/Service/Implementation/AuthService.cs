@@ -73,7 +73,8 @@ namespace Backend.Service.Implementation
 
             ApplicationUser newUser = new ApplicationUser
             {
-                Name = model.Name,
+                Forename = model.Forename,
+                Surname = model.Surname,
                 UserName = model.Email,
                 Email = model.Email,
                 NormalizedEmail = model.Email.ToUpper(),
@@ -158,7 +159,7 @@ namespace Backend.Service.Implementation
             // Send the user an email with the token embedded in the link
 
             // return an api response
-            Console.WriteLine(token);
+            
 
             return apiResponse;
         }
