@@ -1,6 +1,8 @@
 using Backend.Data;
 using Backend.Models.DatabaseModels;
 using Backend.Models.Settings;
+using Backend.Repository.Implementation;
+using Backend.Repository.Interface;
 using Backend.Service.Implementation;
 using Backend.Service.Interface;
 using Microsoft.AspNetCore.Identity;
@@ -21,6 +23,7 @@ builder.Services.Configure<ApplicationSettings>(builder.Configuration.GetSection
 builder.Services.AddSingleton(resolver => resolver.GetRequiredService<IOptions<ApplicationSettings>>().Value);
 
 builder.Services.AddScoped<IJwtService, JwtService>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddControllers();

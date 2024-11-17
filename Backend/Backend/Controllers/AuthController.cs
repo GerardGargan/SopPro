@@ -15,7 +15,7 @@ namespace Backend.Controllers
 {
     [Route("api/auth")]
     [ApiController]
-    public class AuthController : BaseController
+    public class AuthController : BaseApiController
     {
         private readonly ApplicationDbContext _db;
         private readonly IAuthService _authService;
@@ -34,6 +34,11 @@ namespace Backend.Controllers
             _authService = authService;
         }
 
+        /// <summary>
+        /// Creates a new user.
+        /// </summary>
+        /// <param name="ReguesterRequestDTO">A model representing a user and a token containing the users role and organisation</param>
+        /// <returns>A confirmation of the created item.</returns>
         [HttpPost("register")]
         [ProducesResponseType(200, Type = typeof(ApiResponse<ApplicationUser>))]
         public async Task<IActionResult> Register([FromBody] RegisterRequestDTO model)

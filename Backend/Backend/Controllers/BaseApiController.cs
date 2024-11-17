@@ -6,7 +6,7 @@ namespace Backend.Controllers
 
     [GeneralExceptionFilter]
     [Produces("application/json")]
-    public class BaseController : ControllerBase
+    public class BaseApiController : ControllerBase
     {
     }
 
