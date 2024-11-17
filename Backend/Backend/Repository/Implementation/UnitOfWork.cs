@@ -14,6 +14,8 @@ namespace Backend.Repository.Implementation
         {
             _db = db;
             ApplicationUser = new ApplicationUserRepository(_db);
+            Organisation = new OrganisationRepository(_db);
+            Invitation = new InvitationRepository(_db);
         }
         public async Task SaveAsync()
         {

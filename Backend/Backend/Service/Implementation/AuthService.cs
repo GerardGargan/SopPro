@@ -3,6 +3,7 @@ using Backend.Data;
 using Backend.Models;
 using Backend.Models.DatabaseModels;
 using Backend.Models.Dto;
+using Backend.Models.Settings;
 using Backend.Repository.Interface;
 using Backend.Service.Interface;
 using Backend.Utility;
@@ -21,9 +22,10 @@ namespace Backend.Service.Implementation
         private readonly IJwtService _jwtService;
         private readonly IdentityOptions _identityOptions;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ApplicationSettings _appSettings;
         public string secretKey;
 
-        public AuthService(ApplicationDbContext db, IConfiguration configuration, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IJwtService jwtService, IOptions<IdentityOptions> identityOptions, IUnitOfWork unitOfWork)
+        public AuthService(ApplicationDbContext db, IConfiguration configuration, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IJwtService jwtService, IOptions<IdentityOptions> identityOptions, IUnitOfWork unitOfWork, IOptions<ApplicationSettings> appSettings)
         {
             _db = db;
             secretKey = configuration.GetValue<string>("ApplicationSettings:JwtSecret");
@@ -32,13 +34,14 @@ namespace Backend.Service.Implementation
             _jwtService = jwtService;
             _identityOptions = identityOptions.Value;
             _unitOfWork = unitOfWork;
+            _appSettings = appSettings.Value;
         }
         public async Task<ApiResponse> RegisterUser(RegisterRequestDTO model, ModelStateDictionary modelState)
         {
             var apiResponse = new ApiResponse();
             var isError = false;
 
-            // Attempt to fetch a user to see if they already exist
+            // Attempt to fetch a user to check if they already exist
             ApplicationUser userFromDb = await _unitOfWork.ApplicationUser.GetAsync(u => u.UserName.ToLower() == model.Email.ToLower());
 
             // User with that email exists
@@ -125,6 +128,7 @@ namespace Backend.Service.Implementation
         public async Task<ApiResponse> InviteUser(InviteRequestDTO model, ModelStateDictionary modelState)
         {
             ApiResponse apiResponse = new ApiResponse();
+
             // Perform validation and error handling
             ApplicationUser userFromDb = await _unitOfWork.ApplicationUser.GetAsync(u => u.UserName.ToLower() == model.Email.ToLower());
 
@@ -135,6 +139,10 @@ namespace Backend.Service.Implementation
                 apiResponse.ErrorMessages.Add("User already exists");
                 isError = true;
             }
+            /*
+             * Need to validate role and organisation id
+             * 
+             */
 
             if (!modelState.IsValid)
             {
@@ -152,14 +160,26 @@ namespace Backend.Service.Implementation
             }
 
             // Data is validated at this point, proceed to generate a token and store it in the database, send the user an invitation email
-            string token = _jwtService.GenerateToken(model.Email, model.Role);
+            string token = _jwtService.GenerateToken(model.Email, model.Role, model.OrganisationId, _appSettings.JwtIssuer, _appSettings.JwtAudience, _appSettings.JwtExpireHours, _appSettings.JwtSecret);
 
             // Store the token and relevant info in the database
+            await _unitOfWork.Invitation.AddAsync(new Invitation
+            {
+                Email = model.Email,
+                Role = model.Role,
+                OrganisationId = model.OrganisationId,
+                Token = token,
+                Status = Status.Pending,
+                ExpiryDate = DateTime.UtcNow.AddHours(_appSettings.JwtExpireHours),
+                CreatedAt = DateTime.UtcNow
+            });
+
+            await _unitOfWork.SaveAsync();
 
             // Send the user an email with the token embedded in the link
 
-            // return an api response
-            
+            // return an api response with a success
+
 
             return apiResponse;
         }

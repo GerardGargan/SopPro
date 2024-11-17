@@ -1,6 +1,8 @@
-﻿using Backend.Models.Settings;
+﻿using Backend.Data;
+using Backend.Models.Settings;
 using Backend.Service.Interface;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -11,13 +13,12 @@ namespace Backend.Service.Implementation
     public class JwtService : IJwtService
     {
         private readonly ApplicationSettings _appSettings;
-        public JwtService(IOptions<ApplicationSettings> appSettings)
+        public JwtService()
         {
-            _appSettings = appSettings.Value;
         }
-        public string GenerateToken(string email, string role, int organisationId)
+        public string GenerateToken(string email, string role, int organisationId, string issuer, string audience, int expiryHours, string secret)
         {
-            var securityKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_appSettings.JwtSecret));
+            var securityKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(secret));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
             var claims = new[]
@@ -29,10 +30,10 @@ namespace Backend.Service.Implementation
         };
 
             var token = new JwtSecurityToken(
-            issuer: _appSettings.JwtIssuer,
-            audience: _appSettings.JwtAudience,
+            issuer: issuer,
+            audience: audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(_appSettings.JwtExpireHours),
+            expires: DateTime.UtcNow.AddHours(expiryHours),
             signingCredentials: credentials
         );
 
@@ -41,7 +42,49 @@ namespace Backend.Service.Implementation
 
         public ClaimsPrincipal ValidateToken(string token)
         {
-            throw new NotImplementedException();
+            //var securityKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(_appSettings.JwtSecret));
+            //var tokenHandler = new JwtSecurityTokenHandler();
+
+            //var validationParameters = new TokenValidationParameters
+            //{
+            //    ValidateIssuer = true,
+            //    ValidateAudience = true,
+            //    ValidateLifetime = true,
+            //    ValidIssuer = _appSettings.JwtIssuer,
+            //    ValidAudience = _appSettings.JwtAudience,
+            //    IssuerSigningKey = securityKey,
+            //    ClockSkew = TimeSpan.Zero
+            //};
+
+            //try
+            //{
+            //    // Check if the token exists in the database and is valid
+            //    var invitation = _dbContext.Invitations.SingleOrDefault(i => i.Token == token);
+            //    if (invitation == null || invitation.Status != "Pending" || invitation.Expiry < DateTime.UtcNow)
+            //    {
+            //        throw new SecurityTokenException("Invalid or expired token.");
+            //    }
+
+            //    var principal = tokenHandler.ValidateToken(token, validationParameters, out var validatedToken);
+
+            //    // Ensure the token is a JWT
+            //    if (validatedToken is JwtSecurityToken jwtToken &&
+            //        jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+            //    {
+            //        return principal;
+            //    }
+            //}
+            //catch (SecurityTokenException ex)
+            //{
+            //    // Log exception if needed
+            //    throw new SecurityTokenException("Invalid token.", ex);
+            //}
+            //catch (Exception ex)
+            //{
+            //    throw new Exception("An error occurred while validating the token.", ex);
+            //}
+
+            return null;
         }
     }
 }
