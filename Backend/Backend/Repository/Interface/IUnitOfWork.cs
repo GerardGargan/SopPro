@@ -3,6 +3,6 @@
     public interface IUnitOfWork
     {
         IApplicationUserRepository ApplicationUser { get; }
-        public Task Save();
+        public Task SaveAsync();
     }
 }
