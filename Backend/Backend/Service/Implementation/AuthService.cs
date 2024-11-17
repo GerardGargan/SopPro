@@ -3,10 +3,12 @@ using Backend.Data;
 using Backend.Models;
 using Backend.Models.DatabaseModels;
 using Backend.Models.Dto;
+using Backend.Repository.Interface;
 using Backend.Service.Interface;
 using Backend.Utility;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.Extensions.Options;
 using System.Net;
 
 namespace Backend.Service.Implementation
@@ -17,22 +19,27 @@ namespace Backend.Service.Implementation
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IJwtService _jwtService;
+        private readonly IdentityOptions _identityOptions;
+        private readonly IUnitOfWork _unitOfWork;
         public string secretKey;
 
-        public AuthService(ApplicationDbContext db, IConfiguration configuration, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IJwtService jwtService)
+        public AuthService(ApplicationDbContext db, IConfiguration configuration, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IJwtService jwtService, IOptions<IdentityOptions> identityOptions, IUnitOfWork unitOfWork)
         {
             _db = db;
             secretKey = configuration.GetValue<string>("ApplicationSettings:JwtSecret");
             _userManager = userManager;
             _roleManager = roleManager;
             _jwtService = jwtService;
+            _identityOptions = identityOptions.Value;
+            _unitOfWork = unitOfWork;
         }
         public async Task<ApiResponse> RegisterUser(RegisterRequestDTO model, ModelStateDictionary modelState)
         {
             var apiResponse = new ApiResponse();
             var isError = false;
-            // Check is email is already in use
-            ApplicationUser userFromDb = _db.ApplicationUsers.FirstOrDefault(u => u.UserName.ToLower() == model.Email.ToLower());
+
+            // Attempt to fetch a user to see if they already exist
+            ApplicationUser userFromDb = await _unitOfWork.ApplicationUser.GetAsync(u => u.UserName.ToLower() == model.Email.ToLower());
 
             // User with that email exists
             if (userFromDb != null)
@@ -51,7 +58,13 @@ namespace Backend.Service.Implementation
                 isError = true;
             }
 
-            if(isError)
+            if (!ValidatePassword(model.Password))
+            {
+                apiResponse.ErrorMessages.Add("Password does not meet requirements");
+                isError = true;
+            }
+
+            if (isError)
             {
                 apiResponse.StatusCode = HttpStatusCode.BadRequest;
                 apiResponse.IsSuccess = false;
@@ -100,12 +113,53 @@ namespace Backend.Service.Implementation
                     IsSuccess = true,
                     Result = newUser
                 };
-            } 
+            }
             else
             {
                 throw new Exception("Failed to create user, unexpected error");
             }
 
+        }
+
+        public bool ValidatePassword(string password)
+        {
+            // Check if the password length is sufficient
+            if (password.Length < _identityOptions.Password.RequiredLength)
+            {
+                return false;
+            }
+
+            // Check for at least one digit
+            if (_identityOptions.Password.RequireDigit && !password.Any(char.IsDigit))
+            {
+                return false;
+            }
+
+            // Check for at least one lowercase letter
+            if (_identityOptions.Password.RequireLowercase && !password.Any(char.IsLower))
+            {
+                return false;
+            }
+
+            // Check for at least one uppercase letter
+            if (_identityOptions.Password.RequireUppercase && !password.Any(char.IsUpper))
+            {
+                return false;
+            }
+
+            // Check for at least one non-alphanumeric character
+            if (_identityOptions.Password.RequireNonAlphanumeric && password.All(char.IsLetterOrDigit))
+            {
+                return false;
+            }
+
+            // Check for unique characters
+            if (_identityOptions.Password.RequiredUniqueChars > 0 && password.Distinct().Count() < _identityOptions.Password.RequiredUniqueChars)
+            {
+                return false;
+            }
+
+            return true;
         }
 
     }
