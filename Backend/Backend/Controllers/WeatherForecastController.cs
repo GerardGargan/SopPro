@@ -40,7 +40,10 @@ namespace Backend.Controllers
             //.ToArray();
             //return Ok(_appSettings.JwtSecret);
 
-            return await _unitOfWork.ApplicationUser.GetAllAsync(x => x.Email == "user@example.com");
+            //var userToRemove = await _unitOfWork.ApplicationUser.GetAsync(x => x.Email == "user@example.com");
+            //_unitOfWork.ApplicationUser.Remove(userToRemove);
+            //await _unitOfWork.SaveAsync();
+            return await _unitOfWork.ApplicationUsers.GetAllAsync();
 
         }
     }

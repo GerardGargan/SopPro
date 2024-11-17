@@ -1,5 +1,4 @@
-﻿using Azure;
-using Backend.Data;
+﻿using Backend.Data;
 using Backend.Models;
 using Backend.Models.DatabaseModels;
 using Backend.Models.Dto;
@@ -10,8 +9,6 @@ using Backend.Utility;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
-using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
 
@@ -41,6 +38,10 @@ namespace Backend.Service.Implementation
         }
         public async Task<ApiResponse> RegisterInvitedUser(RegisterInviteRequestDTO model, ModelStateDictionary modelState)
         {
+            // Sanitise inputs
+            model.Forename = model.Forename.Trim();
+            model.Surname = model.Surname.Trim();
+
             var apiResponse = new ApiResponse();
             var isError = false;
 
@@ -57,6 +58,7 @@ namespace Backend.Service.Implementation
                 isError = true;
             }
 
+
             if (isError)
             {
                 apiResponse.StatusCode = HttpStatusCode.BadRequest;
@@ -65,7 +67,7 @@ namespace Backend.Service.Implementation
             }
 
             // Validate the token
-            if(model.Token == null)
+            if (model.Token == null)
             {
                 apiResponse.ErrorMessages.Add("Token is required");
                 apiResponse.StatusCode = HttpStatusCode.BadRequest;
@@ -75,22 +77,22 @@ namespace Backend.Service.Implementation
 
             // Validate token exists in the invitations table
             Invitation invitationFromDb = await _unitOfWork.Invitations.GetAsync(invitation => invitation.Token == model.Token, tracked: true);
-            
+
             if (invitationFromDb == null)
             {
                 apiResponse.ErrorMessages.Add("Invitation not found");
                 apiResponse.StatusCode = HttpStatusCode.BadRequest;
                 apiResponse.IsSuccess = false;
                 return apiResponse;
-            } 
+            }
             else if (invitationFromDb.ExpiryDate < DateTime.UtcNow)
             {
                 apiResponse.ErrorMessages.Add("Invitation has expired, please contact an administrator");
                 apiResponse.StatusCode = HttpStatusCode.BadRequest;
                 apiResponse.IsSuccess = false;
                 return apiResponse;
-            } 
-            else if(invitationFromDb.Status == Status.Accepted)
+            }
+            else if (invitationFromDb.Status == Status.Accepted)
             {
                 apiResponse.ErrorMessages.Add("Invitation has already been accepted");
                 apiResponse.StatusCode = HttpStatusCode.BadRequest;
@@ -112,21 +114,6 @@ namespace Backend.Service.Implementation
                 return apiResponse;
             }
 
-            //var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(model.Token);
-
-            //// Get token claims
-            //var tokenEmail = jwtToken.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Sub)?.Value;
-            //var tokenRole = jwtToken.Claims.FirstOrDefault(c => c.Type == "role")?.Value;
-            //var organisationIdClaim = jwtToken.Claims.FirstOrDefault(c => c.Type == "organisationId")?.Value;
-
-            //if (!int.TryParse(organisationIdClaim, out var tokenOrganisationId))
-            //{
-            //    apiResponse.ErrorMessages.Add("Error parsing organisation");
-            //    apiResponse.StatusCode = HttpStatusCode.BadRequest;
-            //    apiResponse.IsSuccess = false;
-            //    return apiResponse;
-            //}
-
             // Attempt to fetch a user to check if they already exist
             ApplicationUser userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(u => u.UserName.ToLower() == invitationFromDb.Email.ToLower());
 
@@ -142,77 +129,46 @@ namespace Backend.Service.Implementation
 
             // Validate that the organisation exists in the DB
             Organisation organisationFromDb = await _unitOfWork.Organisations.GetAsync(organisation => organisation.Id == invitationFromDb.OrganisationId);
-            if (organisationFromDb == null) {
+            if (organisationFromDb == null)
+            {
                 apiResponse.ErrorMessages.Add("Organisation not found");
                 apiResponse.StatusCode = HttpStatusCode.BadRequest;
                 apiResponse.IsSuccess = false;
                 return apiResponse;
             }
 
-            ApplicationUser newUser = new ApplicationUser
-            {
-                Forename = model.Forename,
-                Surname = model.Surname,
-                UserName = invitationFromDb.Email.ToLower(),
-                Email = invitationFromDb.Email.ToLower(),
-                OrganisationId = invitationFromDb.OrganisationId,
-                NormalizedEmail = invitationFromDb.Email.ToUpper(),
-            };
+            ApplicationUser newUser = CreateApplicationUser(model.Forename, model.Surname, invitationFromDb.Email, invitationFromDb.OrganisationId);
+            var result = await CreateUserWithRole(newUser, model.Password, invitationFromDb.Role);
 
-
-            var result = await _userManager.CreateAsync(newUser, model.Password);
-
-            if (result.Succeeded)
-            {
-                // check if roles exists, create if not
-                var doesAdminRoleExist = await _roleManager.RoleExistsAsync(StaticDetails.Role_Admin);
-                var doesUserRoleExist = await _roleManager.RoleExistsAsync(StaticDetails.Role_User);
-
-                if (!doesAdminRoleExist)
-                {
-                    await _roleManager.CreateAsync(new IdentityRole(StaticDetails.Role_Admin));
-                }
-                if (!doesUserRoleExist)
-                {
-                    await _roleManager.CreateAsync(new IdentityRole(StaticDetails.Role_User));
-                }
-
-                // assign user role, default to user if not admin
-                if (invitationFromDb.Role.ToLower() == StaticDetails.Role_Admin)
-                {
-                    await _userManager.AddToRoleAsync(newUser, StaticDetails.Role_Admin);
-                }
-                else
-                {
-                    await _userManager.AddToRoleAsync(newUser, StaticDetails.Role_User);
-                }
-
-                // Update invitation to accepted
-                invitationFromDb.Status = Status.Accepted;
-                
-                await _unitOfWork.SaveAsync();
-
-                return new ApiResponse
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    IsSuccess = true,
-                    SuccessMessage = "User registration successful"
-                };
-
-            }
-            else
+            if (!result.Succeeded)
             {
                 throw new Exception("Failed to create user, unexpected error");
             }
+
+            // Update invitation to accepted
+            invitationFromDb.Status = Status.Accepted;
+
+            await _unitOfWork.SaveAsync();
+
+            return new ApiResponse
+            {
+                StatusCode = HttpStatusCode.OK,
+                IsSuccess = true,
+                SuccessMessage = "User registration successful"
+            };
 
         }
 
         public async Task<ApiResponse> InviteUser(InviteRequestDTO model, ModelStateDictionary modelState)
         {
+            // Sanitise inputs
+            model.Email = model.Email.Trim().ToLower();
+            model.Role = model.Role.Trim().ToLower();
+
             ApiResponse apiResponse = new ApiResponse();
 
             // Perform validation and error handling
-            ApplicationUser userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(u => u.UserName.ToLower() == model.Email.ToLower());
+            ApplicationUser userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(u => u.UserName.ToLower() == model.Email);
 
             var isError = false;
 
@@ -221,10 +177,6 @@ namespace Backend.Service.Implementation
                 apiResponse.ErrorMessages.Add("User already exists");
                 isError = true;
             }
-            /*
-             * Need to validate role and organisation id
-             * 
-             */
 
             if (!modelState.IsValid)
             {
@@ -258,7 +210,7 @@ namespace Backend.Service.Implementation
 
             await _unitOfWork.SaveAsync();
 
-            // Send the user an email with the token embedded in the link
+            // TODO: Send the user an email with the token embedded in the link
 
             // return an api response with a success
 
@@ -269,6 +221,82 @@ namespace Backend.Service.Implementation
             return apiResponse;
         }
 
+        public async Task<ApiResponse> SignupOrganisation(OrganisationSignupRequest model, ModelStateDictionary modelState)
+        {
+            // Sanitise inputs
+            model.OrganisationName = model.OrganisationName.Trim();
+            model.Email = model.Email.Trim().ToLower();
+            model.Forename = model.Forename.Trim();
+            model.Surname = model.Surname.Trim();
+
+            ApiResponse apiResponse = new ApiResponse();
+            bool isError = false;
+
+            // Perform validation and error handling
+            if (!modelState.IsValid)
+            {
+                var errors = modelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+                apiResponse.ErrorMessages.AddRange(errors);
+                isError = true;
+            }
+
+            if (!ValidatePassword(model.Password))
+            {
+                apiResponse.ErrorMessages.Add("Password does not meet minimum requirements");
+                isError = true;
+            }
+
+            // check is user already exists
+            ApplicationUser userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(user => user.UserName.ToLower() == model.Email);
+
+            if (userFromDb != null)
+            {
+                apiResponse.ErrorMessages.Add("User already exists");
+                isError = true;
+            }
+
+            // check if organisation already exists
+
+            Organisation organisationFromDb = await _unitOfWork.Organisations.GetAsync(organisation => organisation.Name.ToLower() == model.OrganisationName.Trim().ToLower());
+            if (organisationFromDb != null)
+            {
+                apiResponse.ErrorMessages.Add("Organisation already exists");
+                isError = true;
+            }
+
+            if (isError)
+            {
+                apiResponse.StatusCode = HttpStatusCode.BadRequest;
+                apiResponse.IsSuccess = false;
+                return apiResponse;
+            }
+
+            // Passed validation checks, create user and organisation
+
+            Organisation newOrganisation = new Organisation
+            {
+                Name = model.OrganisationName,
+            };
+
+            await _unitOfWork.Organisations.AddAsync(newOrganisation);
+            await _unitOfWork.SaveAsync();
+
+            ApplicationUser newAdminUser = CreateApplicationUser(model.Forename, model.Surname, model.Email, newOrganisation.Id);
+            
+            var result = await CreateUserWithRole(newAdminUser, model.Password, StaticDetails.Role_Admin);
+            if(!result.Succeeded)
+            {
+                throw new Exception("Failed to create user, unexpected error");
+            }
+
+            return new ApiResponse
+            {
+                StatusCode = HttpStatusCode.OK,
+                IsSuccess = true,
+                SuccessMessage = "Organisation and user created successfully"
+            };
+        }
+        
         public bool ValidatePassword(string password)
         {
             // Check if the password length is sufficient
@@ -310,6 +338,37 @@ namespace Backend.Service.Implementation
             return true;
         }
 
+        private async Task EnsureRoleExists(string roleName)
+        {
+            if(!await _roleManager.RoleExistsAsync(roleName))
+            {
+                await _roleManager.CreateAsync(new IdentityRole(roleName));
+            }
+        }
+
+        private ApplicationUser CreateApplicationUser(string forename, string surname, string email, int organisationId)
+        {
+            return new ApplicationUser
+            {
+                Forename = forename,
+                Surname = surname,
+                UserName = email.ToLower(),
+                Email = email.ToLower(),
+                OrganisationId = organisationId,
+                NormalizedEmail = email.ToUpper(),
+            };
+        }
+
+        private async Task<IdentityResult> CreateUserWithRole(ApplicationUser user, string password, string role)
+        {
+            await EnsureRoleExists(role);
+            var result = await _userManager.CreateAsync(user, password);
+            if (result.Succeeded)
+            {
+                await _userManager.AddToRoleAsync(user, role);
+            }
+            return result;
+        }
     }
 }
 

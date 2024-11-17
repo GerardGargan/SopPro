@@ -1,15 +1,7 @@
-﻿using Backend.Data;
-using Backend.Models;
-using Backend.Models.DatabaseModels;
+﻿using Backend.Models;
 using Backend.Models.Dto;
 using Backend.Service.Interface;
-using Backend.Utility;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Net;
 
 namespace Backend.Controllers
 {
@@ -22,6 +14,22 @@ namespace Backend.Controllers
         public AuthController(IAuthService authService)
         {
             _authService = authService;
+        }
+
+        [HttpPost("signuporganisation")]
+        [ProducesResponseType(200, Type = typeof(ApiResponse))]
+        public async Task<IActionResult> SignupOrganisation([FromBody] OrganisationSignupRequest model)
+        {
+            var apiResponse = await _authService.SignupOrganisation(model, ModelState);
+
+            if (apiResponse.IsSuccess)
+            {
+                return Ok(apiResponse);
+            }
+            else
+            {
+                return StatusCode((int)apiResponse.StatusCode, apiResponse);
+            }
         }
 
         /// <summary>
