@@ -1,6 +1,7 @@
 using Backend.Models.DatabaseModels;
 using Backend.Models.Settings;
 using Backend.Repository.Interface;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 
@@ -29,6 +30,7 @@ namespace Backend.Controllers
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
+        [Authorize]
         public async Task<IEnumerable<ApplicationUser>> Get()
         {
             //return Enumerable.Range(1, 5).Select(index => new WeatherForecast
