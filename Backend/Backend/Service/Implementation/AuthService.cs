@@ -50,29 +50,14 @@ namespace Backend.Service.Implementation
             var roles = await _userManager.GetRolesAsync(userFromDb);
 
             // Generate JWT Token
-            JwtSecurityTokenHandler tokenHandler = new();
-            byte[] key = System.Text.Encoding.ASCII.GetBytes(_appSettings.JwtSecret);
+            
 
-            SecurityTokenDescriptor tokenDescriptor = new()
-            {
-                Subject = new ClaimsIdentity(new Claim[]
-                {
-                    new Claim("forename", userFromDb.Forename),
-                    new Claim("surname", userFromDb.Surname),
-                    new Claim("id", userFromDb.Id.ToString()),
-                    new Claim(ClaimTypes.Email, userFromDb.UserName),
-                    new Claim(ClaimTypes.Role, roles.FirstOrDefault())
-                }),
-                Expires = DateTime.UtcNow.AddDays(_appSettings.JwtAuthExpireDays),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
-
-            SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
+            string token = _jwtService.GenerateAuthToken(userFromDb, roles, _appSettings.JwtSecret, _appSettings.JwtAuthExpireDays);
 
             LoginResponseDTO loginResponse = new()
             {
                 Email = userFromDb.Email,
-                Token = tokenHandler.WriteToken(token),
+                Token = token,
             };
 
             if(loginResponse.Email == null || string.IsNullOrWhiteSpace(loginResponse.Token))

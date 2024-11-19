@@ -1,4 +1,5 @@
 ﻿using Backend.Data;
+using Backend.Models.DatabaseModels;
 using Backend.Models.Settings;
 using Backend.Service.Interface;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -16,6 +17,33 @@ namespace Backend.Service.Implementation
         public JwtService()
         {
         }
+
+        public string GenerateAuthToken(ApplicationUser userFromDb, IList<string> roles, string jwtSecret, int jwtAuthExpireDays)
+        {
+            JwtSecurityTokenHandler tokenHandler = new();
+            byte[] key = System.Text.Encoding.ASCII.GetBytes(jwtSecret);
+
+            SecurityTokenDescriptor tokenDescriptor = new()
+            {
+                Subject = new ClaimsIdentity(new Claim[]
+                {
+                    new Claim(JwtRegisteredClaimNames.Sub, userFromDb.UserName),
+                    new Claim("forename", userFromDb.Forename),
+                    new Claim("surname", userFromDb.Surname),
+                    new Claim("id", userFromDb.Id.ToString()),
+                    new Claim("organisationId", userFromDb.OrganisationId.ToString()),
+                    new Claim(ClaimTypes.Email, userFromDb.UserName),
+                    new Claim(ClaimTypes.Role, roles.FirstOrDefault())
+                }),
+                Expires = DateTime.UtcNow.AddDays(jwtAuthExpireDays),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
+
+            return tokenHandler.WriteToken(token);
+        }
+
         public string GenerateInviteToken(string email, string role, int organisationId, string issuer, string audience, int expiryHours, string secret)
         {
             var securityKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(secret));
