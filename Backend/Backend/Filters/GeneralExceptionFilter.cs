@@ -42,7 +42,7 @@ namespace Backend.Filters
                 // Handle unmapped exceptions with a 500 Internal Server Error
                 apiResponse.StatusCode = HttpStatusCode.InternalServerError;
                 apiResponse.IsSuccess = false;
-                apiResponse.ErrorMessages.Add(context.Exception.Message);
+                apiResponse.ErrorMessage = context.Exception.Message;
 
                 context.Result = new JsonResult(apiResponse) // Use JsonResult for structured JSON responses
                 {
@@ -56,7 +56,7 @@ namespace Backend.Filters
             // Handle mapped exceptions
             apiResponse.StatusCode = exceptionStatusCode;
             apiResponse.IsSuccess = false;
-            apiResponse.ErrorMessages.Add(context.Exception.Message);
+            apiResponse.ErrorMessage = context.Exception.Message;
 
             context.Result = new JsonResult(apiResponse)
             {

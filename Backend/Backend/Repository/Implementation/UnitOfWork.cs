@@ -19,9 +19,35 @@ namespace Backend.Repository.Implementation
             Invitations = new InvitationRepository(_db);
         }
 
-        public async Task<IDbContextTransaction> BeginTransactionAsync()
+        public async Task ExecuteInTransactionAsync(Func<Task> action)
         {
-            return await _db.Database.BeginTransactionAsync();
+            await using var transaction = await _db.Database.BeginTransactionAsync();
+            try
+            {
+                await action();
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
+        }
+
+        public async Task<T> ExecuteInTransactionAsync<T>(Func<Task<T>> action)
+        {
+            await using var transaction = await _db.Database.BeginTransactionAsync();
+            try
+            {
+                var result = await action();
+                await transaction.CommitAsync();
+                return result;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         public async Task SaveAsync()
@@ -29,9 +55,5 @@ namespace Backend.Repository.Implementation
             await _db.SaveChangesAsync();
         }
 
-        public void Dispose()
-        {
-            _db.Dispose();
-        }
     }
 }

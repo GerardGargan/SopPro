@@ -42,37 +42,22 @@ namespace Backend.Service.Implementation
             model.Forename = model.Forename.Trim();
             model.Surname = model.Surname.Trim();
 
-            var apiResponse = new ApiResponse();
-            var isError = false;
-
             if (!modelState.IsValid)
             {
                 var errors = modelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                apiResponse.ErrorMessages.AddRange(errors);
-                isError = true;
+                throw new Exception(errors.FirstOrDefault());
             }
 
             if (!ValidatePassword(model.Password))
             {
-                apiResponse.ErrorMessages.Add("Password does not meet requirements");
-                isError = true;
-            }
-
-
-            if (isError)
-            {
-                apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                apiResponse.IsSuccess = false;
-                return apiResponse;
+                throw new Exception("Password does not meet requirements");
             }
 
             // Validate the token
             if (model.Token == null)
             {
-                apiResponse.ErrorMessages.Add("Token is required");
-                apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                apiResponse.IsSuccess = false;
-                return apiResponse;
+                throw new Exception("Token is required");
+
             }
 
             // Validate token exists in the invitations table
@@ -80,24 +65,15 @@ namespace Backend.Service.Implementation
 
             if (invitationFromDb == null)
             {
-                apiResponse.ErrorMessages.Add("Invitation not found");
-                apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                apiResponse.IsSuccess = false;
-                return apiResponse;
+                throw new Exception("Invitation not found");
             }
             else if (invitationFromDb.ExpiryDate < DateTime.UtcNow)
             {
-                apiResponse.ErrorMessages.Add("Invitation has expired, please contact an administrator");
-                apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                apiResponse.IsSuccess = false;
-                return apiResponse;
+                throw new Exception("Invitation has expired, please contact an administrator");
             }
             else if (invitationFromDb.Status == Status.Accepted)
             {
-                apiResponse.ErrorMessages.Add("Invitation has already been accepted");
-                apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                apiResponse.IsSuccess = false;
-                return apiResponse;
+                throw new Exception("Invitation has already been accepted");
             }
 
             ClaimsPrincipal claimsPrincipal = null;
@@ -108,10 +84,7 @@ namespace Backend.Service.Implementation
             }
             catch (Exception e)
             {
-                apiResponse.ErrorMessages.Add("Error processing token");
-                apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                apiResponse.IsSuccess = false;
-                return apiResponse;
+                throw new Exception("Error processing token");
             }
 
             // Attempt to fetch a user to check if they already exist
@@ -120,53 +93,36 @@ namespace Backend.Service.Implementation
             // User with that email exists
             if (userFromDb != null)
             {
-                apiResponse.ErrorMessages.Add("Email is already in use");
-                apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                apiResponse.IsSuccess = false;
-                isError = true;
-                return apiResponse;
+                throw new Exception("Email is already in use");
             }
 
             Organisation organisationFromDb = await _unitOfWork.Organisations.GetAsync(organisation => organisation.Id == invitationFromDb.OrganisationId);
             if (organisationFromDb == null)
             {
-                apiResponse.ErrorMessages.Add("Organisation not found");
-                apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                apiResponse.IsSuccess = false;
-                return apiResponse;
+                throw new Exception("Organisation not found");
             }
 
-            using var transaction = _db.Database.BeginTransaction();
-            try
+            await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
-
                 ApplicationUser newUser = CreateApplicationUser(model.Forename, model.Surname, invitationFromDb.Email, invitationFromDb.OrganisationId);
                 var result = await CreateUserWithRole(newUser, model.Password, invitationFromDb.Role);
 
                 if (!result.Succeeded)
                 {
-                    await transaction.RollbackAsync();
                     throw new Exception("Failed to create user, unexpected error");
                 }
 
                 // Update invitation to accepted
                 invitationFromDb.Status = Status.Accepted;
 
-                await transaction.CommitAsync();
-
-                return new ApiResponse
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    IsSuccess = true,
-                    SuccessMessage = "User registration successful"
-                };
-            }
-            catch(Exception e)
+            });
+            
+            return new ApiResponse
             {
-                await transaction.RollbackAsync();
-                throw new Exception("Failed to create user, unexpected error");
-            }
-
+                StatusCode = HttpStatusCode.OK,
+                IsSuccess = true,
+                SuccessMessage = "User registration successful"
+            };
         }
 
         public async Task<ApiResponse> InviteUser(InviteRequestDTO model, ModelStateDictionary modelState)
@@ -175,32 +131,24 @@ namespace Backend.Service.Implementation
             model.Email = model.Email.Trim().ToLower();
             model.Role = model.Role.Trim().ToLower();
 
-            ApiResponse apiResponse = new ApiResponse();
-
             // Perform validation and error handling
             ApplicationUser userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(u => u.UserName.ToLower() == model.Email);
-
-            var isError = false;
+            Organisation orgFromDb = await _unitOfWork.Organisations.GetAsync(o => o.Id == model.OrganisationId);
 
             if (userFromDb != null)
             {
-                apiResponse.ErrorMessages.Add("User already exists");
-                isError = true;
+                throw new Exception("User already exists");
+            }
+
+            if(orgFromDb == null)
+            {
+                throw new Exception("Organisation does not exist");
             }
 
             if (!modelState.IsValid)
             {
                 var errors = modelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                apiResponse.ErrorMessages.AddRange(errors);
-                isError = true;
-            }
-
-            // If an error has occurred return a bad response with the ApiResponse object populated
-            if (isError)
-            {
-                apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                apiResponse.IsSuccess = false;
-                return apiResponse;
+                throw new Exception(errors.FirstOrDefault());
             }
 
             // Data is validated at this point, proceed to generate a token and store it in the database, send the user an invitation email
@@ -223,12 +171,13 @@ namespace Backend.Service.Implementation
             // TODO: Send the user an email with the token embedded in the link
 
             // return an api response with a success
+            return new ApiResponse()
+            {
+                IsSuccess = true,
+                StatusCode = HttpStatusCode.OK,
+                SuccessMessage = "User invited successfully"
+            };
 
-            apiResponse.IsSuccess = true;
-            apiResponse.StatusCode = HttpStatusCode.OK;
-            apiResponse.SuccessMessage = "User invited successfully";
-
-            return apiResponse;
         }
 
         public async Task<ApiResponse> SignupOrganisation(OrganisationSignupRequest model, ModelStateDictionary modelState)
@@ -242,29 +191,16 @@ namespace Backend.Service.Implementation
             // Perform validation and error handling
             if (!modelState.IsValid)
             {
-                
                 var errors = modelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                return new ApiResponse()
-                {
-                    StatusCode = HttpStatusCode.BadRequest,
-                    IsSuccess = false,
-                    ErrorMessages = errors
-                };
+                throw new Exception(errors.FirstOrDefault());
             }
 
             if (!ValidatePassword(model.Password))
             {
-                return new ApiResponse()
-                {
-                    StatusCode = HttpStatusCode.BadRequest,
-                    IsSuccess = false,
-                    ErrorMessages = new List<string> { "Password does not meet minimum requirements" }
-                };
+                throw new Exception("Password does not meet minimum requirements");
             }
 
-
-            using var transaction = _db.Database.BeginTransaction();
-            try
+            await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
                 var apiResponse = new ApiResponse();
 
@@ -273,7 +209,7 @@ namespace Backend.Service.Implementation
 
                 if (userFromDb != null)
                 {
-                    apiResponse.ErrorMessages.Add("User already exists");
+                    throw new Exception("User already exists");
                 }
 
                 // check if organisation already exists
@@ -281,16 +217,9 @@ namespace Backend.Service.Implementation
                 Organisation organisationFromDb = await _unitOfWork.Organisations.GetAsync(organisation => organisation.Name.ToLower() == model.OrganisationName.Trim().ToLower());
                 if (organisationFromDb != null)
                 {
-                    apiResponse.ErrorMessages.Add("Organisation already exists");
+                    throw new Exception("Organisation already exists");
                 }
 
-                if (apiResponse.ErrorMessages.Count > 0)
-                {
-                    await transaction.RollbackAsync();
-                    apiResponse.StatusCode = HttpStatusCode.BadRequest;
-                    apiResponse.IsSuccess = false;
-                    return apiResponse;
-                }
 
                 // Passed validation checks, create user and organisation
                 Organisation newOrganisation = new Organisation
@@ -302,30 +231,25 @@ namespace Backend.Service.Implementation
                 await _unitOfWork.SaveAsync();
 
                 ApplicationUser newAdminUser = CreateApplicationUser(model.Forename, model.Surname, model.Email, newOrganisation.Id);
-            
                 var result = await CreateUserWithRole(newAdminUser, model.Password, StaticDetails.Role_Admin);
-                if(!result.Succeeded)
+
+                if (!result.Succeeded)
                 {
                     throw new Exception("Failed to create user, unexpected error");
                 }
                 await _unitOfWork.SaveAsync();
-                await transaction.CommitAsync();
 
-                return new ApiResponse
-                {
-                    StatusCode = HttpStatusCode.OK,
-                    IsSuccess = true,
-                    SuccessMessage = "Organisation and user created successfully"
-                };
-            }
-            catch(Exception e)
+
+            });
+
+            return new ApiResponse
             {
-                await transaction.RollbackAsync();
-                throw new Exception("Failed to create user and organisation, unexpected error");
-            }
-
+                StatusCode = HttpStatusCode.OK,
+                IsSuccess = true,
+                SuccessMessage = "Organisation and user created successfully"
+            };
         }
-        
+
         public bool ValidatePassword(string password)
         {
             // Check if the password length is sufficient
@@ -369,7 +293,7 @@ namespace Backend.Service.Implementation
 
         private async Task EnsureRoleExists(string roleName)
         {
-            if(!await _roleManager.RoleExistsAsync(roleName))
+            if (!await _roleManager.RoleExistsAsync(roleName))
             {
                 await _roleManager.CreateAsync(new IdentityRole(roleName));
             }

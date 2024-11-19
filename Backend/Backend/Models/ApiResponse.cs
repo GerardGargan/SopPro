@@ -6,7 +6,7 @@ namespace Backend.Models
     {
         public HttpStatusCode StatusCode { get; set; }
         public bool IsSuccess { get; set; }
-        public List<string> ErrorMessages { get; set; } = new();
+        public string ErrorMessage { get; set; }
         public string SuccessMessage { get; set; }
     }
 
