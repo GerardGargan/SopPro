@@ -16,7 +16,7 @@ namespace Backend.Service.Implementation
         public JwtService()
         {
         }
-        public string GenerateToken(string email, string role, int organisationId, string issuer, string audience, int expiryHours, string secret)
+        public string GenerateInviteToken(string email, string role, int organisationId, string issuer, string audience, int expiryHours, string secret)
         {
             var securityKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(secret));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -40,7 +40,7 @@ namespace Backend.Service.Implementation
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        public ClaimsPrincipal ValidateToken(string token, string secret, string issuer, string audiece)
+        public ClaimsPrincipal ValidateInviteToken(string token, string secret, string issuer, string audiece)
         {
             var securityKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(secret));
             var tokenHandler = new JwtSecurityTokenHandler();

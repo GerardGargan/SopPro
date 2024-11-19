@@ -16,6 +16,15 @@ namespace Backend.Controllers
             _authService = authService;
         }
 
+        [HttpPost("login")]
+        [ProducesResponseType(200, Type = typeof(ApiResponse<LoginResponseDTO>))]
+        public async Task<IActionResult> Login([FromBody] LoginRequestDTO model)
+        {
+            var apiResponse = await _authService.Login(model, ModelState);
+
+            return Ok(apiResponse);
+        }
+
         [HttpPost("signuporganisation")]
         [ProducesResponseType(200, Type = typeof(ApiResponse))]
         public async Task<IActionResult> SignupOrganisation([FromBody] OrganisationSignupRequest model)

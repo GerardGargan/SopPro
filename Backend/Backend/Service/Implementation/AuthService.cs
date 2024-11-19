@@ -9,6 +9,8 @@ using Backend.Utility;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
 
@@ -23,18 +25,68 @@ namespace Backend.Service.Implementation
         private readonly IdentityOptions _identityOptions;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ApplicationSettings _appSettings;
-        public string secretKey;
 
         public AuthService(ApplicationDbContext db, IConfiguration configuration, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IJwtService jwtService, IOptions<IdentityOptions> identityOptions, IUnitOfWork unitOfWork, IOptions<ApplicationSettings> appSettings)
         {
             _db = db;
-            secretKey = configuration.GetValue<string>("ApplicationSettings:JwtSecret");
             _userManager = userManager;
             _roleManager = roleManager;
             _jwtService = jwtService;
             _identityOptions = identityOptions.Value;
             _unitOfWork = unitOfWork;
             _appSettings = appSettings.Value;
+        }
+
+        public async Task<ApiResponse<LoginResponseDTO>> Login(LoginRequestDTO model, ModelStateDictionary modelState)
+        {
+            ApplicationUser userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(user => user.UserName.ToLower() == model.Email.ToLower());
+            bool isValid = await _userManager.CheckPasswordAsync(userFromDb, model.Password);
+
+            if(userFromDb == null || !isValid)
+            {
+                throw new Exception("Email or password is incorrect");
+            }
+
+            var roles = await _userManager.GetRolesAsync(userFromDb);
+
+            // Generate JWT Token
+            JwtSecurityTokenHandler tokenHandler = new();
+            byte[] key = System.Text.Encoding.ASCII.GetBytes(_appSettings.JwtSecret);
+
+            SecurityTokenDescriptor tokenDescriptor = new()
+            {
+                Subject = new ClaimsIdentity(new Claim[]
+                {
+                    new Claim("forename", userFromDb.Forename),
+                    new Claim("surname", userFromDb.Surname),
+                    new Claim("id", userFromDb.Id.ToString()),
+                    new Claim(ClaimTypes.Email, userFromDb.UserName),
+                    new Claim(ClaimTypes.Role, roles.FirstOrDefault())
+                }),
+                Expires = DateTime.UtcNow.AddDays(_appSettings.JwtAuthExpireDays),
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
+
+            LoginResponseDTO loginResponse = new()
+            {
+                Email = userFromDb.Email,
+                Token = tokenHandler.WriteToken(token),
+            };
+
+            if(loginResponse.Email == null || string.IsNullOrWhiteSpace(loginResponse.Token))
+            {
+                throw new Exception("Email or password is incorrect");
+            }
+
+            return new ApiResponse<LoginResponseDTO>
+            {
+                StatusCode = HttpStatusCode.OK,
+                IsSuccess = true,
+                Result = loginResponse
+            };
+
         }
         public async Task<ApiResponse> RegisterInvitedUser(RegisterInviteRequestDTO model, ModelStateDictionary modelState)
         {
@@ -80,7 +132,7 @@ namespace Backend.Service.Implementation
 
             try
             {
-                claimsPrincipal = _jwtService.ValidateToken(model.Token, _appSettings.JwtSecret, _appSettings.JwtIssuer, _appSettings.JwtAudience);
+                claimsPrincipal = _jwtService.ValidateInviteToken(model.Token, _appSettings.JwtSecret, _appSettings.JwtIssuer, _appSettings.JwtAudience);
             }
             catch (Exception e)
             {
@@ -152,7 +204,7 @@ namespace Backend.Service.Implementation
             }
 
             // Data is validated at this point, proceed to generate a token and store it in the database, send the user an invitation email
-            string token = _jwtService.GenerateToken(model.Email, model.Role, model.OrganisationId, _appSettings.JwtIssuer, _appSettings.JwtAudience, _appSettings.JwtExpireHours, _appSettings.JwtSecret);
+            string token = _jwtService.GenerateInviteToken(model.Email, model.Role, model.OrganisationId, _appSettings.JwtIssuer, _appSettings.JwtAudience, _appSettings.JwtInviteExpireHours, _appSettings.JwtSecret);
 
             // Store the token and relevant info in the database
             await _unitOfWork.Invitations.AddAsync(new Invitation
@@ -162,7 +214,7 @@ namespace Backend.Service.Implementation
                 OrganisationId = model.OrganisationId,
                 Token = token,
                 Status = Status.Pending,
-                ExpiryDate = DateTime.UtcNow.AddHours(_appSettings.JwtExpireHours),
+                ExpiryDate = DateTime.UtcNow.AddHours(_appSettings.JwtInviteExpireHours),
                 CreatedAt = DateTime.UtcNow
             });
 
@@ -322,6 +374,7 @@ namespace Backend.Service.Implementation
             }
             return result;
         }
+
     }
 }
 

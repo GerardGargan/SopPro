@@ -9,5 +9,6 @@ namespace Backend.Service.Interface
         Task<ApiResponse> RegisterInvitedUser(RegisterInviteRequestDTO model, ModelStateDictionary modelState);
         Task<ApiResponse> InviteUser(InviteRequestDTO model, ModelStateDictionary modelState);
         Task<ApiResponse> SignupOrganisation(OrganisationSignupRequest model, ModelStateDictionary modelState);
+        Task<ApiResponse<LoginResponseDTO>> Login(LoginRequestDTO model, ModelStateDictionary modelState);
     }
 }
