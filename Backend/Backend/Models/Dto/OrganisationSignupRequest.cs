@@ -2,8 +2,14 @@
 
 namespace Backend.Models.Dto
 {
-    public class LoginRequestDTO
+    public class OrganisationSignupRequest
     {
+        [Required]
+        public string OrganisationName { get; set; }
+        [Required]
+        public string Forename { get; set; }
+        [Required]
+        public string Surname { get; set; }
         [Required]
         [EmailAddress]
         public string Email { get; set; }

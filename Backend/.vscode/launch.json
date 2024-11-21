@@ -1,0 +1,23 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Web",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceRoot}/Backend/bin/Debug/net9.0/Backend.dll",
+            "args": [],
+            "cwd": "${workspaceRoot}/Backend",
+            "stopAtEntry": false,
+            "console": "internalConsole",
+            "launchBrowser": {
+                "enabled": true,
+                "args": "${auto-detect-url}"
+            },
+            "env": {
+                "ASPNETCORE_URLS": "https://localhost:44311",
+            }
+        }
+    ]
+}

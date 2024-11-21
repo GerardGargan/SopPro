@@ -2,12 +2,14 @@
 
 namespace Backend.Models.Dto
 {
-    public class LoginRequestDTO
+    public class InviteRequestDTO
     {
         [Required]
         [EmailAddress]
         public string Email { get; set; }
         [Required]
-        public string Password { get; set; }
+        public string Role { get; set; }
+        [Required]
+        public int OrganisationId { get; set; }
     }
 }
