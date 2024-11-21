@@ -485,3 +485,42 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# React native section
+
+# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+
+# dependencies
+/SopPro/node_modules/
+
+# Expo
+/SopPro/.expo/
+/SopPro/dist/
+/SopPro/web-build/
+/SopPro/expo-env.d.ts
+
+# Native
+/SopPro/*.orig.*
+/SopPro/*.jks
+/SopPro/*.p8
+/SopPro/*.p12
+/SopPro/*.key
+/SopPro/*.mobileprovision
+
+# Metro
+/SopPro/.metro-health-check*
+
+# debug
+/SopPro/npm-debug.*
+/SopPro/yarn-debug.*
+/SopPro/yarn-error.*
+
+# macOS
+/SopPro/.DS_Store
+/SopPro/*.pem
+
+# local env files
+/SopPro/.env*.local
+
+# typescript
+/SopPro/*.tsbuildinfo
