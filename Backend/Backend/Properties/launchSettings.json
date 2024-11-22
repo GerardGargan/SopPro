@@ -7,7 +7,8 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "http://localhost:5160"
+      "applicationUrl": "http://192.168.1.5:5160"
+      //replaced http://localhost:5160 to test with react native
     },
     "https": {
       "launchUrl": "swagger",
