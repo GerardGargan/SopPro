@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, ImageBackground } from "react-native";
+import { View, StyleSheet, ImageBackground } from "react-native";
 import React from "react";
 import Header from "../components/UI/Header";
 import { useRouter } from "expo-router";
@@ -7,6 +7,7 @@ import { Button } from "react-native-paper";
 
 const App = () => {
   const router = useRouter();
+  
   return (
     <>
       <ImageBackground
@@ -40,7 +41,7 @@ const App = () => {
                 style={{ borderRadius: 0 }}
                 onPress={() => router.push('/register')}
               >
-                Sign up your organisation!
+                Sign up your company!
               </Button>
             </View>
           </View>

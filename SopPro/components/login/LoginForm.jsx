@@ -13,10 +13,12 @@ const LoginForm = () => {
       <Header
         text="Welcome back!"
         textStyle={{ color: "black", textAlign: "left" }}
+        containerStyle={{ alignItems: 'start' }}
       />
       <View style={styles.inputContainer}>
         <TextInput
           label="Email"
+          keyboardType="email-address"
           value={email}
           onChangeText={(value) => setEmail(value)}
         />
@@ -26,7 +28,7 @@ const LoginForm = () => {
           label="Password"
           value={password}
           onChangeText={(value) => setPassword(value)}
-          secureTextEntry={!isPasswordVisible} // Set this only when rendering, not dynamically
+          secureTextEntry={!isPasswordVisible} 
           right={
             <TextInput.Icon
               icon={isPasswordVisible ? "eye-off" : "eye"}
