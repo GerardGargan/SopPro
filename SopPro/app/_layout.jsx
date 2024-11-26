@@ -5,7 +5,10 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import { PaperProvider } from "react-native-paper";
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import "react-native-reanimated";
+
+const queryClient = new QueryClient();
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -37,9 +40,11 @@ export default function RootLayout() {
   }
 
   return (
-    <PaperProvider>
-      <RootLayoutNav />
-    </PaperProvider>
+    <QueryClientProvider client={queryClient}>
+      <PaperProvider>
+        <RootLayoutNav />
+      </PaperProvider>
+    </QueryClientProvider>
   );
 }
 
