@@ -5,7 +5,7 @@ import Header from "../UI/Header";
 import InputErrorMessage from "../UI/InputErrorMessage";
 import { validateEmail, validatePassword, validateName, capitiliseFirstLetter } from "../../util/validationHelpers";
 
-const RegisterForm = () => {
+const RegisterForm = ({ onSubmit }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -42,7 +42,7 @@ const RegisterForm = () => {
 
   function handleSubmit() {
     if(isValid.email && isValid.forename && isValid.surname && isValid.company && isValid.password) {
-        console.log('validation passed, submitting...')
+        onSubmit(formData);
     } else {
         console.log('display global error or modal')
     }
