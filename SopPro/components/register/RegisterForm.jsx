@@ -41,10 +41,41 @@ const RegisterForm = ({ onSubmit, isPending }) => {
   }
 
   function handleSubmit() {
-    if(!isPending && isValid.email && isValid.forename && isValid.surname && isValid.company && isValid.password) {
-        onSubmit(formData);
-    } 
-  }
+    // Re-validate all fields
+    const emailValidation = validateEmail(formData.email);
+    const forenameValidation = validateName(formData.forename, "forename");
+    const surnameValidation = validateName(formData.surname, "surname");
+    const companyValidation = validateName(formData.company, "company");
+    const passwordValidation = validatePassword(formData.password);
+  
+    const allValid = 
+      emailValidation.isFieldValid &&
+      forenameValidation.isFieldValid &&
+      surnameValidation.isFieldValid &&
+      companyValidation.isFieldValid &&
+      passwordValidation.isFieldValid;
+  
+    // Update the state for displaying error messages
+    setIsValid({
+      email: emailValidation.isFieldValid,
+      forename: forenameValidation.isFieldValid,
+      surname: surnameValidation.isFieldValid,
+      company: companyValidation.isFieldValid,
+      password: passwordValidation.isFieldValid,
+    });
+  
+    setErrorMessage({
+      email: emailValidation.message,
+      forename: forenameValidation.message,
+      surname: surnameValidation.message,
+      company: companyValidation.message,
+      password: passwordValidation.message,
+    });
+  
+    if (!isPending && allValid) {
+      onSubmit(formData);
+    }
+  }  
 
   function validateField(identifier, validateFn) {
     const { isFieldValid, message } = validateFn(
