@@ -5,6 +5,7 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
+  Text
 } from "react-native";
 import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -40,7 +41,7 @@ const register = () => {
   content = <RegisterForm onSubmit={handleRegister} isPending={isPending} />;
 
   if (successMessage) {
-    content = successMessage;
+    content = <Text>{successMessage}</Text>;
   }
 
   return (
