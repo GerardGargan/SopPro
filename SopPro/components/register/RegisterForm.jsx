@@ -1,9 +1,16 @@
 import React, { useState } from "react";
-import { StyleSheet, View, Text } from "react-native";
+import {
+  StyleSheet,
+  View,
+} from "react-native";
 import { TextInput, Button } from "react-native-paper";
 import Header from "../UI/Header";
 import InputErrorMessage from "../UI/InputErrorMessage";
-import { validateEmail, validatePassword, validateName, capitiliseFirstLetter } from "../../util/validationHelpers";
+import {
+  validateEmail,
+  validatePassword,
+  validateName,
+} from "../../util/validationHelpers";
 
 const RegisterForm = ({ onSubmit, isPending }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -47,14 +54,14 @@ const RegisterForm = ({ onSubmit, isPending }) => {
     const surnameValidation = validateName(formData.surname, "surname");
     const companyValidation = validateName(formData.company, "company");
     const passwordValidation = validatePassword(formData.password);
-  
-    const allValid = 
+
+    const allValid =
       emailValidation.isFieldValid &&
       forenameValidation.isFieldValid &&
       surnameValidation.isFieldValid &&
       companyValidation.isFieldValid &&
       passwordValidation.isFieldValid;
-  
+
     // Update the state for displaying error messages
     setIsValid({
       email: emailValidation.isFieldValid,
@@ -63,7 +70,7 @@ const RegisterForm = ({ onSubmit, isPending }) => {
       company: companyValidation.isFieldValid,
       password: passwordValidation.isFieldValid,
     });
-  
+
     setErrorMessage({
       email: emailValidation.message,
       forename: forenameValidation.message,
@@ -71,11 +78,11 @@ const RegisterForm = ({ onSubmit, isPending }) => {
       company: companyValidation.message,
       password: passwordValidation.message,
     });
-  
+
     if (!isPending && allValid) {
       onSubmit(formData);
     }
-  }  
+  }
 
   function validateField(identifier, validateFn) {
     const { isFieldValid, message } = validateFn(
@@ -91,8 +98,6 @@ const RegisterForm = ({ onSubmit, isPending }) => {
       return { ...prevState, [identifier]: message };
     });
   }
-
-  
 
   return (
     <>
@@ -111,7 +116,9 @@ const RegisterForm = ({ onSubmit, isPending }) => {
           onBlur={() => validateField("email", validateEmail)}
           onChangeText={(value) => handleInput("email", value)}
         />
-        {!isValid.email && <InputErrorMessage>{errorMessage.email}</InputErrorMessage>}
+        {!isValid.email && (
+          <InputErrorMessage>{errorMessage.email}</InputErrorMessage>
+        )}
       </View>
       <View style={styles.inputContainer}>
         <TextInput
@@ -121,7 +128,9 @@ const RegisterForm = ({ onSubmit, isPending }) => {
           onBlur={() => validateField("forename", validateName)}
           onChangeText={(value) => handleInput("forename", value)}
         />
-        {!isValid.forename && <InputErrorMessage>{errorMessage.forename}</InputErrorMessage>}
+        {!isValid.forename && (
+          <InputErrorMessage>{errorMessage.forename}</InputErrorMessage>
+        )}
       </View>
       <View style={styles.inputContainer}>
         <TextInput
@@ -131,7 +140,9 @@ const RegisterForm = ({ onSubmit, isPending }) => {
           onBlur={() => validateField("surname", validateName)}
           onChangeText={(value) => handleInput("surname", value)}
         />
-        {!isValid.surname && <InputErrorMessage>{errorMessage.surname}</InputErrorMessage>}
+        {!isValid.surname && (
+          <InputErrorMessage>{errorMessage.surname}</InputErrorMessage>
+        )}
       </View>
       <View style={styles.inputContainer}>
         <TextInput
@@ -141,7 +152,9 @@ const RegisterForm = ({ onSubmit, isPending }) => {
           onBlur={() => validateField("company", validateName)}
           onChangeText={(value) => handleInput("company", value)}
         />
-        {!isValid.company && <InputErrorMessage>{errorMessage.company}</InputErrorMessage>}
+        {!isValid.company && (
+          <InputErrorMessage>{errorMessage.company}</InputErrorMessage>
+        )}
       </View>
       <View style={styles.inputContainer}>
         <TextInput
@@ -158,7 +171,9 @@ const RegisterForm = ({ onSubmit, isPending }) => {
             />
           }
         />
-        {!isValid.password && <InputErrorMessage>{errorMessage.password}</InputErrorMessage>}
+        {!isValid.password && (
+          <InputErrorMessage>{errorMessage.password}</InputErrorMessage>
+        )}
       </View>
       <View style={styles.buttonContainer}>
         <Button
