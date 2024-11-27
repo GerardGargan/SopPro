@@ -1,33 +1,42 @@
 import React from "react";
-import { View, Text, StyleSheet, ImageBackground } from "react-native";
+import {
+  View,
+  Platform,
+  StyleSheet,
+  ImageBackground,
+  KeyboardAvoidingView,
+  ScrollView
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "../components/UI/Header";
 import LoginForm from "../components/login/LoginForm";
 
-
-const login = () => {
+const Login = () => {
   return (
-    <ImageBackground
-      source={require("../assets/images/background.png")}
-      resizeMode="cover"
-      style={styles.background}
-    >
-      <SafeAreaView style={styles.rootContainer}>
-        <Header text="Log in" />
-        <View style={styles.formContainer}>
-          <LoginForm />
-        </View>
-      </SafeAreaView>
-    </ImageBackground>
+      <ScrollView
+        keyboardShouldPersistTaps="handled"
+        contentContainerStyle={styles.scrollViewContent}
+      >
+        <KeyboardAvoidingView
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+          style={{ flex: 1 }}
+        >
+          <SafeAreaView style={styles.rootContainer}>
+            <Header text="Log in" textStyle={{ color: 'black '}} />
+            <View style={styles.formContainer}>
+              <LoginForm />
+            </View>
+          </SafeAreaView>
+        </KeyboardAvoidingView>
+      </ScrollView>
   );
 };
 
-export default login;
+export default Login;
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    height: '100%'
+  scrollViewContent: {
+    flexGrow: 1,
   },
   rootContainer: {
     flex: 1,
@@ -35,6 +44,6 @@ const styles = StyleSheet.create({
     paddingTop: 50,
   },
   formContainer: {
-    marginTop: 300
-  }
-})
+    marginTop: 64,
+  },
+});
