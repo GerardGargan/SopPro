@@ -5,7 +5,7 @@ import Header from "../UI/Header";
 import InputErrorMessage from "../UI/InputErrorMessage";
 import { validateEmail, validatePassword, validateName, capitiliseFirstLetter } from "../../util/validationHelpers";
 
-const RegisterForm = ({ onSubmit }) => {
+const RegisterForm = ({ onSubmit, isPending }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -41,11 +41,9 @@ const RegisterForm = ({ onSubmit }) => {
   }
 
   function handleSubmit() {
-    if(isValid.email && isValid.forename && isValid.surname && isValid.company && isValid.password) {
+    if(!isPending && isValid.email && isValid.forename && isValid.surname && isValid.company && isValid.password) {
         onSubmit(formData);
-    } else {
-        console.log('display global error or modal')
-    }
+    } 
   }
 
   function validateField(identifier, validateFn) {
@@ -134,12 +132,13 @@ const RegisterForm = ({ onSubmit }) => {
       <View style={styles.buttonContainer}>
         <Button
           mode="contained"
+          loading={isPending}
           contentStyle={{ height: 50 }}
           labelStyle={{ fontSize: 20 }}
           style={{ borderRadius: 0 }}
           onPress={handleSubmit}
         >
-          Create account and company
+          {isPending ? "Registering..." : "Create account and company"}
         </Button>
       </View>
     </>

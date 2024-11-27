@@ -7,6 +7,7 @@ import { useMutation } from "@tanstack/react-query";
 import { registerCompany } from "../util/httpRequests";
 import { ActivityIndicator } from "react-native-paper";
 import { useRouter } from "expo-router";
+import InputErrorMessage from "../components/UI/InputErrorMessage";
 
 const register = () => {
 
@@ -32,15 +33,7 @@ const register = () => {
 
   let content;
 
-  content = <RegisterForm onSubmit={handleRegister} />;
-
-  if(isPending) {
-    content = <ActivityIndicator size="large" />;
-  }
-
-  if(isError) {
-    content = "Error!"
-  }
+  content = <RegisterForm onSubmit={handleRegister} isPending={isPending} />;
 
   if(successMessage) {
     content = successMessage;
@@ -50,6 +43,7 @@ const register = () => {
       <SafeAreaView style={styles.rootContainer}>
         <View>
           {content}
+          {isError && <InputErrorMessage>{error.message}</InputErrorMessage>}
         </View>
       </SafeAreaView>
   );

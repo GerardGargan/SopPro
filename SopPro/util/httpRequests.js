@@ -6,8 +6,7 @@ export async function registerCompany(data) {
         console.log(response.data);
 
     } catch(e) {
-        const error = new Error("Error, could not register user!");
-        error.code = response.status;
+        const error = new Error(e.response.data.errorMessage || "Oops something went wrong!");
         throw error;
     }
 }
