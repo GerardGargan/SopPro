@@ -12,12 +12,24 @@ import LoginForm from "../components/login/LoginForm";
 import { useMutation } from '@tanstack/react-query';
 import { login } from '../util/httpRequests';
 import InputErrorMessage from '../components/UI/InputErrorMessage'
+import useAuthStore from '../store/useAuthStore';
+import { useRouter } from "expo-router";
 
 const Login = () => {
 
+  const { setToken } = useAuthStore();
+  const router = useRouter();
+
   const { mutate, isPending, isError, error, data: apiData } = useMutation({
     mutationFn: login,
-    onSuccess: () => { console.log('login successful'); }
+    onSuccess: (data) => { 
+      const token = data?.result?.token;
+      console.log(token);
+      if(token) {
+        setToken(token);
+        router.navigate('/(auth)');
+      }
+     }
   });
 
   function handleLogin(data) {

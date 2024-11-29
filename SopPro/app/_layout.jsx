@@ -7,6 +7,7 @@ import { StatusBar } from "expo-status-bar";
 import { PaperProvider } from "react-native-paper";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import "react-native-reanimated";
+import useAuthStore from '../store/useAuthStore';
 
 const queryClient = new QueryClient();
 
@@ -19,6 +20,12 @@ export {
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+
+  const { isLoggedIn } = useAuthStore();
+  if(isLoggedIn) {
+    console.log('logged in!')
+  };
+
   const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
     ...FontAwesome.font,
