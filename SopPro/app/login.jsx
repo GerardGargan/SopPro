@@ -23,7 +23,6 @@ const Login = () => {
   function handleLogin(data) {
     mutate(data);
   }
-  console.log(apiData)
 
   return (
       <ScrollView
