@@ -16,6 +16,7 @@
     "@expo/vector-icons": "^14.0.2",
     "@react-native-async-storage/async-storage": "1.23.1",
     "@react-navigation/native": "^7.0.0",
+    "@reduxjs/toolkit": "^2.4.0",
     "@tanstack/react-query": "^5.61.4",
     "axios": "^1.7.7",
     "expo": "~52.0.9",
@@ -35,7 +36,8 @@
     "react-native-safe-area-context": "4.12.0",
     "react-native-screens": "~4.1.0",
     "react-native-web": "~0.19.13",
-    "zustand": "^5.0.1"
+    "react-redux": "^9.1.2",
+    "redux-devtools-expo-dev-plugin": "^1.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",

@@ -4,7 +4,6 @@ import { Tabs } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import "react-native-reanimated";
-import useAuthStore from '../../store/useAuthStore';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -19,9 +18,6 @@ function TabBarIcon({ ...props }) {
 }
 
 export default function RootLayout() {
-  const { isLoggedIn } = useAuthStore();
-
-  console.log(isLoggedIn);
 
   const [loaded, error] = useFonts({
     SpaceMono: require("../../assets/fonts/SpaceMono-Regular.ttf"),

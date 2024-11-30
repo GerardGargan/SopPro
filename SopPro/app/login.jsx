@@ -12,13 +12,14 @@ import LoginForm from "../components/login/LoginForm";
 import { useMutation } from '@tanstack/react-query';
 import { login } from '../util/httpRequests';
 import InputErrorMessage from '../components/UI/InputErrorMessage'
-import useAuthStore from '../store/useAuthStore';
 import { useRouter } from "expo-router";
+import { useDispatch} from 'react-redux';
+import { authActions } from '../store/authSlice';
 
 const Login = () => {
 
-  const { setToken } = useAuthStore();
   const router = useRouter();
+  const dispatch = useDispatch();
 
   const { mutate, isPending, isError, error, data: apiData } = useMutation({
     mutationFn: login,
@@ -26,7 +27,7 @@ const Login = () => {
       const token = data?.result?.token;
       console.log(token);
       if(token) {
-        setToken(token);
+        dispatch(authActions.setToken(token));
         router.navigate('/(auth)');
       }
      }
