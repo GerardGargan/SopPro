@@ -7,7 +7,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "http://localhost:5160"
+      "applicationUrl": "http://192.168.1.46:5000"
     },
     "https": {
       "launchUrl": "swagger",
@@ -16,7 +16,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "https://localhost:7229;http://localhost:5160"
+      "applicationUrl": "https://192.168.1.46:5001;http://192.168.1.46:5000"
     },
     "IIS Express": {
       "launchUrl": "swagger",

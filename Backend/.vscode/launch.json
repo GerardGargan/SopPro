@@ -16,8 +16,9 @@
                 "args": "${auto-detect-url}"
             },
             "env": {
-                "ASPNETCORE_URLS": "https://localhost:44311",
-            }
+                "ASPNETCORE_URLS": "http://192.168.1.46:5000",
+            },
+            "justMyCode": true
         }
     ]
 }
