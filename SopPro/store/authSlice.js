@@ -11,12 +11,12 @@ const authSlice = createSlice({
     setToken(state, action) {
         state.token = action.payload;
         state.isLoggedIn = !!action.payload;
-        // AsyncStorage.setItem("authToken", action.payload);
+        AsyncStorage.setItem("authToken", action.payload);
     },
     logout(state) {
         state.token = null;
         state.isLoggedIn = false;
-        // AsyncStorage.removeItem("authToken");
+        AsyncStorage.removeItem("authToken");
     },
     initialiseAuth(state, action) {
         state.token = action.payload;

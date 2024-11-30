@@ -2,8 +2,13 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
 import { Tabs } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import "react-native-reanimated";
+import { authActions } from "../../store/authSlice";
+import { useSelector, useDispatch } from "react-redux";
+import { Text } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Redirect } from "expo-router";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -43,6 +48,28 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
+  const dispatch = useDispatch();
+  const [authChecked, setAuthChecked] = useState(false);
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const token = await AsyncStorage.getItem("authToken");
+      console.log(token);
+      dispatch(authActions.initialiseAuth(token));
+      setAuthChecked(true);
+    };
+    checkAuth();
+  }, [dispatch]);
+
+  if (!authChecked) {
+    return <Text>Loading</Text>;
+  }
+
+  if (!isLoggedIn) {
+    return <Redirect href="/home" />;
+  }
+
   return (
     <Tabs
       screenOptions={{
@@ -60,6 +87,13 @@ function RootLayoutNav() {
         name="one"
         options={{
           title: "Tab Two",
+          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+        }}
+      />
+      <Tabs.Screen
+        name="test"
+        options={{
+          title: "Tab test",
           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
         }}
       />

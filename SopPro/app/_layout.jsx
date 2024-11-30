@@ -1,14 +1,14 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Slot } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import { PaperProvider } from "react-native-paper";
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "react-native-reanimated";
 import { Provider } from "react-redux";
-import store from '../store/index';
+import store from "../store/index";
 
 const queryClient = new QueryClient();
 
@@ -21,7 +21,6 @@ export {
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
-
   const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
     ...FontAwesome.font,
@@ -54,15 +53,11 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
+
   return (
     <>
       <StatusBar style="light" />
-      <Stack>
-        <Stack.Screen name="index" options={{ headerShown: false }} />
-        <Stack.Screen name="login" options={{ title: "Login" }} />
-        <Stack.Screen name="register" options={{ title: "Sign up" }} />
-        <Stack.Screen name="(auth)" />
-      </Stack>
+        <Slot />
     </>
   );
 }
