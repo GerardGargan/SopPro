@@ -1,6 +1,6 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
-import { Slot } from "expo-router";
+import { Slot, Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
@@ -57,7 +57,12 @@ function RootLayoutNav() {
   return (
     <>
       <StatusBar style="light" />
-        <Slot />
+        <Stack>
+          <Stack.Screen name="(auth)" options={{headerShown: false}} />
+          <Stack.Screen name="home" options={{headerShown: false}} />
+          <Stack.Screen name="login" />
+          <Stack.Screen name="register" />
+        </Stack>
     </>
   );
 }

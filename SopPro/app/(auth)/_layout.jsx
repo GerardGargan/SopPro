@@ -9,6 +9,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { Text } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Redirect } from "expo-router";
+import { useNavigation } from "expo-router";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -48,6 +49,7 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
+ const navigator = useNavigation();
   const dispatch = useDispatch();
   const [authChecked, setAuthChecked] = useState(false);
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
