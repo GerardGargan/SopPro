@@ -15,23 +15,11 @@ import InputErrorMessage from '../components/UI/InputErrorMessage'
 import { useRouter } from "expo-router";
 import { useDispatch} from 'react-redux';
 import { authActions } from '../store/authSlice';
+import useLogin from '../hooks/useLogin';
 
 const Login = () => {
 
-  const router = useRouter();
-  const dispatch = useDispatch();
-
-  const { mutate, isPending, isError, error, data: apiData } = useMutation({
-    mutationFn: login,
-    onSuccess: (data) => { 
-      const token = data?.result?.token;
-      console.log(token);
-      if(token) {
-        dispatch(authActions.setToken(token));
-        router.navigate('/(auth)');
-      }
-     }
-  });
+  const { mutate, isPending, isError, error } = useLogin();
 
   function handleLogin(data) {
     mutate(data);

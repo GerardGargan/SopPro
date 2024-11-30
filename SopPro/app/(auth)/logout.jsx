@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { authActions } from "../../store/authSlice";
 import { useDispatch } from "react-redux";
 
-const one = () => {
+const logout = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
@@ -17,4 +17,4 @@ const one = () => {
   );
 };
 
-export default one;
+export default logout;

@@ -81,14 +81,7 @@ function RootLayoutNav() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Tab One",
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="one"
-        options={{
-          title: "Tab Two",
+          title: "Index",
           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
         }}
       />
@@ -99,6 +92,13 @@ function RootLayoutNav() {
           tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
         }}
       />
+        <Tabs.Screen
+          name="logout"
+          options={{
+            title: "Logout",
+            tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
+          }}
+        />
     </Tabs>
   );
 }
