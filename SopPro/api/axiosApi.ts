@@ -3,7 +3,7 @@ import store from '../store/index';
 
 // TODO: Set up a environment variable for baseURL
 const api = axios.create({
-  baseURL: "http://192.168.1.46:5000/api",
+  baseURL: `${process.env.EXPO_PUBLIC_API_URL}`,
   headers: {
     "Content-Type": "application/json",
   },
