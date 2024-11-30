@@ -106,11 +106,6 @@ const RegisterForm = ({ onSubmit, isPendingRegistration, isPendingLogin }) => {
 
   return (
     <>
-      <Header
-        text="Sign up your company!"
-        textStyle={{ color: "black", textAlign: "left" }}
-        containerStyle={{ alignItems: "start" }}
-      />
       <View style={styles.inputContainer}>
         <TextInput
           label="Email"

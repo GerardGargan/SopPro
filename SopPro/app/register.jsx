@@ -13,6 +13,8 @@ import { useMutation } from "@tanstack/react-query";
 import { registerCompany } from "../util/httpRequests";
 import InputErrorMessage from "../components/UI/InputErrorMessage";
 import useLogin from "../hooks/useLogin";
+import ErrorBlock from "../components/UI/ErrorBlock";
+import Header from "../components/UI/Header";
 
 const register = () => {
   const { mutate: loginMutate, isPending: isPendingLogin, isError: isLoginError } = useLogin();
@@ -47,9 +49,14 @@ const register = () => {
           style={{ flex: 1 }}
         >
           <View>
+          <Header
+        text="Sign up your company!"
+        textStyle={{ color: "black", textAlign: "left" }}
+        containerStyle={{ alignItems: "start" }}
+      />
+            {isError && <ErrorBlock>{error.message}</ErrorBlock>}
+            {isLoginError && <ErrorBlock>Registration was successful but automatic log in failed. Please try to login manually.</ErrorBlock>}
             {content}
-            {isError && <InputErrorMessage>{error.message}</InputErrorMessage>}
-            {isLoginError && <InputErrorMessage>Registration was successful but automatic log in failed. Please try to login manually.</InputErrorMessage>}
           </View>
         </KeyboardAvoidingView>
       </SafeAreaView>

@@ -9,8 +9,9 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "../components/UI/Header";
 import LoginForm from "../components/login/LoginForm";
-import InputErrorMessage from '../components/UI/InputErrorMessage'
+import ErrorBlock from '../components/UI/ErrorBlock'
 import useLogin from '../hooks/useLogin';
+
 
 const Login = () => {
 
@@ -32,9 +33,9 @@ const Login = () => {
           <SafeAreaView style={styles.rootContainer}>
             <Header text="Log in" textStyle={{ color: 'black '}} />
             <View style={styles.formContainer}>
+            {isError && <ErrorBlock>{error.message}</ErrorBlock>}
               <LoginForm isPending={isPending} onSubmit={handleLogin} />
             </View>
-            {isError && <InputErrorMessage>{error.message}</InputErrorMessage>}
           </SafeAreaView>
         </KeyboardAvoidingView>
       </ScrollView>
