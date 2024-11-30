@@ -7,25 +7,21 @@ import {
   Platform,
   Text
 } from "react-native";
-import { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import RegisterForm from "../components/register/RegisterForm";
 import { useMutation } from "@tanstack/react-query";
 import { registerCompany } from "../util/httpRequests";
-import { useRouter } from "expo-router";
 import InputErrorMessage from "../components/UI/InputErrorMessage";
+import useLogin from "../hooks/useLogin";
 
 const register = () => {
-  const [successMessage, setSuccessMessage] = useState(null);
-  const router = useRouter();
+  const { mutate: loginMutate, isPending: isPendingLogin, isError: isLoginError } = useLogin();
 
   const { mutate, isPending, isError, error } = useMutation({
     mutationFn: registerCompany,
-    onSuccess: async () => {
-      setSuccessMessage("User successfully created");
-      setTimeout(() => {
-        router.replace("/login");
-      }, 3000);
+    onSuccess: (responseData, variables) => {
+      const { email, password } = variables;
+      loginMutate({ email, password });
     },
   });
 
@@ -38,11 +34,7 @@ const register = () => {
 
   let content;
 
-  content = <RegisterForm onSubmit={handleRegister} isPending={isPending} />;
-
-  if (successMessage) {
-    content = <Text>{successMessage}</Text>;
-  }
+  content = <RegisterForm onSubmit={handleRegister} isPendingRegistration={isPending} isPendingLogin={isPendingLogin} />;
 
   return (
     <ScrollView
@@ -57,6 +49,7 @@ const register = () => {
           <View>
             {content}
             {isError && <InputErrorMessage>{error.message}</InputErrorMessage>}
+            {isLoginError && <InputErrorMessage>Registration was successful but automatic log in failed. Please try to login manually.</InputErrorMessage>}
           </View>
         </KeyboardAvoidingView>
       </SafeAreaView>

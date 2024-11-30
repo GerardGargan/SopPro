@@ -12,7 +12,7 @@ import {
   validateName,
 } from "../../util/validationHelpers";
 
-const RegisterForm = ({ onSubmit, isPending }) => {
+const RegisterForm = ({ onSubmit, isPendingRegistration, isPendingLogin }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -79,7 +79,7 @@ const RegisterForm = ({ onSubmit, isPending }) => {
       password: passwordValidation.message,
     });
 
-    if (!isPending && allValid) {
+    if (!isPendingRegistration && allValid) {
       onSubmit(formData);
     }
   }
@@ -97,6 +97,11 @@ const RegisterForm = ({ onSubmit, isPending }) => {
     setErrorMessage((prevState) => {
       return { ...prevState, [identifier]: message };
     });
+  }
+
+  let buttonText = "Create account and company";
+  if(isPendingRegistration || isPendingLogin) {
+    buttonText = "Registering and logging you in..."
   }
 
   return (
@@ -178,13 +183,13 @@ const RegisterForm = ({ onSubmit, isPending }) => {
       <View style={styles.buttonContainer}>
         <Button
           mode="contained"
-          loading={isPending}
+          loading={isPendingRegistration || isPendingLogin}
           contentStyle={{ height: 50 }}
           labelStyle={{ fontSize: 20 }}
           style={{ borderRadius: 0 }}
           onPress={handleSubmit}
         >
-          {isPending ? "Registering..." : "Create account and company"}
+          {buttonText}
         </Button>
       </View>
     </>
