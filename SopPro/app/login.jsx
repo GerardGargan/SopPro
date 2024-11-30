@@ -9,12 +9,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "../components/UI/Header";
 import LoginForm from "../components/login/LoginForm";
-import { useMutation } from '@tanstack/react-query';
-import { login } from '../util/httpRequests';
 import InputErrorMessage from '../components/UI/InputErrorMessage'
-import { useRouter } from "expo-router";
-import { useDispatch} from 'react-redux';
-import { authActions } from '../store/authSlice';
 import useLogin from '../hooks/useLogin';
 
 const Login = () => {
