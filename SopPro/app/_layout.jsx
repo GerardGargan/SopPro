@@ -60,8 +60,8 @@ function RootLayoutNav() {
         <Stack>
           <Stack.Screen name="(auth)" options={{headerShown: false}} />
           <Stack.Screen name="home" options={{headerShown: false}} />
-          <Stack.Screen name="login" />
-          <Stack.Screen name="register" />
+          <Stack.Screen name="login" options={{ title: "Log in" }} />
+          <Stack.Screen name="register" options={{ title: "Sign up "}} />
         </Stack>
     </>
   );
