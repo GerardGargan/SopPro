@@ -57,23 +57,12 @@ namespace Backend.Service.Implementation {
                 return false;
             }
 
-            List<string> recipientIds = recipients ?? new List<string>();
-            List<string> bccRecipientIds = bccRecipients ?? new List<string>();
+            // handle nulls by creating empty lists
+            recipients = recipients ?? new List<string>(0);
+            bccRecipients = bccRecipients ?? new List<string>(0);
 
-            IEnumerable<ApplicationUser> recipientEmails = Enumerable.Empty<ApplicationUser>();
-            IEnumerable<ApplicationUser> bccRecipientEmails = Enumerable.Empty<ApplicationUser>();
-
-            if(recipientIds.Count > 0)
-            {
-                recipientEmails = await _unitOfWork.ApplicationUsers.GetAll(u => recipientIds.Contains(u.Id)).ToListAsync();
-            }
-
-            if(bccRecipientIds.Count > 0) {
-                bccRecipientEmails = await _unitOfWork.ApplicationUsers.GetAll(u => bccRecipientIds.Contains(u.Id)).ToListAsync();
-            }
-
-            string toEmails = string.Join(",", recipientEmails.Select(u => u.Email));
-            string bccEmails = string.Join(",", bccRecipientEmails.Select(u => u.Email));
+            string toEmails = string.Join(",", recipients);
+            string bccEmails = string.Join(",", bccRecipients);
 
             var client = new PostmarkClient(_appSettings.PostmarkApiToken);
 
@@ -92,7 +81,7 @@ namespace Backend.Service.Implementation {
 
                 return response.Status == PostmarkStatus.Success;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return false;
             }
