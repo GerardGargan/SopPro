@@ -4,6 +4,7 @@ using Backend.Repository.Interface;
 using Backend.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 namespace Backend.Controllers
@@ -52,7 +53,7 @@ namespace Backend.Controllers
             List<string> userIds = new List<string>();
             userIds.Add("bf31a459-93d7-4135-89b8-2068e49d1fea");
             await _emailService.SendEmailAsync(null, userIds, "Test", "Testing");
-            return await _unitOfWork.ApplicationUsers.GetAllAsync();
+            return await _unitOfWork.ApplicationUsers.GetAll().ToListAsync();
 
         }
     }

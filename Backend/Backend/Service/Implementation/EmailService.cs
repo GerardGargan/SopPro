@@ -2,6 +2,7 @@ using Backend.Models.DatabaseModels;
 using Backend.Models.Settings;
 using Backend.Repository.Interface;
 using Backend.Service.Interface;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PostmarkDotNet;
 
@@ -64,11 +65,11 @@ namespace Backend.Service.Implementation {
 
             if(recipientIds.Count > 0)
             {
-                recipientEmails = await _unitOfWork.ApplicationUsers.GetAllAsync(u => recipientIds.Contains(u.Id));
+                recipientEmails = await _unitOfWork.ApplicationUsers.GetAll(u => recipientIds.Contains(u.Id)).ToListAsync();
             }
 
             if(bccRecipientIds.Count > 0) {
-                bccRecipientEmails = await _unitOfWork.ApplicationUsers.GetAllAsync(u => bccRecipientIds.Contains(u.Id));
+                bccRecipientEmails = await _unitOfWork.ApplicationUsers.GetAll(u => bccRecipientIds.Contains(u.Id)).ToListAsync();
             }
 
             string toEmails = string.Join(",", recipientEmails.Select(u => u.Email));

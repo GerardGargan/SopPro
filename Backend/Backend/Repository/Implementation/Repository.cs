@@ -68,7 +68,7 @@ namespace Backend.Repository.Implementation
         /// <param name="filter"></param>
         /// <param name="includeProperties"></param>
         /// <returns>All entities matching the filter</returns>
-        public async Task<IEnumerable<T>> GetAllAsync(System.Linq.Expressions.Expression<Func<T, bool>> filter = null, string includeProperties = null, bool tracked = false)
+        public IQueryable<T> GetAll(System.Linq.Expressions.Expression<Func<T, bool>> filter = null, string includeProperties = null, bool tracked = false)
         {
             IQueryable<T> query;
 
@@ -95,7 +95,7 @@ namespace Backend.Repository.Implementation
                 }
             }
 
-            return await query.ToListAsync();
+            return query;
         }
 
         /// <summary>
