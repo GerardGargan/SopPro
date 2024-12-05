@@ -7,5 +7,7 @@
         public string JwtAudience { get; set; }
         public int JwtInviteExpireHours { get; set; }
         public int JwtAuthExpireDays { get; set; }
+        public string PostmarkFromEmail { get; set; }
+        public string PostmarkApiToken { get; set; }
     }
 }

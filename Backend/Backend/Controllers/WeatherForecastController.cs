@@ -1,6 +1,7 @@
 using Backend.Models.DatabaseModels;
 using Backend.Models.Settings;
 using Backend.Repository.Interface;
+using Backend.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -21,16 +22,18 @@ namespace Backend.Controllers
 
         private readonly ILogger<WeatherForecastController> _logger;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IEmailService _emailService;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger, IOptions<ApplicationSettings> appSettings, IUnitOfWork unitOfWork)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, IOptions<ApplicationSettings> appSettings, IUnitOfWork unitOfWork, IEmailService emailService)
         {
             _logger = logger;
             _appSettings = appSettings.Value;
             _unitOfWork = unitOfWork;
+            _emailService = emailService;
         }
 
         [HttpGet(Name = "GetWeatherForecast")]
-        [Authorize]
+        //[Authorize]
         public async Task<IEnumerable<ApplicationUser>> Get()
         {
             //return Enumerable.Range(1, 5).Select(index => new WeatherForecast
@@ -45,6 +48,7 @@ namespace Backend.Controllers
             //var userToRemove = await _unitOfWork.ApplicationUser.GetAsync(x => x.Email == "user@example.com");
             //_unitOfWork.ApplicationUser.Remove(userToRemove);
             //await _unitOfWork.SaveAsync();
+            await _emailService.SendEmailAsync("ggargan01@qub.ac.uk", "Test api email", "Testing 123");
             return await _unitOfWork.ApplicationUsers.GetAllAsync();
 
         }
