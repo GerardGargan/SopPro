@@ -1,4 +1,5 @@
 ﻿using Backend.Data;
+using Backend.Models.DatabaseModels;
 using Backend.Repository.Interface;
 using Microsoft.EntityFrameworkCore;
 

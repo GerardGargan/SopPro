@@ -48,7 +48,10 @@ namespace Backend.Controllers
             //var userToRemove = await _unitOfWork.ApplicationUser.GetAsync(x => x.Email == "user@example.com");
             //_unitOfWork.ApplicationUser.Remove(userToRemove);
             //await _unitOfWork.SaveAsync();
-            await _emailService.SendEmailAsync("ggargan01@qub.ac.uk", "Test api email", "Testing 123");
+            //await _emailService.SendEmailAsync("ggargan01@qub.ac.uk", "Test api email", "Testing 123");
+            List<string> userIds = new List<string>();
+            userIds.Add("bf31a459-93d7-4135-89b8-2068e49d1fea");
+            await _emailService.SendEmailAsync(null, userIds, "Test", "Testing");
             return await _unitOfWork.ApplicationUsers.GetAllAsync();
 
         }
