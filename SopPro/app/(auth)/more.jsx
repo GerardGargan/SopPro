@@ -1,10 +1,11 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
+import { Link } from 'expo-router'
 
 const more = () => {
   return (
-    <View>
-      <Text>more</Text>
+    <View style={{margin: 50}}>
+      <Link href="logout">Logout</Link>
     </View>
   )
 }
