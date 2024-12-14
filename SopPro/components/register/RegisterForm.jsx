@@ -4,7 +4,6 @@ import {
   View,
 } from "react-native";
 import { TextInput, Button } from "react-native-paper";
-import Header from "../UI/Header";
 import InputErrorMessage from "../UI/InputErrorMessage";
 import {
   validateEmail,

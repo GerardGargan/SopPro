@@ -5,13 +5,11 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Text
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import RegisterForm from "../components/register/RegisterForm";
 import { useMutation } from "@tanstack/react-query";
 import { registerCompany } from "../util/httpRequests";
-import InputErrorMessage from "../components/UI/InputErrorMessage";
 import useLogin from "../hooks/useLogin";
 import ErrorBlock from "../components/UI/ErrorBlock";
 import Header from "../components/UI/Header";
