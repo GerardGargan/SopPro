@@ -35,7 +35,7 @@ export default function RootLayout() {
   useEffect(() => {
     if (error) throw error;
   }, [error]);
-
+  
   useEffect(() => {
     if (loaded) {
       SplashScreen.hideAsync();
@@ -58,7 +58,6 @@ function RootLayoutNav() {
   useEffect(() => {
     const checkAuth = async () => {
       const token = await AsyncStorage.getItem("authToken");
-      console.log(token);
       dispatch(authActions.initialiseAuth(token));
       setAuthChecked(true);
     };
