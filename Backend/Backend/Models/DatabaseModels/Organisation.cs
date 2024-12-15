@@ -12,5 +12,6 @@ namespace Backend.Models.DatabaseModels
         public List<Invitation> Invitations { get; set; }
         public List<Department> Departments { get; set; }
         public List<Sop> Sops { get; set; }
+        public List<SopVersion> SopVersions { get; set; }
     }
 }

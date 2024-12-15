@@ -15,6 +15,7 @@ namespace Backend.Data
         public DbSet<Invitation> Invitations { get; set; }
         public DbSet<Department> Departments { get; set; }
         public DbSet<Sop> Sops { get; set; }
+        public DbSet<SopVersion> SopVersions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -24,6 +25,7 @@ namespace Backend.Data
                 .HasOne(a => a.Organisation)
                 .WithMany(o => o.Users)
                 .HasForeignKey(a => a.OrganisationId)
+                .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
 
             // Relationships for Invitation
@@ -31,6 +33,7 @@ namespace Backend.Data
                 .HasOne(i => i.Organisation)
                 .WithMany(o => o.Invitations)
                 .HasForeignKey(i => i.OrganisationId)
+                .OnDelete(DeleteBehavior.Cascade)
                 .IsRequired();
 
             // Relationships for Departments
@@ -46,13 +49,40 @@ namespace Backend.Data
                 .HasOne(s => s.Organisation)
                 .WithMany(o => o.Sops)
                 .HasForeignKey(s => s.OrganisationId)
-                .OnDelete(DeleteBehavior.Cascade)
+                .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
             
             modelBuilder.Entity<Sop>()
                 .HasOne(s => s.Department)
                 .WithMany(d => d.Sops)
                 .HasForeignKey(s => s.DepartmentId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // Relationships for Sop Versions
+            modelBuilder.Entity<SopVersion>()
+                .HasOne(s => s.Organisation)
+                .WithMany(o => o.SopVersions)
+                .HasForeignKey(s => s.OrganisationId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired();
+            
+            modelBuilder.Entity<SopVersion>()
+                .HasOne(s => s.Sop)
+                .WithMany(s => s.SopVersions)
+                .HasForeignKey(s => s.SopId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired();
+            
+            modelBuilder.Entity<SopVersion>()
+                .HasOne(s => s.Author)
+                .WithMany(a => a.AuthoredSopVersions)
+                .HasForeignKey(s => s.AuthorId)
+                .OnDelete(DeleteBehavior.SetNull);
+            
+            modelBuilder.Entity<SopVersion>()
+                .HasOne(s => s.ApprovedBy)
+                .WithMany(a => a.ApprovedSopVersions)
+                .HasForeignKey(s => s.ApprovedById)
                 .OnDelete(DeleteBehavior.SetNull);
         }
     }

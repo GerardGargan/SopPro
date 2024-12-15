@@ -11,5 +11,6 @@ namespace Backend.Models.DatabaseModels {
         public Department Department { get; set; }
         public string reference { get; set; }
         public bool isAiGenerated { get; set; }
+        public List<SopVersion> SopVersions { get; set; }
     }
 }
