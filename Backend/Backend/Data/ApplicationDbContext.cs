@@ -17,6 +17,8 @@ namespace Backend.Data
         public DbSet<Sop> Sops { get; set; }
         public DbSet<SopVersion> SopVersions { get; set; }
         public DbSet<SopStep> SopSteps { get; set; }
+        public DbSet<Ppe> Ppe { get; set; }
+        public DbSet<SopStepPpe> SopStepPpe { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -98,6 +100,28 @@ namespace Backend.Data
                 .HasOne(s => s.SopVersion)
                 .WithMany(s => s.SopSteps)
                 .HasForeignKey(s => s.SopVersionId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired();
+
+            // Relationships for SopStepPpe
+            modelBuilder.Entity<SopStepPpe>()
+                .HasOne(s => s.Organisation)
+                .WithMany(o => o.SopStepPpe)
+                .HasForeignKey(s => s.OrganisationId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
+
+            modelBuilder.Entity<SopStepPpe>()
+                .HasOne(s => s.SopStep)
+                .WithMany(s => s.SopStepPpe)
+                .HasForeignKey(s => s.SopStepId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired();
+            
+            modelBuilder.Entity<SopStepPpe>()
+                .HasOne(s => s.Ppe)
+                .WithMany(s => s.SopStepPpe)
+                .HasForeignKey(s => s.PpeId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .IsRequired();
         }

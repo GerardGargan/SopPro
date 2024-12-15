@@ -14,5 +14,6 @@ namespace Backend.Models.DatabaseModels
         public List<Sop> Sops { get; set; }
         public List<SopVersion> SopVersions { get; set; }
         public List<SopStep> SopSteps { get; set; }
+        public List<SopStepPpe> SopStepPpe { get; set; }
     }
 }
