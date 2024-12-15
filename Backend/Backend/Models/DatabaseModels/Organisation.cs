@@ -10,5 +10,6 @@ namespace Backend.Models.DatabaseModels
         public string Name { get; set; }
         public List<ApplicationUser> Users { get; set; }
         public List<Invitation> Invitations { get; set; }
+        public List<Department> Departments { get; set; }
     }
 }

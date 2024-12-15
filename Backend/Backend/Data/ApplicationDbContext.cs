@@ -13,6 +13,7 @@ namespace Backend.Data
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<Organisation> Organisations { get; set; }
         public DbSet<Invitation> Invitations { get; set; }
+        public DbSet<Department> Departments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -30,8 +31,14 @@ namespace Backend.Data
                 .WithMany(o => o.Invitations)
                 .HasForeignKey(i => i.OrganisationId)
                 .IsRequired();
-        }
 
-        
+            // Relationships for Departments
+            modelBuilder.Entity<Department>()
+                .HasOne(d => d.Organisation)
+                .WithMany(o => o.Departments)
+                .HasForeignKey(d => d.OrganisationId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired();
+        }
     }
 }
