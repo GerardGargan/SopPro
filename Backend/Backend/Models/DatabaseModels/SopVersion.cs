@@ -22,6 +22,7 @@ namespace Backend.Models.DatabaseModels {
         public DateTime? ApprovalDate { get; set; }
         public DateTime? RequestApprovalDate { get; set; }
         public List<SopStep> SopSteps { get; set; }
+        public List<SopHazard> SopHazards { get; set; }
     }
 
     public enum SopStatus
