@@ -14,6 +14,7 @@ namespace Backend.Data
         public DbSet<Organisation> Organisations { get; set; }
         public DbSet<Invitation> Invitations { get; set; }
         public DbSet<Department> Departments { get; set; }
+        public DbSet<Sop> Sops { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -39,6 +40,20 @@ namespace Backend.Data
                 .HasForeignKey(d => d.OrganisationId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .IsRequired();
+            
+            // Relationships for Sops
+            modelBuilder.Entity<Sop>()
+                .HasOne(s => s.Organisation)
+                .WithMany(o => o.Sops)
+                .HasForeignKey(s => s.OrganisationId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired();
+            
+            modelBuilder.Entity<Sop>()
+                .HasOne(s => s.Department)
+                .WithMany(d => d.Sops)
+                .HasForeignKey(s => s.DepartmentId)
+                .OnDelete(DeleteBehavior.SetNull);
         }
     }
 }
