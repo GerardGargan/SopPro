@@ -84,6 +84,14 @@ namespace Backend.Data
                 .WithMany(a => a.ApprovedSopVersions)
                 .HasForeignKey(s => s.ApprovedById)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Relationships for sop steps
+            modelBuilder.Entity<SopStep>()
+                .HasOne(s => s.SopVersion)
+                .WithMany(s => s.SopSteps)
+                .HasForeignKey(s => s.SopVersionId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .IsRequired();
         }
     }
 }
