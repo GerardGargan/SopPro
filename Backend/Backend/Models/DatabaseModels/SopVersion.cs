@@ -18,7 +18,7 @@ namespace Backend.Models.DatabaseModels {
         public string ApprovedById { get; set; }
         [ForeignKey("ApprovedById")]
         public ApplicationUser ApprovedBy { get; set; }
-        public DateTime? CreateDate { get; set; }
+        public DateTime? CreateDate { get; set; } = DateTime.UtcNow;
         public DateTime? ApprovalDate { get; set; }
         public DateTime? RequestApprovalDate { get; set; }
     }

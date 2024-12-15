@@ -10,7 +10,7 @@ namespace Backend.Models.DatabaseModels {
         [ForeignKey("DepartmentId")]
         public Department Department { get; set; }
         public string reference { get; set; }
-        public bool isAiGenerated { get; set; }
+        public bool? isAiGenerated { get; set; }
         public List<SopVersion> SopVersions { get; set; }
     }
 }

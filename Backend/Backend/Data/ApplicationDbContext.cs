@@ -63,7 +63,7 @@ namespace Backend.Data
                 .HasOne(s => s.Organisation)
                 .WithMany(o => o.SopVersions)
                 .HasForeignKey(s => s.OrganisationId)
-                .OnDelete(DeleteBehavior.Cascade)
+                .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
             
             modelBuilder.Entity<SopVersion>()
@@ -77,13 +77,13 @@ namespace Backend.Data
                 .HasOne(s => s.Author)
                 .WithMany(a => a.AuthoredSopVersions)
                 .HasForeignKey(s => s.AuthorId)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
             
             modelBuilder.Entity<SopVersion>()
                 .HasOne(s => s.ApprovedBy)
                 .WithMany(a => a.ApprovedSopVersions)
                 .HasForeignKey(s => s.ApprovedById)
-                .OnDelete(DeleteBehavior.SetNull);
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
