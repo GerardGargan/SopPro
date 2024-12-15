@@ -16,6 +16,7 @@ namespace Backend.Data
         public DbSet<Department> Departments { get; set; }
         public DbSet<Sop> Sops { get; set; }
         public DbSet<SopVersion> SopVersions { get; set; }
+        public DbSet<SopStep> SopSteps { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -86,6 +87,13 @@ namespace Backend.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Relationships for sop steps
+            modelBuilder.Entity<SopStep>()
+                .HasOne(s => s.Organisation)
+                .WithMany(o => o.SopSteps)
+                .HasForeignKey(s => s.OrganisationId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
+
             modelBuilder.Entity<SopStep>()
                 .HasOne(s => s.SopVersion)
                 .WithMany(s => s.SopSteps)

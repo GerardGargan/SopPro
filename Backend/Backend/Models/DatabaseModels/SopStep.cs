@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Backend.Models.DatabaseModels {
-    public class SopStep {
+    public class SopStep : BaseOrganisationClass {
         [Key]
         public int Id { get; set; }
         public int SopVersionId { get; set; }
