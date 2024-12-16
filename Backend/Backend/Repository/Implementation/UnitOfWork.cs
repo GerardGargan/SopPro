@@ -1,6 +1,5 @@
 ﻿using Backend.Data;
 using Backend.Repository.Interface;
-using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Backend.Repository.Implementation
 {
@@ -12,6 +11,7 @@ namespace Backend.Repository.Implementation
         public IInvitationRepository Invitations { get; private set; }
         public IDepartmentRepository Departments { get; private set; }
         public IPpeRepository Ppe { get; private set; }
+        public ISopRepository Sops { get; private set; }
 
         public UnitOfWork(ApplicationDbContext db)
         {
@@ -21,6 +21,7 @@ namespace Backend.Repository.Implementation
             Invitations = new InvitationRepository(_db);
             Departments = new DepartmentRepository(_db);
             Ppe = new PpeRepository(_db);
+            Sops = new SopRepository(_db);
         }
 
         public async Task ExecuteInTransactionAsync(Func<Task> action)

@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Storage;
-
+﻿
 namespace Backend.Repository.Interface
 {
     public interface IUnitOfWork
@@ -9,6 +8,7 @@ namespace Backend.Repository.Interface
         IInvitationRepository Invitations { get; }
         IDepartmentRepository Departments { get; }
         IPpeRepository Ppe { get; }
+        ISopRepository Sops { get; }
         public Task SaveAsync();
         public Task ExecuteInTransactionAsync(Func<Task> action);
         public Task<T> ExecuteInTransactionAsync<T>(Func<Task<T>> action);
