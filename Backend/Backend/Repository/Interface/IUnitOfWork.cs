@@ -8,6 +8,7 @@ namespace Backend.Repository.Interface
         IOrganisationRepository Organisations { get; }
         IInvitationRepository Invitations { get; }
         IDepartmentRepository Departments { get; }
+        IPpeRepository Ppe { get; }
         public Task SaveAsync();
         public Task ExecuteInTransactionAsync(Func<Task> action);
         public Task<T> ExecuteInTransactionAsync<T>(Func<Task<T>> action);

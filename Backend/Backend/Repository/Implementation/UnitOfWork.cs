@@ -11,6 +11,7 @@ namespace Backend.Repository.Implementation
         public IOrganisationRepository Organisations { get; private set; }
         public IInvitationRepository Invitations { get; private set; }
         public IDepartmentRepository Departments { get; private set; }
+        public IPpeRepository Ppe { get; private set; }
 
         public UnitOfWork(ApplicationDbContext db)
         {
@@ -19,6 +20,7 @@ namespace Backend.Repository.Implementation
             Organisations = new OrganisationRepository(_db);
             Invitations = new InvitationRepository(_db);
             Departments = new DepartmentRepository(_db);
+            Ppe = new PpeRepository(_db);
         }
 
         public async Task ExecuteInTransactionAsync(Func<Task> action)
