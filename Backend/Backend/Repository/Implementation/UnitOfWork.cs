@@ -13,6 +13,7 @@ namespace Backend.Repository.Implementation
         public IPpeRepository Ppe { get; private set; }
         public ISopRepository Sops { get; private set; }
         public ISopHazardRepository SopHazards { get; private set; }
+        public ISopStepRepository SopSteps { get; private set; }
 
         public UnitOfWork(ApplicationDbContext db)
         {
@@ -24,6 +25,7 @@ namespace Backend.Repository.Implementation
             Ppe = new PpeRepository(_db);
             Sops = new SopRepository(_db);
             SopHazards = new SopHazardRepository(_db);
+            SopSteps = new SopStepRepository(_db);
         }
 
         public async Task ExecuteInTransactionAsync(Func<Task> action)
