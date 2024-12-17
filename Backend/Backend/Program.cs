@@ -61,6 +61,7 @@ builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ISopService, SopService>();
+builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 builder.Services.AddTransient<IEmailService, EmailService>();
 
 builder.Services.AddControllers();

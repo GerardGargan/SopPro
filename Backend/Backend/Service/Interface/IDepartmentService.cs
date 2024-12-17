@@ -1,0 +1,10 @@
+using Backend.Models;
+using Backend.Models.DatabaseModels;
+using Backend.Models.Dto;
+
+namespace Backend.Service.Interface {
+    public interface IDepartmentService
+    {
+        public Task<ApiResponse<Department>> Create(DepartmentDto model, int orgId);
+    }
+}
