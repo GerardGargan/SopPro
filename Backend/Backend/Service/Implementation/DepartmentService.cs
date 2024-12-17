@@ -19,6 +19,13 @@ namespace Backend.Service.Implementation
         public async Task<ApiResponse<Department>> Create(DepartmentDto model, int orgId)
         {
             validateModel(model);
+
+            // Check for duplicate departments
+            var duplicateDepartment = await _unitOfWork.Departments.GetAsync(d => d.Name.ToLower().Trim() == model.Name.ToLower().Trim() && d.OrganisationId == orgId);
+            if(duplicateDepartment != null)
+            {
+                throw new Exception("This department already exists");
+            }
             
             Department newDepartment = new Department()
                 {
