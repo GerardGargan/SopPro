@@ -60,6 +60,7 @@ builder.Services.AddSingleton(resolver => resolver.GetRequiredService<IOptions<A
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ISopService, SopService>();
 builder.Services.AddTransient<IEmailService, EmailService>();
 
 builder.Services.AddControllers();
