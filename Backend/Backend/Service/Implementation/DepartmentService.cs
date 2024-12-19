@@ -84,6 +84,27 @@ namespace Backend.Service.Implementation
             return result;
         }
 
+        public async Task<ApiResponse<Department>> GetById(int id)
+        {
+            if(id <= 0)
+            {
+                throw new Exception("Invalid id");
+            }
+
+            Department deptFromDb = await _unitOfWork.Departments.GetAsync(d => d.Id == id);
+
+            if(deptFromDb == null)
+            {
+                throw new Exception("Department does not exist");
+            }
+
+            return new ApiResponse<Department>
+            {
+                IsSuccess = true,
+                Result = deptFromDb
+            };
+        }
+
         public void validateModel(DepartmentDto model)
         {
             if(string.IsNullOrWhiteSpace(model.Name))

@@ -46,10 +46,19 @@ namespace Backend.Controllers {
 
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(ApiResponse<List<Department>>))]
-        public async Task <IActionResult> GetAll()
+        public async Task<IActionResult> GetAll()
         {
             var apiResponse = await _departmentService.GetAll();
 
+            return Ok(apiResponse);
+        }
+
+        [HttpGet]
+        [Route("{id:int}")]
+        [ProducesResponseType(200, Type = typeof(ApiResponse<Department>))]
+        public async Task<IActionResult> GetById(int id)
+        {
+            var apiResponse = await _departmentService.GetById(id);
             return Ok(apiResponse);
         }
     }
