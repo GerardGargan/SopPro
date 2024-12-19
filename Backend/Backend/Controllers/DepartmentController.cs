@@ -61,5 +61,14 @@ namespace Backend.Controllers {
             var apiResponse = await _departmentService.GetById(id);
             return Ok(apiResponse);
         }
+
+        [HttpDelete]
+        [Route("{id:int}")]
+        [ProducesResponseType(200, Type = typeof(ApiResponse))]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var apiResponse = await _departmentService.Delete(id);
+            return Ok(apiResponse);
+        }
     }
 }

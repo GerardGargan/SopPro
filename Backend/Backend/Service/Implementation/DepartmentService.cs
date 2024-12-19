@@ -68,7 +68,8 @@ namespace Backend.Service.Implementation
             {
                 IsSuccess = true,
                 SuccessMessage = "Department successfully updated",
-                Result = deptToUpdate
+                Result = deptToUpdate,
+                StatusCode = HttpStatusCode.OK
             };
         }
 
@@ -78,7 +79,8 @@ namespace Backend.Service.Implementation
             var result = new ApiResponse<List<Department>>
             {
                 IsSuccess = true,
-                Result = departments
+                Result = departments,
+                StatusCode = HttpStatusCode.OK
             };
 
             return result;
@@ -101,7 +103,29 @@ namespace Backend.Service.Implementation
             return new ApiResponse<Department>
             {
                 IsSuccess = true,
-                Result = deptFromDb
+                Result = deptFromDb,
+                StatusCode = HttpStatusCode.OK
+            };
+        }
+
+        public async Task<ApiResponse> Delete(int id)
+        {
+            // obtain department record from db
+            var deptFromDb = await _unitOfWork.Departments.GetAsync(d => d.Id == id, tracked: true);
+
+            if(deptFromDb == null)
+            {
+                throw new Exception("Department does not exist");
+            }
+
+            _unitOfWork.Departments.Remove(deptFromDb);
+            await _unitOfWork.SaveAsync();
+
+            return new ApiResponse
+            {
+                IsSuccess = true,
+                SuccessMessage = "Department successfully deleted",
+                StatusCode = HttpStatusCode.OK
             };
         }
 

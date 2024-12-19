@@ -9,6 +9,7 @@ namespace Backend.Service.Interface {
         public Task<ApiResponse<Department>> Update(DepartmentDto model);
         public Task<ApiResponse<List<Department>>> GetAll();
         public Task<ApiResponse<Department>> GetById(int id);
+        public Task<ApiResponse> Delete(int id);
 
     }
 }
