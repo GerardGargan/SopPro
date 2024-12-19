@@ -43,5 +43,14 @@ namespace Backend.Controllers {
 
             return Ok(apiResponse);
         }
+
+        [HttpGet]
+        [ProducesResponseType(200, Type = typeof(ApiResponse<List<Department>>))]
+        public async Task <IActionResult> GetAll()
+        {
+            var apiResponse = await _departmentService.GetAll();
+
+            return Ok(apiResponse);
+        }
     }
 }

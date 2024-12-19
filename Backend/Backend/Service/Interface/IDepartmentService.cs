@@ -7,5 +7,7 @@ namespace Backend.Service.Interface {
     {
         public Task<ApiResponse<Department>> Create(DepartmentDto model, int orgId);
         public Task<ApiResponse<Department>> Update(DepartmentDto model);
+        public Task<ApiResponse<List<Department>>> GetAll();
+
     }
 }

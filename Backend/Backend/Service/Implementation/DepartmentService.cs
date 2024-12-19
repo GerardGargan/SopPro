@@ -4,6 +4,7 @@ using Backend.Models.DatabaseModels;
 using Backend.Models.Dto;
 using Backend.Repository.Interface;
 using Backend.Service.Interface;
+using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Service.Implementation
 {
@@ -69,6 +70,18 @@ namespace Backend.Service.Implementation
                 SuccessMessage = "Department successfully updated",
                 Result = deptToUpdate
             };
+        }
+
+        public async Task<ApiResponse<List<Department>>> GetAll()
+        {
+            List<Department> departments = await _unitOfWork.Departments.GetAll().ToListAsync();
+            var result = new ApiResponse<List<Department>>
+            {
+                IsSuccess = true,
+                Result = departments
+            };
+
+            return result;
         }
 
         public void validateModel(DepartmentDto model)
