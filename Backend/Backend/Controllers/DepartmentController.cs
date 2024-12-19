@@ -1,4 +1,6 @@
 
+using Backend.Models;
+using Backend.Models.DatabaseModels;
 using Backend.Models.Dto;
 using Backend.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
@@ -18,6 +20,7 @@ namespace Backend.Controllers {
         }
 
         [HttpPost]
+        [ProducesResponseType(200, Type = typeof(ApiResponse<Department>))]
         public async Task<IActionResult> CreateDepartment([FromBody] DepartmentDto model)
         {
             var orgIdClaim = User.FindFirst("organisationId")?.Value;
@@ -28,6 +31,16 @@ namespace Backend.Controllers {
             }
 
             var apiResponse = await _departmentService.Create(model, orgId);
+            return Ok(apiResponse);
+        }
+
+        [HttpPut]
+        [Route("{id:int}")]
+        [ProducesResponseType(200, Type = typeof(ApiResponse<Department>))]
+        public async Task<IActionResult> UpdateDepartment([FromBody] DepartmentDto model)
+        {
+            var apiResponse = await _departmentService.Update(model);
+
             return Ok(apiResponse);
         }
     }

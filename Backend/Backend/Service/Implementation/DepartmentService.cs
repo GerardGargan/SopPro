@@ -43,6 +43,34 @@ namespace Backend.Service.Implementation
             };
         }
 
+        public async Task<ApiResponse<Department>> Update(DepartmentDto model)
+        {
+            if(model.Id == null)
+            {
+                throw new Exception("Id is required");
+            }
+
+            // Check is the department exists
+            Department deptToUpdate = await _unitOfWork.Departments.GetAsync(d => d.Id == model.Id, tracked: true);
+
+            if(deptToUpdate == null)
+            {
+                throw new Exception("Department does not exist");
+            }
+
+            validateModel(model);
+
+            deptToUpdate.Name = model.Name;
+            await _unitOfWork.SaveAsync();
+
+            return new ApiResponse<Department>
+            {
+                IsSuccess = true,
+                SuccessMessage = "Department successfully updated",
+                Result = deptToUpdate
+            };
+        }
+
         public void validateModel(DepartmentDto model)
         {
             if(string.IsNullOrWhiteSpace(model.Name))
@@ -50,6 +78,5 @@ namespace Backend.Service.Implementation
                 throw new Exception("Department name must not be empty");
             }
         }
-
     }
 }

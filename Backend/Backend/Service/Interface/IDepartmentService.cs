@@ -6,5 +6,6 @@ namespace Backend.Service.Interface {
     public interface IDepartmentService
     {
         public Task<ApiResponse<Department>> Create(DepartmentDto model, int orgId);
+        public Task<ApiResponse<Department>> Update(DepartmentDto model);
     }
 }
