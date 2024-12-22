@@ -1,13 +1,17 @@
-﻿using Backend.Models.DatabaseModels;
+﻿using System.Reflection;
+using Backend.Models.DatabaseModels;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace Backend.Data
 {
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
-        public ApplicationDbContext(DbContextOptions options) : base(options)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        public ApplicationDbContext(DbContextOptions options, IHttpContextAccessor httpContextAccessor) : base(options)
         {
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
@@ -23,8 +27,21 @@ namespace Backend.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Relationships for ApplicationUser
             base.OnModelCreating(modelBuilder);
+
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                if (typeof(BaseClass).IsAssignableFrom(entityType.ClrType) && entityType.ClrType != typeof(BaseClass))
+                {
+                    var method = typeof(ModelBuilderExtensions)
+                        .GetMethod(nameof(ModelBuilderExtensions.ApplyOrganisationQueryFilter), BindingFlags.Static | BindingFlags.Public)
+                        .MakeGenericMethod(entityType.ClrType);
+
+                    method.Invoke(null, new object[] { modelBuilder, this });
+                }
+            }
+
+            // Relationships for ApplicationUser
             modelBuilder.Entity<ApplicationUser>()
                 .HasOne(a => a.Organisation)
                 .WithMany(o => o.Users)
@@ -37,7 +54,7 @@ namespace Backend.Data
                 .HasOne(i => i.Organisation)
                 .WithMany(o => o.Invitations)
                 .HasForeignKey(i => i.OrganisationId)
-                .OnDelete(DeleteBehavior.Cascade)
+                .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
 
             // Relationships for Departments
@@ -45,9 +62,9 @@ namespace Backend.Data
                 .HasOne(d => d.Organisation)
                 .WithMany(o => o.Departments)
                 .HasForeignKey(d => d.OrganisationId)
-                .OnDelete(DeleteBehavior.Cascade)
+                .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
-            
+
             // Relationships for Sops
             modelBuilder.Entity<Sop>()
                 .HasOne(s => s.Organisation)
@@ -55,7 +72,7 @@ namespace Backend.Data
                 .HasForeignKey(s => s.OrganisationId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
-            
+
             modelBuilder.Entity<Sop>()
                 .HasOne(s => s.Department)
                 .WithMany(d => d.Sops)
@@ -69,20 +86,20 @@ namespace Backend.Data
                 .HasForeignKey(s => s.OrganisationId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
-            
+
             modelBuilder.Entity<SopVersion>()
                 .HasOne(s => s.Sop)
                 .WithMany(s => s.SopVersions)
                 .HasForeignKey(s => s.SopId)
-                .OnDelete(DeleteBehavior.Cascade)
+                .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
-            
+
             modelBuilder.Entity<SopVersion>()
                 .HasOne(s => s.Author)
                 .WithMany(a => a.AuthoredSopVersions)
                 .HasForeignKey(s => s.AuthorId)
                 .OnDelete(DeleteBehavior.Restrict);
-            
+
             modelBuilder.Entity<SopVersion>()
                 .HasOne(s => s.ApprovedBy)
                 .WithMany(a => a.ApprovedSopVersions)
@@ -101,7 +118,7 @@ namespace Backend.Data
                 .HasOne(s => s.SopVersion)
                 .WithMany(s => s.SopSteps)
                 .HasForeignKey(s => s.SopVersionId)
-                .OnDelete(DeleteBehavior.Cascade)
+                .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
 
             // Relationships for SopStepPpe
@@ -116,14 +133,14 @@ namespace Backend.Data
                 .HasOne(s => s.SopStep)
                 .WithMany(s => s.SopStepPpe)
                 .HasForeignKey(s => s.SopStepId)
-                .OnDelete(DeleteBehavior.Cascade)
+                .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
-            
+
             modelBuilder.Entity<SopStepPpe>()
                 .HasOne(s => s.Ppe)
                 .WithMany(s => s.SopStepPpe)
                 .HasForeignKey(s => s.PpeId)
-                .OnDelete(DeleteBehavior.Cascade)
+                .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
 
             // Relationships for Hazards
@@ -133,13 +150,38 @@ namespace Backend.Data
                 .HasForeignKey(h => h.OrganisationId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
-            
+
             modelBuilder.Entity<SopHazard>()
                 .HasOne(h => h.SopVersion)
                 .WithMany(s => s.SopHazards)
                 .HasForeignKey(h => h.SopVersionId)
-                .OnDelete(DeleteBehavior.Cascade)
+                .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
+        }
+
+        public int CurrentOrganisationId
+        {
+            get
+            {
+                if (_httpContextAccessor == null || _httpContextAccessor.HttpContext == null)
+                {
+                    return -1;
+                }
+
+                var user = _httpContextAccessor.HttpContext.User;
+                var organisationClaim = user?.FindFirst("organisationId");
+
+                return organisationClaim != null ? int.Parse(organisationClaim.Value) : -1;
+            }
+        }
+    }
+
+    public static class ModelBuilderExtensions
+    {
+        public static void ApplyOrganisationQueryFilter<T>(this ModelBuilder builder, ApplicationDbContext context)
+            where T : BaseClass
+        {
+            builder.Entity<T>().HasQueryFilter(e => e.OrganisationId == context.CurrentOrganisationId);
         }
     }
 }

@@ -8,3 +8,4 @@ namespace Backend.Models.Dto
         public string Password { get; set; }
     }
 }
+    

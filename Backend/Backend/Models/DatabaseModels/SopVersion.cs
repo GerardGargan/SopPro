@@ -2,9 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Backend.Models.DatabaseModels {
-    public class SopVersion : BaseOrganisationClass {
-        [Key]
-        public int Id { get; set; }
+    public class SopVersion : BaseClass {
         public int SopId { get; set; }
         [ForeignKey("SopId")]
         public Sop Sop { get; set; }

@@ -1,9 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 
 namespace Backend.Models.DatabaseModels {
-    public class Department : BaseOrganisationClass {
-        [Key]
-        public int Id { get; set; }
+    public class Department : BaseClass {
         public string Name { get; set; }
         public List<Sop> Sops { get; set; }
     }

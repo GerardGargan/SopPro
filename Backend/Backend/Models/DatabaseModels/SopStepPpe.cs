@@ -2,9 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Backend.Models.DatabaseModels {
-    public class SopStepPpe : BaseOrganisationClass {
-        [Key]
-        public int Id { get; set; }
+    public class SopStepPpe : BaseClass {
         public int SopStepId { get; set; }
         [ForeignKey("SopStepId")]
         public SopStep SopStep { get; set; }
