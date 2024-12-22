@@ -52,7 +52,7 @@ namespace Backend.Controllers
             //await _emailService.SendEmailAsync("ggargan01@qub.ac.uk", "Test api email", "Testing 123");
             List<string> emails = new List<string>();
             emails.Add("ggargan01@qub.ac.uk");
-            await _emailService.SendEmailAsync(null, emails, "Test", "Testing");
+            //await _emailService.SendEmailAsync(null, emails, "Test", "Testing");
             return await _unitOfWork.ApplicationUsers.GetAll().ToListAsync();
 
         }
