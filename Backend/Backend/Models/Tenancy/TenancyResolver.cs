@@ -8,20 +8,23 @@ namespace Backend.Models.Tenancy
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public int GetOrganisationid()
+        public int? GetOrganisationid()
         {
-            if(_httpContextAccessor == null || _httpContextAccessor.HttpContext == null)
+            var user = _httpContextAccessor.HttpContext?.User;
+
+            if (user == null || !user.Identity?.IsAuthenticated == true)
             {
-                return -1;
+                return null; // Handle unauthenticated requests
             }
 
-            int organisationId = int.TryParse(_httpContextAccessor.HttpContext.User?.FindFirst("organisationId")?.Value, out organisationId) ? organisationId : -1;
+            var organisationIdClaim = user.Claims.FirstOrDefault(c => c.Type == "organisationId")?.Value;
 
-            if(organisationId == -1)
+            if (int.TryParse(organisationIdClaim, out var organisationId))
             {
-                throw new UnauthorizedAccessException("OrganisationId is missing from the token");
+                return organisationId;
             }
-            return organisationId;
+
+            throw new InvalidOperationException("Organisation ID is missing or invalid in the token.");
         }
     }
 }
