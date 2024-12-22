@@ -1,4 +1,3 @@
-using System.ComponentModel.DataAnnotations;
 
 namespace Backend.Models.DatabaseModels {
     public class Department : BaseClass {
