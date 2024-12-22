@@ -1,6 +1,7 @@
 using Backend.Data;
 using Backend.Models.DatabaseModels;
 using Backend.Models.Settings;
+using Backend.Models.Tenancy;
 using Backend.Repository.Implementation;
 using Backend.Repository.Interface;
 using Backend.Service.Implementation;
@@ -63,6 +64,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ISopService, SopService>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 builder.Services.AddTransient<IEmailService, EmailService>();
+builder.Services.AddScoped<ITenancyResolver, TenancyResolver>();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
