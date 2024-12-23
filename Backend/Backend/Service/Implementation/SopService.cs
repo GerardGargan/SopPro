@@ -64,7 +64,7 @@ namespace Backend.Service.Implementation
 
                 // Create SopHazard records
 
-                if(model.SopHazards != null && model.SopHazards.Any())
+                if(model.SopHazards != null && model.SopHazards.Count > 0)
                 {
                     var sopHazards = model.SopHazards.Select(sopHazard => new SopHazard
                     {
@@ -78,9 +78,6 @@ namespace Backend.Service.Implementation
                     await _unitOfWork.SopHazards.AddRangeAsync(sopHazards);
                     await _unitOfWork.SaveAsync();
                 }
-
-                // await _unitOfWork.SopHazards.AddRangeAsync(sopHazards);
-                // await _unitOfWork.SaveAsync();
             });
 
             return new ApiResponse
