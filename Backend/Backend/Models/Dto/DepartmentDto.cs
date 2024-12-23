@@ -1,8 +1,7 @@
 namespace Backend.Models.Dto
 {
-    public class DepartmentDto
+    public class DepartmentDto : BaseDto
     {
-        public int? Id { get; set; }
         public string Name { get; set; }
         public List<SopDto> Sops { get; set; }
     }

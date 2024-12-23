@@ -6,7 +6,7 @@ namespace Backend.Models.DatabaseModels {
         public int? DepartmentId { get; set; }
         [ForeignKey("DepartmentId")]
         public Department Department { get; set; }
-        public string reference { get; set; }
+        public string Reference { get; set; }
         public bool? isAiGenerated { get; set; }
         public List<SopVersion> SopVersions { get; set; }
     }
