@@ -29,5 +29,13 @@ namespace Backend.Controllers {
             var apiResponse = await _sopService.GetAllSops();
             return Ok(apiResponse);
         }
+
+        [HttpGet]
+        [Route("{id:int}")]
+        public async Task<IActionResult> GetSopLatestVersion(int id)
+        {
+            var apiResponse = await _sopService.GetLatestSopVersion(id);
+            return Ok(apiResponse);
+        }
     }
 }

@@ -6,5 +6,6 @@ namespace Backend.Service.Interface {
     public interface ISopService {
         public Task<ApiResponse> CreateSop(SopDto model);
         public Task<ApiResponse<List<SopDto>>> GetAllSops();
+        public Task<ApiResponse<SopDto>> GetLatestSopVersion(int id);
     };
 }

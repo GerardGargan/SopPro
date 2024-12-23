@@ -66,7 +66,7 @@ namespace Backend.Service.Implementation
 
                 // Create SopHazard records
 
-                if(model.SopHazards != null && model.SopHazards.Count > 0)
+                if (model.SopHazards != null && model.SopHazards.Count > 0)
                 {
                     var sopHazards = model.SopHazards.Select(sopHazard => new SopHazard
                     {
@@ -85,7 +85,7 @@ namespace Backend.Service.Implementation
             return new ApiResponse
             {
                 IsSuccess = true,
-                SuccessMessage = "Sop created successfully"        
+                SuccessMessage = "Sop created successfully"
             };
         }
 
@@ -100,6 +100,7 @@ namespace Backend.Service.Implementation
                 SopVersions = sop.SopVersions.Select(sopVersion => new SopVersionDto
                 {
                     Id = sopVersion.Id,
+                    SopId = sop.Id,
                     Version = sopVersion.Version,
                     AuthorId = sopVersion.AuthorId,
                     CreateDate = sopVersion.CreateDate,
@@ -116,13 +117,68 @@ namespace Backend.Service.Implementation
                     }).ToList()
                 }).ToList()
             }).ToListAsync();
-        
+
 
             return new ApiResponse<List<SopDto>>
             {
                 IsSuccess = true,
                 StatusCode = HttpStatusCode.OK,
                 Result = sops
+            };
+        }
+
+        public async Task<ApiResponse<SopDto>> GetLatestSopVersion(int id)
+        {
+            var sopEntity = await _unitOfWork.Sops.GetAsync(s => s.Id == id, includeProperties: "SopVersions,SopVersions.SopHazards");
+            if (sopEntity == null)
+            {
+                throw new Exception("Sop not found");
+            }
+
+            var latestSopVersion = sopEntity.SopVersions
+                .OrderByDescending(sv => sv.Version)
+                .FirstOrDefault();
+
+            if (latestSopVersion == null)
+            {
+                throw new Exception("No SopVersion found");
+            }
+
+            var sopDto = new SopDto
+            {
+                Id = sopEntity.Id,
+                Reference = sopEntity.Reference,
+                DepartmentId = sopEntity.DepartmentId ?? 0,
+                isAiGenerated = sopEntity.isAiGenerated,
+                SopVersions = new List<SopVersionDto>
+                {
+                    new SopVersionDto
+                    {
+                        Id = latestSopVersion.Id,
+                        SopId = sopEntity.Id,
+                        Version = latestSopVersion.Version,
+                        AuthorId = latestSopVersion.AuthorId,
+                        CreateDate = latestSopVersion.CreateDate,
+                        Title = latestSopVersion.Title,
+                        Description = latestSopVersion.Description,
+                        Status = latestSopVersion.Status,
+                        SopHazards = latestSopVersion.SopHazards.Select(sopHazard => new SopHazardDto
+                        {
+                            Id = sopHazard.Id,
+                            SopVersionId = sopHazard.SopVersionId,
+                            Name = sopHazard.Name,
+                            ControlMeasure = sopHazard.ControlMeasure,
+                            RiskLevel = sopHazard.RiskLevel,
+                        }).ToList()
+                    }
+                }
+            };
+
+            return new ApiResponse<SopDto>
+            {
+                IsSuccess = true,
+                StatusCode = HttpStatusCode.OK,
+                Result = sopDto
             };
         }
     }
