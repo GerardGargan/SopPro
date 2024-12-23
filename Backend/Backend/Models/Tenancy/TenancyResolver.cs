@@ -1,3 +1,5 @@
+using System.Security.Claims;
+
 namespace Backend.Models.Tenancy
 {
     public class TenancyResolver : ITenancyResolver
@@ -25,6 +27,12 @@ namespace Backend.Models.Tenancy
             }
 
             throw new InvalidOperationException("Organisation ID is missing or invalid in the token.");
+        }
+
+        public string GetUserId()
+        {
+            var userId = _httpContextAccessor.HttpContext?.User?.FindFirst("id")?.Value;
+            return userId;
         }
     }
 }
