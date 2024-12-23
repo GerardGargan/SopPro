@@ -1,9 +1,11 @@
+using System.Net;
 using Backend.Models;
 using Backend.Models.DatabaseModels;
 using Backend.Models.Dto;
 using Backend.Models.Tenancy;
 using Backend.Repository.Interface;
 using Backend.Service.Interface;
+using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Service.Implementation
 {
@@ -84,6 +86,43 @@ namespace Backend.Service.Implementation
             {
                 IsSuccess = true,
                 SuccessMessage = "Sop created successfully"        
+            };
+        }
+
+        public async Task<ApiResponse<List<SopDto>>> GetAllSops()
+        {
+            List<SopDto> sops = await _unitOfWork.Sops.GetAll().Select(sop => new SopDto
+            {
+                Id = sop.Id,
+                Reference = sop.Reference,
+                DepartmentId = sop.DepartmentId,
+                isAiGenerated = sop.isAiGenerated,
+                SopVersions = sop.SopVersions.Select(sopVersion => new SopVersionDto
+                {
+                    Id = sopVersion.Id,
+                    Version = sopVersion.Version,
+                    AuthorId = sopVersion.AuthorId,
+                    CreateDate = sopVersion.CreateDate,
+                    Title = sopVersion.Title,
+                    Description = sopVersion.Description,
+                    Status = sopVersion.Status,
+                    SopHazards = sopVersion.SopHazards.Select(sopHazard => new SopHazardDto
+                    {
+                        Id = sopHazard.Id,
+                        SopVersionId = sopHazard.SopVersionId,
+                        Name = sopHazard.Name,
+                        ControlMeasure = sopHazard.ControlMeasure,
+                        RiskLevel = sopHazard.RiskLevel,
+                    }).ToList()
+                }).ToList()
+            }).ToListAsync();
+        
+
+            return new ApiResponse<List<SopDto>>
+            {
+                IsSuccess = true,
+                StatusCode = HttpStatusCode.OK,
+                Result = sops
             };
         }
     }

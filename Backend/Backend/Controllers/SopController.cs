@@ -22,5 +22,12 @@ namespace Backend.Controllers {
             var apiResponse = await _sopService.CreateSop(sopDto);
             return Ok(apiResponse);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
+        {
+            var apiResponse = await _sopService.GetAllSops();
+            return Ok(apiResponse);
+        }
     }
 }

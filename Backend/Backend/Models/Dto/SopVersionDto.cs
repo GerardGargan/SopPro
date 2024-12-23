@@ -18,6 +18,6 @@ namespace Backend.Models.Dto
         // Collections for related entities
         // TODO: Implement these
         // public List<SopStepDto> SopSteps { get; set; }
-        // public List<SopHazardDto> SopHazards { get; set; }
+        public List<SopHazardDto> SopHazards { get; set; }
     }
 }
