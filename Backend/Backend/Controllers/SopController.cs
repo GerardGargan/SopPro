@@ -1,3 +1,4 @@
+using Backend.Models;
 using Backend.Models.Dto;
 using Backend.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
@@ -35,6 +36,14 @@ namespace Backend.Controllers {
         public async Task<IActionResult> GetSopLatestVersion(int id)
         {
             var apiResponse = await _sopService.GetLatestSopVersion(id);
+            return Ok(apiResponse);
+        }
+
+        [HttpPut]
+        [Route("{id:int}")]
+        public async Task<IActionResult> UpdateSop(int id, [FromBody] SopDto sopDto)
+        {
+            var apiResponse = await _sopService.UpdateSop(id, sopDto);
             return Ok(apiResponse);
         }
     }
