@@ -228,27 +228,11 @@ namespace Backend.Service.Implementation
                     await _unitOfWork.SaveAsync();
 
                     // duplicate sop steps
-                    var sopSteps = latestVersion.SopSteps.Select(s => new SopStep
-                    {
-                        SopVersionId = newVersion.Id,
-                        Position = s.Position,
-                        ImageUrl = s.ImageUrl,
-                        Text = s.Text,
-                        OrganisationId = _tenancyResolver.GetOrganisationid().Value,
-                    }).ToList();
-
+                    List<SopStep> sopSteps = DuplicateSteps(latestVersion, newVersion.Id);
                     await _unitOfWork.SopSteps.AddRangeAsync(sopSteps);
 
                     // create sop hazards from model
-                    var newHazards = model.SopHazards.Select(hazard => new SopHazard
-                    {
-                        SopVersionId = newVersion.Id,
-                        Name = hazard.Name,
-                        ControlMeasure = hazard.ControlMeasure,
-                        RiskLevel = hazard.RiskLevel,
-                        OrganisationId = _tenancyResolver.GetOrganisationid().Value
-                    }).ToList();
-
+                    List<SopHazard> newHazards = CreateHazards(model, newVersion.Id);
                     await _unitOfWork.SopHazards.AddRangeAsync(newHazards);
                     await _unitOfWork.SaveAsync();
 
@@ -324,6 +308,30 @@ namespace Backend.Service.Implementation
 
             return response;
 
+        }
+
+        private List<SopHazard> CreateHazards(SopDto model, int sopVersionId)
+        {
+            return model.SopHazards.Select(hazard => new SopHazard
+            {
+                SopVersionId = sopVersionId,
+                Name = hazard.Name,
+                ControlMeasure = hazard.ControlMeasure,
+                RiskLevel = hazard.RiskLevel,
+                OrganisationId = _tenancyResolver.GetOrganisationid().Value
+            }).ToList();
+        }
+
+        private List<SopStep> DuplicateSteps(SopVersion sopVersion, int sopVersionId)
+        {
+            return sopVersion.SopSteps.Select(s => new SopStep
+            {
+                SopVersionId = sopVersionId,
+                Position = s.Position,
+                ImageUrl = s.ImageUrl,
+                Text = s.Text,
+                OrganisationId = _tenancyResolver.GetOrganisationid().Value,
+            }).ToList();
         }
     }
 }
