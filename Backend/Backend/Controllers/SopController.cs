@@ -4,15 +4,17 @@ using Backend.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Backend.Controllers {
+namespace Backend.Controllers
+{
     [Route("api/sop")]
     [ApiController]
     [Authorize]
-    public class SopController : BaseApiController 
+    public class SopController : BaseApiController
     {
         private readonly ISopService _sopService;
 
-        public SopController(ISopService sopService) {
+        public SopController(ISopService sopService)
+        {
 
             _sopService = sopService;
         }
@@ -44,6 +46,14 @@ namespace Backend.Controllers {
         public async Task<IActionResult> UpdateSop(int id, [FromBody] SopDto sopDto)
         {
             var apiResponse = await _sopService.UpdateSop(id, sopDto);
+            return Ok(apiResponse);
+        }
+
+        [HttpDelete]
+        [Route("{id:int}")]
+        public async Task<IActionResult> DeleteSop(int id)
+        {
+            var apiResponse = await _sopService.DeleteSop(id);
             return Ok(apiResponse);
         }
     }

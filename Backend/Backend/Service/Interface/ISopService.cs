@@ -10,5 +10,6 @@ namespace Backend.Service.Interface
         public Task<ApiResponse<List<SopDto>>> GetAllSops();
         public Task<ApiResponse<SopDto>> GetLatestSopVersion(int id);
         public Task<ApiResponse<SopDto>> UpdateSop(int id, SopDto model);
+        public Task<ApiResponse> DeleteSop(int id);
     };
 }

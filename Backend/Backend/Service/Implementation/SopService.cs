@@ -1,4 +1,5 @@
 using System.Net;
+using Backend.Data;
 using Backend.Models;
 using Backend.Models.DatabaseModels;
 using Backend.Models.Dto;
@@ -13,11 +14,13 @@ namespace Backend.Service.Implementation
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly ITenancyResolver _tenancyResolver;
+        private readonly ApplicationDbContext _db;
 
-        public SopService(IUnitOfWork unitOfWork, ITenancyResolver tenancyResolver)
+        public SopService(IUnitOfWork unitOfWork, ITenancyResolver tenancyResolver, ApplicationDbContext db)
         {
             _unitOfWork = unitOfWork;
             _tenancyResolver = tenancyResolver;
+            _db = db;
         }
 
         public async Task<ApiResponse> CreateSop(SopDto model)
@@ -308,6 +311,67 @@ namespace Backend.Service.Implementation
 
             return response;
 
+        }
+
+        public async Task<ApiResponse> DeleteSop(int id)
+        {
+            var response = new ApiResponse();
+
+            var sop = await _unitOfWork.Sops.GetAsync(x => x.Id == id);
+
+            if (sop == null)
+            {
+                throw new Exception("Sop not found");
+            }
+
+            var sopVersions = await _unitOfWork.SopVersions.GetAll(x => x.SopId == id).ToListAsync();
+            var sopVersionIds = sopVersions.Select(x => x.Id).ToList();
+
+            var sopHazards = await _unitOfWork.SopHazards.GetAll(x => sopVersionIds.Contains(x.SopVersionId)).ToListAsync();
+            var sopSteps = await _unitOfWork.SopSteps.GetAll(x => sopVersionIds.Contains(x.SopVersionId)).ToListAsync();
+            var sopStepIds = sopSteps.Select(x => x.Id).ToList();
+
+            var sopStepPpe = _db.SopStepPpe.Where(x => sopStepIds.Contains(x.SopStepId)).ToList();
+
+            // perform deletion in order
+
+            await _unitOfWork.ExecuteInTransactionAsync(async () =>
+            {
+                // delete sop step ppe
+                if (sopStepPpe.Count > 0)
+                {
+                    _db.SopStepPpe.RemoveRange(sopStepPpe);
+                }
+
+                // delete sop steps
+                if (sopStepIds.Count > 0)
+                {
+                    _unitOfWork.SopSteps.RemoveRange(sopSteps);
+                }
+
+                if (sopHazards.Count > 0)
+                {
+                    // delete sop hazards
+                    _unitOfWork.SopHazards.RemoveRange(sopHazards);
+                }
+
+                if (sopVersionIds.Count > 0)
+                {
+                    // delete sop versions
+                    _unitOfWork.SopVersions.RemoveRange(sopVersions);
+                }
+
+                // delete sop
+                _unitOfWork.Sops.Remove(sop);
+
+                await _unitOfWork.SaveAsync();
+
+                response.StatusCode = HttpStatusCode.OK;
+                response.IsSuccess = true;
+                response.SuccessMessage = "Sop deleted successfully";
+            });
+
+            return response;
         }
 
         private List<SopHazard> CreateHazards(SopDto model, int sopVersionId)
