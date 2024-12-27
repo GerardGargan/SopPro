@@ -43,12 +43,6 @@ namespace Backend.Service.Implementation
                 await _unitOfWork.Sops.AddAsync(sop);
                 await _unitOfWork.SaveAsync();
 
-                var firstSopVersion = model.SopVersions.FirstOrDefault();
-                if (firstSopVersion == null)
-                {
-                    throw new Exception("Sop version is required");
-                }
-
                 // Create sop version record
                 var sopVersion = new SopVersion
                 {
@@ -56,8 +50,8 @@ namespace Backend.Service.Implementation
                     Version = 1,
                     AuthorId = _tenancyResolver.GetUserId(),
                     CreateDate = DateTime.UtcNow,
-                    Title = firstSopVersion.Title,
-                    Description = firstSopVersion.Description,
+                    Title = model.Title,
+                    Description = model.Description,
                     Status = SopStatus.Draft,
                     OrganisationId = _tenancyResolver.GetOrganisationid().Value,
                 };
@@ -189,8 +183,10 @@ namespace Backend.Service.Implementation
         /// <param name="model"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public async Task<ApiResponse<Sop>> UpdateSop(int id, SopDto model)
+        public async Task<ApiResponse<SopDto>> UpdateSop(int id, SopDto model)
         {
+            ApiResponse<SopDto> response = new ApiResponse<SopDto>();
+
             // check if sop id exists
             if (id == 0 || model == null || model.Id == null)
             {
@@ -215,92 +211,101 @@ namespace Backend.Service.Implementation
             {
                 if (latestVersion.Status == SopStatus.Approved)
                 {
-
-                    // create new version
+                    // Create new version, duplicate steps, hazards
                     var newVersion = new SopVersion
                     {
-                        SopId = sopFromDb.Id,
+                        SopId = latestVersion.SopId,
                         Version = latestVersion.Version + 1,
                         AuthorId = _tenancyResolver.GetUserId(),
-                        CreateDate = DateTime.UtcNow,
-                        Title = model.SopVersions.FirstOrDefault().Title,
-                        Description = model.SopVersions.FirstOrDefault().Description,
-                        Status = SopStatus.Draft,
                         OrganisationId = _tenancyResolver.GetOrganisationid().Value,
-                        SopHazards = model.SopHazards.Select(sopHazard => new SopHazard
-                        {
-                            Name = sopHazard.Name,
-                            ControlMeasure = sopHazard.ControlMeasure,
-                            RiskLevel = sopHazard.RiskLevel,
-                            OrganisationId = _tenancyResolver.GetOrganisationid().Value
-                        }).ToList()
+                        Title = model.Title,
+                        Description = model.Description,
+                        Status = SopStatus.Draft,
+                        CreateDate = DateTime.UtcNow
                     };
 
                     await _unitOfWork.SopVersions.AddAsync(newVersion);
                     await _unitOfWork.SaveAsync();
 
-                    // Duplicate sop steps and link to new vesion
-                    var newSopSteps = latestVersion.SopSteps.Select(sopStep => new SopStep
+                    // duplicate sop steps
+                    var sopSteps = latestVersion.SopSteps.Select(s => new SopStep
                     {
                         SopVersionId = newVersion.Id,
-                        Position = sopStep.Position,
-                        Text = sopStep.Text,
-                        ImageUrl = sopStep.ImageUrl,
-                        SopStepPpe = sopStep.SopStepPpe.Select(sopStepPpe => new SopStepPpe
-                        {
-                            SopStepId = sopStepPpe.SopStepId,
-                            PpeId = sopStepPpe.PpeId
-                        }).ToList()
-                    });
+                        Position = s.Position,
+                        ImageUrl = s.ImageUrl,
+                        Text = s.Text,
+                        OrganisationId = _tenancyResolver.GetOrganisationid().Value,
+                    }).ToList();
 
-                    await _unitOfWork.SopSteps.AddRangeAsync(newSopSteps);
+                    await _unitOfWork.SopSteps.AddRangeAsync(sopSteps);
+
+                    // create sop hazards from model
+                    var newHazards = model.SopHazards.Select(hazard => new SopHazard
+                    {
+                        SopVersionId = newVersion.Id,
+                        Name = hazard.Name,
+                        ControlMeasure = hazard.ControlMeasure,
+                        RiskLevel = hazard.RiskLevel,
+                        OrganisationId = _tenancyResolver.GetOrganisationid().Value
+                    }).ToList();
+
+                    await _unitOfWork.SopHazards.AddRangeAsync(newHazards);
                     await _unitOfWork.SaveAsync();
+
+                    var newSop = await _unitOfWork.Sops.GetAsync(s => s.Id == model.Id, includeProperties: "SopVersions,SopVersions.SopHazards");
+
+                    response.IsSuccess = true;
+                    response.StatusCode = HttpStatusCode.OK;
+                    response.Result = SopDto.FromSop(newSop);
 
                 }
                 else
                 {
-
-                    // update existing sop version
-                    latestVersion.Title = model.SopVersions.FirstOrDefault().Title;
-                    latestVersion.Description = model.SopVersions.FirstOrDefault().Description;
+                    // update existing version
+                    latestVersion.Title = model.Title;
+                    latestVersion.Description = model.Description;
 
                     // update sop hazards
                     var existingHazardIds = latestVersion.SopHazards.Select(h => h.Id).ToList();
                     var modelHazardIds = model.SopHazards.Select(h => h.Id).ToList();
 
-                    var hazardsToDelete = existingHazardIds.Where(id => !modelHazardIds.Contains(id)).ToList();
-                    var hazardsToUpdate = existingHazardIds.Where(id => modelHazardIds.Contains(id)).ToList();
-                    var hazardsToAdd = modelHazardIds.Where(id => id == null).ToList();
+                    var hazardIdsToDelete = existingHazardIds.Where(id => !modelHazardIds.Contains(id)).ToList();
+                    var hazardIdsToUpdate = existingHazardIds.Where(id => modelHazardIds.Contains(id)).ToList();
+                    var hazardsToAdd = model.SopHazards.Where(hazard => hazard.Id == null || hazard.Id == 0).ToList();
 
                     // delete hazards
-                    if (hazardsToDelete != null && hazardsToDelete.Count > 0)
+                    if (hazardIdsToDelete.Count > 0)
                     {
-                        latestVersion.SopHazards.RemoveAll(h => hazardsToDelete.Contains(h.Id));
+                        var hazardsToDelete = latestVersion.SopHazards.Where(h => hazardIdsToDelete.Contains(h.Id)).ToList();
+                        _unitOfWork.SopHazards.RemoveRange(hazardsToDelete);
                     }
 
-                    // update hazards
-                    if (hazardsToUpdate != null && hazardsToUpdate.Count > 0)
+                    if (hazardIdsToUpdate.Count > 0)
                     {
-                        foreach (var hazardId in hazardsToUpdate)
+                        // update hazards
+                        foreach (var hazardId in hazardIdsToUpdate)
                         {
                             var hazard = latestVersion.SopHazards.FirstOrDefault(h => h.Id == hazardId);
                             var modelHazard = model.SopHazards.FirstOrDefault(h => h.Id == hazardId);
 
-                            hazard.Name = modelHazard.Name;
-                            hazard.ControlMeasure = modelHazard.ControlMeasure;
-                            hazard.RiskLevel = modelHazard.RiskLevel;
+                            if (hazard != null && modelHazard != null)
+                            {
+                                hazard.Name = modelHazard.Name;
+                                hazard.ControlMeasure = modelHazard.ControlMeasure;
+                                hazard.RiskLevel = modelHazard.RiskLevel;
+                            }
                         }
                     }
 
-                    // add hazards
                     if (hazardsToAdd != null && hazardsToAdd.Count > 0)
                     {
-                        var newHazards = model.SopHazards.Where(h => h.Id == null).Select(h => new SopHazard
+                        // add new hazards
+                        var newHazards = hazardsToAdd.Select(hazard => new SopHazard
                         {
                             SopVersionId = latestVersion.Id,
-                            Name = h.Name,
-                            ControlMeasure = h.ControlMeasure,
-                            RiskLevel = h.RiskLevel,
+                            Name = hazard.Name,
+                            ControlMeasure = hazard.ControlMeasure,
+                            RiskLevel = hazard.RiskLevel,
                             OrganisationId = _tenancyResolver.GetOrganisationid().Value
                         }).ToList();
 
@@ -308,21 +313,17 @@ namespace Backend.Service.Implementation
                     }
                     await _unitOfWork.SaveAsync();
 
-                }
+                    var updatedSop = await _unitOfWork.Sops.GetAsync(s => s.Id == model.Id, includeProperties: "SopVersions,SopVersions.SopHazards");
 
+                    response.IsSuccess = true;
+                    response.StatusCode = HttpStatusCode.OK;
+                    response.Result = SopDto.FromSop(updatedSop);
+
+                }
             });
 
-            var updatedSop = await _unitOfWork.Sops.GetAsync(s => s.Id == model.Id, includeProperties: "SopVersions, SopVersions.SopHazards");
-            var updatedSopVersion = updatedSop.SopVersions.OrderByDescending(sv => sv.Version).FirstOrDefault();
-            updatedSop.SopVersions = new List<SopVersion> { updatedSopVersion };
+            return response;
 
-            return new ApiResponse<Sop>
-            {
-                IsSuccess = true,
-                SuccessMessage = "Sop updated successfully",
-                StatusCode = HttpStatusCode.OK,
-                Result = updatedSop
-            };
         }
     }
 }
