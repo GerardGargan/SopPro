@@ -368,7 +368,7 @@ namespace Backend.Service.Implementation
 
                 response.StatusCode = HttpStatusCode.OK;
                 response.IsSuccess = true;
-                response.SuccessMessage = "Sop deleted successfully";
+                response.SuccessMessage = $"Sop id: {id} deleted successfully";
             });
 
             return response;
