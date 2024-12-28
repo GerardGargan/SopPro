@@ -21,7 +21,13 @@ const Fab = () => {
           {
             icon: "plus",
             label: "Start from scratch",
-            onPress: () => router.navigate("/(auth)/upsert"),
+            onPress: () =>
+              router.push({
+                pathname: "/(auth)/upsert",
+                params: {
+                  sopId: 7,
+                },
+              }),
           },
           {
             icon: "lightbulb",
