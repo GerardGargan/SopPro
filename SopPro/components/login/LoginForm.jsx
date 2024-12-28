@@ -17,7 +17,7 @@ const LoginForm = ({ onSubmit, isPending }) => {
       <Header
         text="Welcome back!"
         textStyle={{ color: "black", textAlign: "left" }}
-        containerStyle={{ alignItems: 'start' }}
+        containerStyle={{ alignItems: "start" }}
       />
       <View style={styles.inputContainer}>
         <TextInput
@@ -32,7 +32,7 @@ const LoginForm = ({ onSubmit, isPending }) => {
           label="Password"
           value={password}
           onChangeText={(value) => setPassword(value)}
-          secureTextEntry={!isPasswordVisible} 
+          secureTextEntry={!isPasswordVisible}
           right={
             <TextInput.Icon
               icon={isPasswordVisible ? "eye-off" : "eye"}
@@ -43,15 +43,15 @@ const LoginForm = ({ onSubmit, isPending }) => {
       </View>
       <View style={styles.buttonContainer}>
         <Button
-            icon="login"
-            mode="contained"
-            loading={isPending}
-            contentStyle={{ height: 50 }}
-            labelStyle={{ fontSize: 20 }}
-            style={{ borderRadius: 0 }}
-            onPress={handlePress}
+          icon="login"
+          mode="contained"
+          loading={isPending}
+          contentStyle={{ height: 50 }}
+          labelStyle={{ fontSize: 20 }}
+          style={{ borderRadius: 0 }}
+          onPress={handlePress}
         >
-            {isPending ? "Loggin in..." : "Log in"}
+          {isPending ? "Loggin in..." : "Log in"}
         </Button>
       </View>
     </>
@@ -65,6 +65,6 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
   buttonContainer: {
-    marginTop: 20
-  }
+    marginTop: 20,
+  },
 });
