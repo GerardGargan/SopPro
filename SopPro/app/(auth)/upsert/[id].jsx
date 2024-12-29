@@ -16,14 +16,14 @@ import { fetchSop } from "../../../util/httpRequests";
 import ErrorBlock from "../../../components/UI/ErrorBlock";
 import SOP from "../../../models/sop";
 import Header from "../../../components/UI/Header";
-import HazardItem from "../../../components/sops/hazardItem";
+import HazardItem from "../../../components/sops/upsert/hazardItem";
 
 const Upsert = () => {
   const navigation = useNavigation();
   const { id } = useLocalSearchParams();
   const [sop, setSop] = useState(new SOP());
 
-  const isCreate = !id;
+  const isCreate = id === "-1";
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -36,8 +36,10 @@ const Upsert = () => {
     });
   }, [navigation, id, isError]);
 
+  console.log(id);
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["sop", id],
+    enabled: !isCreate,
     queryFn: () => fetchSop(id),
   });
 
@@ -68,14 +70,18 @@ const Upsert = () => {
       <TextInput
         style={styles.TextInput}
         value={sop.title}
-        onChangeText={(text) => setSop({ ...sop, title: text })}
+        onChangeText={(text) =>
+          setSop((prevState) => ({ ...prevState, title: text }))
+        }
         label="Title"
         placeholder="Enter title"
       />
       <TextInput
         style={[styles.textArea, styles.TextInput]}
         value={sop.description}
-        onChangeText={(text) => setSop({ ...sop, description: text })}
+        onChangeText={(text) =>
+          setSop((prevState) => ({ ...prevState, description: text }))
+        }
         label="Description"
         placeholder="Enter description"
         multiline
