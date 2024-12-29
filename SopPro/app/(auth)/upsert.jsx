@@ -6,7 +6,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import React, { useLayoutEffect, useState } from "react";
+import React, { useLayoutEffect, useState, useEffect } from "react";
 import { useNavigation } from "expo-router";
 import { useLocalSearchParams } from "expo-router";
 import { TextInput, Button, ActivityIndicator } from "react-native-paper";
@@ -37,12 +37,15 @@ const Upsert = () => {
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["sop", sopId],
-    enabled: sopId != null,
     queryFn: () => fetchSop(sopId),
-    onSuccess: (data) => {
-      console.log(data);
-    },
   });
+
+  useEffect(() => {
+    if (data) {
+      setTitle(data.sopVersions[0].title);
+      setDescription(data.sopVersions[0].description);
+    }
+  }, [data]);
 
   const handleSave = () => {
     // Handle save logic

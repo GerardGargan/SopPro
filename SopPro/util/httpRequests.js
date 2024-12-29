@@ -26,7 +26,7 @@ export async function login(data) {
 export async function fetchSop(id) {
   try {
     const response = await api.get(`/sop/${id}`);
-    return response.data;
+    return response.data.result;
   } catch (e) {
     const error = new Error(
       e.response?.data?.errorMessage || "Error fetching SOP"
