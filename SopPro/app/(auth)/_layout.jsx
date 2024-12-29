@@ -66,7 +66,7 @@ export default function RootLayout() {
   return (
     <Stack>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-      <Stack.Screen name="upsert" options={{ title: "Create SOP" }} />
+      <Stack.Screen name="upsert/[id]" options={{ title: "Create SOP" }} />
     </Stack>
   );
 }

@@ -145,8 +145,18 @@ namespace Backend.Service.Implementation
             {
                 Id = sopEntity.Id,
                 Reference = sopEntity.Reference,
+                Title = latestSopVersion.Title,
+                Description = latestSopVersion.Description,
                 DepartmentId = sopEntity.DepartmentId ?? 0,
                 isAiGenerated = sopEntity.isAiGenerated,
+                SopHazards = latestSopVersion.SopHazards.Select(sopHazard => new SopHazardDto
+                {
+                    Id = sopHazard.Id,
+                    SopVersionId = sopHazard.SopVersionId,
+                    Name = sopHazard.Name,
+                    ControlMeasure = sopHazard.ControlMeasure,
+                    RiskLevel = sopHazard.RiskLevel,
+                }).ToList(),
                 SopVersions = new List<SopVersionDto>
                 {
                     new SopVersionDto

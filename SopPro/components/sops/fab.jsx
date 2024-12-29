@@ -23,9 +23,9 @@ const Fab = () => {
             label: "Start from scratch",
             onPress: () =>
               router.push({
-                pathname: "/(auth)/upsert",
+                pathname: "/(auth)/upsert/[id]",
                 params: {
-                  sopId: 7,
+                  id: 7,
                 },
               }),
           },
