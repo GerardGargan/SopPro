@@ -17,8 +17,8 @@ import {
   Modal,
   Portal,
 } from "react-native-paper";
-import { useQuery } from "@tanstack/react-query";
-import { fetchSop } from "../../../util/httpRequests";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { fetchSop, updateSop } from "../../../util/httpRequests";
 import ErrorBlock from "../../../components/UI/ErrorBlock";
 import SOP from "../../../models/sop";
 import Header from "../../../components/UI/Header";
@@ -31,8 +31,6 @@ const Upsert = () => {
   const [selectedHazard, setSelectedHazard] = useState(null);
 
   const isCreate = id === "-1";
-  console.log(sop.sopHazards);
-  console.log(selectedHazard);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -52,6 +50,17 @@ const Upsert = () => {
     queryFn: () => fetchSop(id),
   });
 
+  const {
+    mutate,
+    data: putData,
+    isLoading: isPutLoading,
+  } = useMutation({
+    mutationFn: updateSop,
+    onSuccess: () => {
+      router.replace("/home");
+    },
+  });
+
   // set the state if data is loaded from the api
   useEffect(() => {
     if (data) {
@@ -61,12 +70,16 @@ const Upsert = () => {
   }, [data]);
 
   const handleAddHazard = () => {
-    const newHazard = {
-      id: Date.now().toString(),
-      name: "New hazard",
-      controlMeasure: "control measure",
-    };
     setSop((prev) => {
+      const maxId = prev.sopHazards.reduce(
+        (max, hazard) => Math.max(max, hazard.id || 0),
+        0
+      );
+      const newHazard = {
+        id: maxId + 1,
+        name: "New hazard",
+        controlMeasure: "control measure",
+      };
       return { ...prev, sopHazards: [...prev.sopHazards, newHazard] };
     });
   };
@@ -84,6 +97,7 @@ const Upsert = () => {
   };
 
   const handleSave = () => {
+    console.log(sop);
     if (isCreate) {
       console.log("Create");
     } else {

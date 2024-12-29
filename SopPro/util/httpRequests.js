@@ -34,3 +34,16 @@ export async function fetchSop(id) {
     throw error;
   }
 }
+
+export async function updateSop(sop) {
+  console.log(sop);
+  try {
+    const response = await api.put(`/sop/${sop.id}`, sop);
+    return response.data;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error updating SOP"
+    );
+    throw error;
+  }
+}
