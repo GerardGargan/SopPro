@@ -10,7 +10,13 @@ import {
 } from "react-native";
 import { useNavigation, useRouter } from "expo-router";
 import { useLocalSearchParams } from "expo-router";
-import { TextInput, Button, ActivityIndicator } from "react-native-paper";
+import {
+  TextInput,
+  Button,
+  ActivityIndicator,
+  Modal,
+  Portal,
+} from "react-native-paper";
 import { useQuery } from "@tanstack/react-query";
 import { fetchSop } from "../../../util/httpRequests";
 import ErrorBlock from "../../../components/UI/ErrorBlock";
@@ -22,8 +28,11 @@ const Upsert = () => {
   const navigation = useNavigation();
   const { id } = useLocalSearchParams();
   const [sop, setSop] = useState(new SOP());
+  const [selectedHazard, setSelectedHazard] = useState(null);
 
   const isCreate = id === "-1";
+  console.log(sop.sopHazards);
+  console.log(selectedHazard);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -36,23 +45,20 @@ const Upsert = () => {
     });
   }, [navigation, id, isError]);
 
-  console.log(id);
+  // queries to api
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["sop", id],
     enabled: !isCreate,
     queryFn: () => fetchSop(id),
   });
 
+  // set the state if data is loaded from the api
   useEffect(() => {
     if (data) {
       const loadedSop = new SOP(data);
       setSop(loadedSop);
     }
   }, [data]);
-
-  const handleSave = () => {
-    console.log(isCreate ? "Create SOP" : "Update SOP");
-  };
 
   const handleAddHazard = () => {
     const newHazard = {
@@ -65,32 +71,25 @@ const Upsert = () => {
     });
   };
 
-  const renderHeader = () => (
-    <View>
-      <TextInput
-        style={styles.TextInput}
-        value={sop.title}
-        onChangeText={(text) =>
-          setSop((prevState) => ({ ...prevState, title: text }))
+  const updateHazard = (id, key, value) => {
+    setSop((prevState) => {
+      const updatedHazards = prevState.sopHazards.map((hazard) => {
+        if (hazard.id === id) {
+          return { ...hazard, [key]: value };
         }
-        label="Title"
-        placeholder="Enter title"
-      />
-      <TextInput
-        style={[styles.textArea, styles.TextInput]}
-        value={sop.description}
-        onChangeText={(text) =>
-          setSop((prevState) => ({ ...prevState, description: text }))
-        }
-        label="Description"
-        placeholder="Enter description"
-        multiline
-        numberOfLines={10}
-        textAlignVertical="top"
-      />
-      <Header text="Safety information" textStyle={{ color: "black" }} />
-    </View>
-  );
+        return hazard;
+      });
+      return { ...prevState, sopHazards: updatedHazards };
+    });
+  };
+
+  const handleSave = () => {
+    if (isCreate) {
+      console.log("Create");
+    } else {
+      console.log("Update");
+    }
+  };
 
   if (isLoading) {
     return <ActivityIndicator animating={true} />;
@@ -105,13 +104,36 @@ const Upsert = () => {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
+      <View>
+        <TextInput
+          style={styles.TextInput}
+          value={sop.title}
+          onChangeText={(text) =>
+            setSop((prevState) => ({ ...prevState, title: text }))
+          }
+          label="Title"
+          placeholder="Enter title"
+        />
+        <TextInput
+          style={[styles.textArea, styles.TextInput]}
+          value={sop.description}
+          onChangeText={(text) =>
+            setSop((prevState) => ({ ...prevState, description: text }))
+          }
+          label="Description"
+          placeholder="Enter description"
+          multiline
+          numberOfLines={10}
+          textAlignVertical="top"
+        />
+        <Header text="Safety information" textStyle={{ color: "black" }} />
+      </View>
       <FlatList
         data={sop.sopHazards}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
-          <HazardItem hazard={item} onEdit={() => console.log("Edit", item)} />
+          <HazardItem hazard={item} onEdit={setSelectedHazard} />
         )}
-        ListHeaderComponent={renderHeader}
         ListEmptyComponent={
           <Text style={styles.emptyListText}>No hazards added yet.</Text>
         }
@@ -120,6 +142,43 @@ const Upsert = () => {
       <TouchableOpacity style={styles.addButton} onPress={handleAddHazard}>
         <Text style={styles.addButtonText}>+</Text>
       </TouchableOpacity>
+      <Portal>
+        <Modal
+          visible={selectedHazard !== null}
+          onDismiss={() => setSelectedHazard(null)}
+          contentContainerStyle={styles.modalContainerStyle}
+        >
+          <TextInput
+            style={styles.TextInput}
+            placeholder="Enter hazard"
+            label="Hazard"
+            value={
+              selectedHazard &&
+              sop.sopHazards.find((x) => x.id == selectedHazard)?.name
+            }
+            onChangeText={(text) => updateHazard(selectedHazard, "name", text)}
+          />
+          <TextInput
+            label="Control measure"
+            placeholder="Enter control measure"
+            style={styles.TextInput}
+            value={
+              selectedHazard &&
+              sop.sopHazards.find((x) => x.id == selectedHazard)?.controlMeasure
+            }
+            onChangeText={(text) =>
+              updateHazard(selectedHazard, "controlMeasure", text)
+            }
+          />
+          <Button
+            mode="outlined"
+            style={{ width: 100, alignSelf: "flex-end" }}
+            onPress={() => setSelectedHazard(null)}
+          >
+            Save
+          </Button>
+        </Modal>
+      </Portal>
     </KeyboardAvoidingView>
   );
 };
@@ -131,6 +190,13 @@ const styles = StyleSheet.create({
     flex: 1,
     margin: 16,
   },
+  modalContainerStyle: {
+    backgroundColor: "white",
+    paddingVertical: 40,
+    paddingHorizontal: 20,
+    marginHorizontal: 20,
+  },
+
   TextInput: {
     marginBottom: 16,
   },

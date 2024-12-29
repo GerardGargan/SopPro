@@ -10,7 +10,7 @@ const hazardItem = ({ hazard, onEdit }) => {
         <Text style={styles.hazardControl}>{hazard.controlMeasure}</Text>
       </View>
       <View>
-        <IconButton icon="pencil" onPress={onEdit} />
+        <IconButton icon="pencil" onPress={() => onEdit(hazard.id)} />
       </View>
     </View>
   );
