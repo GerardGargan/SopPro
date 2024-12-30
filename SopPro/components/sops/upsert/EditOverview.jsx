@@ -1,8 +1,23 @@
 import { StyleSheet, View, Text } from "react-native";
-import { TextInput, Modal, Portal, Button } from "react-native-paper";
+import { TextInput, Modal, Portal, Button, Chip } from "react-native-paper";
 import React from "react";
 import Header from "../../UI/Header";
 import HazardItem from "./hazardItem";
+
+function getStatus(identifier) {
+  switch (identifier) {
+    case 1:
+      return "Draft";
+    case 2:
+      return "In review";
+    case 3:
+      return "Approved";
+    case 4:
+      return "Archived";
+    default:
+      return "Unknown";
+  }
+}
 
 const EditOverview = ({
   title,
@@ -16,9 +31,33 @@ const EditOverview = ({
   selectedHazard,
   handleUpdateHazard,
   handleRemoveHazard,
+  version,
+  isApproved,
+  status,
 }) => {
+  let versionChip = (
+    <Chip
+      icon="information-outline"
+      mode="outlined"
+      style={{ alignSelf: "flex-end" }}
+    >
+      Version {version}
+    </Chip>
+  );
+
+  let newVersionChip = (
+    <Chip icon="information-outline" mode="outlined">
+      A new version will be created (V{version + 1})
+    </Chip>
+  );
+  let statusChip = <Chip>{getStatus(status)}</Chip>;
+
   return (
     <>
+      <View style={styles.chipContainer}>
+        {statusChip}
+        {isApproved ? newVersionChip : versionChip}
+      </View>
       <TextInput
         style={styles.textInput}
         label="Title"
@@ -117,5 +156,11 @@ const styles = StyleSheet.create({
   },
   controlMeasureInput: {
     height: 100,
+  },
+  chipContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 10,
+    marginBottom: 10,
   },
 });

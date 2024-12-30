@@ -7,6 +7,8 @@ namespace Backend.Models.Dto
         public string Title { get; set; }
         public string Description { get; set; }
         public int? DepartmentId { get; set; }
+        public bool? IsApproved { get; set; }
+        public SopStatus? Status { get; set; }
         public string Reference { get; set; }
         public bool? isAiGenerated { get; set; }
         public List<SopHazardDto> SopHazards { get; set; }

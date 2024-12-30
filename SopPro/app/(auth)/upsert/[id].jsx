@@ -15,6 +15,8 @@ const Upsert = () => {
   const [hazards, setHazards] = React.useState([]);
   const [selectedHazard, setSelectedHazard] = React.useState(null);
   const [screen, setScreen] = React.useState("overview");
+  const [version, setVersion] = React.useState(1);
+  const [status, setStatus] = React.useState(1);
 
   const isCreate = id === "-1";
 
@@ -58,6 +60,8 @@ const Upsert = () => {
           return { ...hazard, key: hazard.id };
         }) || []
       );
+      setStatus(data?.status || 1);
+      setVersion(data?.version || 1);
     }
   }, [data]);
 
@@ -152,6 +156,9 @@ const Upsert = () => {
             handleAddHazard={handleAddHazard}
             handleUpdateHazard={handleUpdateHazard}
             handleRemoveHazard={handleRemoveHazard}
+            version={version}
+            status={status}
+            isApproved={data?.isApproved}
           />
         )}
 
