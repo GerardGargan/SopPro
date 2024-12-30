@@ -12,6 +12,7 @@ namespace Backend.Models.Dto
         public string Reference { get; set; }
         public bool? isAiGenerated { get; set; }
         public int? Version { get; set; }
+        public List<SopStep> SopSteps { get; set; }
         public List<SopHazardDto> SopHazards { get; set; }
         public List<SopVersionDto> SopVersions { get; set; }
 

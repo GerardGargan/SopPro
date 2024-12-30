@@ -126,7 +126,7 @@ namespace Backend.Service.Implementation
 
         public async Task<ApiResponse<SopDto>> GetLatestSopVersion(int id)
         {
-            var sopEntity = await _unitOfWork.Sops.GetAsync(s => s.Id == id, includeProperties: "SopVersions,SopVersions.SopHazards");
+            var sopEntity = await _unitOfWork.Sops.GetAsync(s => s.Id == id, includeProperties: "SopVersions,SopVersions.SopHazards,SopVersions.SopSteps");
             if (sopEntity == null)
             {
                 throw new Exception("Sop not found");
@@ -152,6 +152,14 @@ namespace Backend.Service.Implementation
                 Version = latestSopVersion.Version,
                 DepartmentId = sopEntity.DepartmentId ?? 0,
                 isAiGenerated = sopEntity.isAiGenerated,
+                SopSteps = latestSopVersion.SopSteps.Select(sopStep => new SopStep
+                {
+                    Id = sopStep.Id,
+                    SopVersionId = sopStep.SopVersionId,
+                    Position = sopStep.Position,
+                    Text = sopStep.Text,
+                    ImageUrl = sopStep.ImageUrl,
+                }).ToList(),
                 SopHazards = latestSopVersion.SopHazards.Select(sopHazard => new SopHazardDto
                 {
                     Id = sopHazard.Id,
