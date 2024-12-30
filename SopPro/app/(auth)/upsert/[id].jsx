@@ -79,7 +79,7 @@ const Upsert = () => {
       title: title,
       description: description,
       departmentId: 0,
-      reference: "",
+      reference: Math.random().toString(36).substring(7),
       isAiGenerated: false,
       sopHazards: hazards,
       id: +id,
