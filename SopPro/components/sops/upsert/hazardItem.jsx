@@ -6,8 +6,12 @@ const hazardItem = ({ hazard, onEdit }) => {
   return (
     <View style={styles.hazardItem}>
       <View style={styles.hazardDetails}>
-        <Text style={styles.hazardName}>{hazard.name}</Text>
-        <Text style={styles.hazardControl}>{hazard.controlMeasure}</Text>
+        <Text style={styles.hazardName}>
+          {hazard.name ? hazard.name : "New hazard"}
+        </Text>
+        <Text style={styles.hazardControl}>
+          {hazard.controlMeasure ? hazard.controlMeasure : "Control measure"}
+        </Text>
       </View>
       <View>
         <IconButton icon="pencil" onPress={() => onEdit(hazard.id)} />

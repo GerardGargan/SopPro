@@ -1,242 +1,200 @@
-import React, { useLayoutEffect, useState, useEffect } from "react";
-import {
-  StyleSheet,
-  FlatList,
-  View,
-  KeyboardAvoidingView,
-  Platform,
-  Text,
-  TouchableOpacity,
-} from "react-native";
-import { useNavigation, useRouter } from "expo-router";
-import { useLocalSearchParams } from "expo-router";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useLayoutEffect } from "react";
 import {
   TextInput,
   Button,
-  ActivityIndicator,
   Modal,
   Portal,
+  IconButton,
+  ActivityIndicator,
 } from "react-native-paper";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { fetchSop, updateSop } from "../../../util/httpRequests";
-import ErrorBlock from "../../../components/UI/ErrorBlock";
-import SOP from "../../../models/sop";
+import { useQuery } from "@tanstack/react-query";
+import { useLocalSearchParams, useNavigation } from "expo-router";
+import { fetchSop } from "../../../util/httpRequests";
 import Header from "../../../components/UI/Header";
 import HazardItem from "../../../components/sops/upsert/hazardItem";
 
 const Upsert = () => {
-  const navigation = useNavigation();
   const { id } = useLocalSearchParams();
-  const [sop, setSop] = useState(new SOP());
-  const [selectedHazard, setSelectedHazard] = useState(null);
+
+  const [title, setTitle] = React.useState("");
+  const [description, setDescription] = React.useState("");
+  const [hazards, setHazards] = React.useState([]);
+  const [selectedHazard, setSelectedHazard] = React.useState(null);
 
   const isCreate = id === "-1";
 
+  const navigation = useNavigation();
   useLayoutEffect(() => {
     navigation.setOptions({
       title: isCreate ? "Create SOP" : "Edit SOP",
-      headerRight: () => (
-        <Button disabled={isError} mode="contained" onPress={handleSave}>
-          {isCreate ? "Create" : "Update"}
-        </Button>
-      ),
+      headerRight: () => <Button onPress={handleSave}>Save</Button>,
     });
-  }, [navigation, id, isError]);
+  }, [navigation, handleSave]);
 
-  // queries to api
-  const { data, isLoading, isError, error } = useQuery({
+  const { data, isError, isLoading } = useQuery({
     queryKey: ["sop", id],
-    enabled: !isCreate,
     queryFn: () => fetchSop(id),
   });
 
-  const {
-    mutate,
-    data: putData,
-    isLoading: isPutLoading,
-  } = useMutation({
-    mutationFn: updateSop,
-    onSuccess: () => {
-      router.replace("/home");
-    },
-  });
-
-  // set the state if data is loaded from the api
   useEffect(() => {
     if (data) {
-      const loadedSop = new SOP(data);
-      setSop(loadedSop);
+      setTitle(data?.title || "");
+      setDescription(data?.description || "");
+      setHazards(data?.sopHazards || []);
     }
   }, [data]);
 
-  const handleAddHazard = () => {
-    setSop((prev) => {
-      const maxId = prev.sopHazards.reduce(
-        (max, hazard) => Math.max(max, hazard.id || 0),
-        0
-      );
+  function handleTitleChange(text) {
+    setTitle(text);
+  }
+
+  function handleDescriptionChange(text) {
+    setDescription(text);
+  }
+
+  function handleSave() {
+    console.log("Save SOP", { title, description, hazards });
+  }
+
+  function handleSelectHazard(id) {
+    setSelectedHazard(id);
+  }
+
+  function handleAddHazard(hazard) {
+    setHazards((prevState) => {
+      const maxId =
+        prevState.length > 0
+          ? Math.max(...prevState.map((hazard) => hazard.id))
+          : 1;
       const newHazard = {
         id: maxId + 1,
-        name: "New hazard",
-        controlMeasure: "control measure",
+        name: "",
+        controlMeasure: "",
+        riskLevel: 1,
       };
-      return { ...prev, sopHazards: [...prev.sopHazards, newHazard] };
+      return [...prevState, newHazard];
     });
-  };
+  }
 
-  const updateHazard = (id, key, value) => {
-    setSop((prevState) => {
-      const updatedHazards = prevState.sopHazards.map((hazard) => {
-        if (hazard.id === id) {
-          return { ...hazard, [key]: value };
-        }
-        return hazard;
-      });
-      return { ...prevState, sopHazards: updatedHazards };
+  function handleUpdateHazard(id, key, value) {
+    setHazards((prevState) => {
+      const hazards = [...prevState];
+      const index = hazards.findIndex((hazard) => hazard.id === id);
+      hazards[index][key] = value;
+      return hazards;
     });
-  };
+  }
 
-  const handleSave = () => {
-    console.log(sop);
-    if (isCreate) {
-      console.log("Create");
-    } else {
-      console.log("Update");
-    }
-  };
+  function handleRemoveHazard(id) {
+    setHazards((prevState) => {
+      return prevState.filter((hazard) => hazard.id !== id);
+    });
+    setSelectedHazard(null);
+  }
 
   if (isLoading) {
     return <ActivityIndicator animating={true} />;
   }
 
   if (isError) {
-    return <ErrorBlock>{error.message}</ErrorBlock>;
+    return <Text>Error fetching SOP</Text>;
   }
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={styles.container}
-    >
-      <View>
-        <TextInput
-          style={styles.TextInput}
-          value={sop.title}
-          onChangeText={(text) =>
-            setSop((prevState) => ({ ...prevState, title: text }))
-          }
-          label="Title"
-          placeholder="Enter title"
-        />
-        <TextInput
-          style={[styles.textArea, styles.TextInput]}
-          value={sop.description}
-          onChangeText={(text) =>
-            setSop((prevState) => ({ ...prevState, description: text }))
-          }
-          label="Description"
-          placeholder="Enter description"
-          multiline
-          numberOfLines={10}
-          textAlignVertical="top"
-        />
-        <Header text="Safety information" textStyle={{ color: "black" }} />
-      </View>
-      <FlatList
-        data={sop.sopHazards}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <HazardItem hazard={item} onEdit={setSelectedHazard} />
-        )}
-        ListEmptyComponent={
-          <Text style={styles.emptyListText}>No hazards added yet.</Text>
-        }
-        ListFooterComponent={<View style={{ height: 80 }} />}
+    <ScrollView style={styles.rootContainer}>
+      <TextInput
+        style={styles.textInput}
+        label="Title"
+        placeholder="Enter title"
+        value={title}
+        onChangeText={(text) => handleTitleChange(text)}
       />
-      <TouchableOpacity style={styles.addButton} onPress={handleAddHazard}>
-        <Text style={styles.addButtonText}>+</Text>
-      </TouchableOpacity>
+      <TextInput
+        style={[styles.textInput, styles.descInput]}
+        label="Description"
+        placeholder="Enter description"
+        multiline
+        numberOfLines={10}
+        value={description}
+        onChangeText={(text) => handleDescriptionChange(text)}
+        scrollEnabled={false}
+      />
+      <Header text="Safety information" textStyle={{ color: "black" }} />
+      {hazards.map((hazard, index) => {
+        return (
+          <HazardItem
+            key={hazard.id}
+            hazard={hazard}
+            onEdit={() => handleSelectHazard(hazard.id)}
+          />
+        );
+      })}
+      <Button onPress={handleAddHazard}>Add hazard</Button>
       <Portal>
         <Modal
           visible={selectedHazard !== null}
           onDismiss={() => setSelectedHazard(null)}
-          contentContainerStyle={styles.modalContainerStyle}
+          contentContainerStyle={styles.modalContainer}
         >
+          <Button
+            icon="trash-can"
+            onPress={() => handleRemoveHazard(selectedHazard)}
+            style={{ alignSelf: "flex-end", marginBottom: 10 }}
+            mode="contained"
+          >
+            Delete
+          </Button>
           <TextInput
-            style={styles.TextInput}
-            placeholder="Enter hazard"
             label="Hazard"
-            value={
-              selectedHazard &&
-              sop.sopHazards.find((x) => x.id == selectedHazard)?.name
+            placeholder="Hazard description"
+            style={styles.textInput}
+            value={hazards.find((hazard) => hazard.id === selectedHazard)?.name}
+            onChangeText={(text) =>
+              handleUpdateHazard(selectedHazard, "name", text)
             }
-            onChangeText={(text) => updateHazard(selectedHazard, "name", text)}
           />
           <TextInput
             label="Control measure"
-            placeholder="Enter control measure"
-            style={styles.TextInput}
+            placeholder="Control measure"
+            style={[styles.textInput, styles.controlMeasureInput]}
+            multiline
+            numberOfLines={3}
             value={
-              selectedHazard &&
-              sop.sopHazards.find((x) => x.id == selectedHazard)?.controlMeasure
+              hazards.find((hazard) => hazard.id === selectedHazard)
+                ?.controlMeasure
             }
             onChangeText={(text) =>
-              updateHazard(selectedHazard, "controlMeasure", text)
+              handleUpdateHazard(selectedHazard, "controlMeasure", text)
             }
           />
-          <Button
-            mode="outlined"
-            style={{ width: 100, alignSelf: "flex-end" }}
-            onPress={() => setSelectedHazard(null)}
-          >
-            Save
+          <Button mode="text" onPress={() => setSelectedHazard(null)}>
+            Close
           </Button>
         </Modal>
       </Portal>
-    </KeyboardAvoidingView>
+    </ScrollView>
   );
 };
 
 export default Upsert;
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    margin: 16,
+  rootContainer: {
+    margin: 20,
   },
-  modalContainerStyle: {
+  modalContainer: {
     backgroundColor: "white",
-    paddingVertical: 40,
-    paddingHorizontal: 20,
-    marginHorizontal: 20,
+    padding: 20,
+    margin: 20,
   },
-
-  TextInput: {
-    marginBottom: 16,
+  textInput: {
+    marginBottom: 10,
   },
-  textArea: {
+  descInput: {
     height: 150,
   },
-  emptyListText: {
-    textAlign: "center",
-    color: "gray",
-    marginVertical: 16,
-  },
-  addButton: {
-    position: "absolute",
-    bottom: 16,
-    right: 16,
-    backgroundColor: "#6200ee",
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: "center",
-    justifyContent: "center",
-    elevation: 4,
-  },
-  addButtonText: {
-    color: "white",
-    fontSize: 24,
-    fontWeight: "bold",
+  controlMeasureInput: {
+    height: 100,
   },
 });
