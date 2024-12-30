@@ -36,13 +36,24 @@ export async function fetchSop(id) {
 }
 
 export async function updateSop(sop) {
-  console.log(sop);
   try {
     const response = await api.put(`/sop/${sop.id}`, sop);
     return response.data;
   } catch (e) {
     const error = new Error(
       e.response?.data?.errorMessage || "Error updating SOP"
+    );
+    throw error;
+  }
+}
+
+export async function createSop(sop) {
+  try {
+    const response = await api.post(`/sop`, sop);
+    return response.data;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error creating SOP"
     );
     throw error;
   }

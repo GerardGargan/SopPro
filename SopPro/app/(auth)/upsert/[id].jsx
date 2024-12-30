@@ -7,9 +7,9 @@ import {
   Portal,
   ActivityIndicator,
 } from "react-native-paper";
-import { useQuery } from "@tanstack/react-query";
-import { useLocalSearchParams, useNavigation } from "expo-router";
-import { fetchSop } from "../../../util/httpRequests";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { createSop, fetchSop, updateSop } from "../../../util/httpRequests";
 import Header from "../../../components/UI/Header";
 import HazardItem from "../../../components/sops/upsert/hazardItem";
 
@@ -23,6 +23,7 @@ const Upsert = () => {
 
   const isCreate = id === "-1";
 
+  const router = useRouter();
   const navigation = useNavigation();
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -37,6 +38,20 @@ const Upsert = () => {
     enabled: !isCreate,
     queryKey: ["sop", id],
     queryFn: () => fetchSop(id),
+  });
+
+  const { mutate: mutateUpdate } = useMutation({
+    mutationFn: updateSop,
+    onSuccess: () => {
+      router.navigate("/(auth)");
+    },
+  });
+
+  const { mutate: mutateCreate } = useMutation({
+    mutationFn: createSop,
+    onSuccess: () => {
+      router.navigate("/(auth)");
+    },
   });
 
   useEffect(() => {
@@ -60,7 +75,21 @@ const Upsert = () => {
   }
 
   function handleSave() {
-    console.log("Save SOP", { title, description, hazards });
+    const sop = {
+      title: title,
+      description: description,
+      departmentId: 0,
+      reference: "",
+      isAiGenerated: false,
+      sopHazards: hazards,
+      id: +id,
+    };
+
+    if (isCreate) {
+      mutateCreate(sop);
+    } else {
+      mutateUpdate(sop);
+    }
   }
 
   function handleSelectHazard(id) {
@@ -87,7 +116,7 @@ const Upsert = () => {
   function handleUpdateHazard(key, identifier, value) {
     setHazards((prevState) => {
       const hazards = [...prevState];
-      const index = hazards.findIndex((hazard) => hazard.key === identifier);
+      const index = hazards.findIndex((hazard) => hazard.key === key);
       hazards[index][identifier] = value;
       return hazards;
     });

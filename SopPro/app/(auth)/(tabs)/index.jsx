@@ -19,7 +19,7 @@ const index = () => {
           router.push({
             pathname: "/(auth)/upsert/[id]",
             params: {
-              id: 7,
+              id: 1003,
             },
           })
         }
