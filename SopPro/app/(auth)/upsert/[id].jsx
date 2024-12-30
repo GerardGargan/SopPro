@@ -1,17 +1,11 @@
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import React, { useEffect, useLayoutEffect } from "react";
-import {
-  TextInput,
-  Button,
-  Modal,
-  Portal,
-  ActivityIndicator,
-} from "react-native-paper";
+import { Button, ActivityIndicator } from "react-native-paper";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { createSop, fetchSop, updateSop } from "../../../util/httpRequests";
-import Header from "../../../components/UI/Header";
-import HazardItem from "../../../components/sops/upsert/hazardItem";
+import EditOverview from "../../../components/sops/upsert/EditOverview";
+import BottomBar from "../../../components/sops/upsert/BottomBar";
 
 const Upsert = () => {
   const { id } = useLocalSearchParams();
@@ -20,6 +14,7 @@ const Upsert = () => {
   const [description, setDescription] = React.useState("");
   const [hazards, setHazards] = React.useState([]);
   const [selectedHazard, setSelectedHazard] = React.useState(null);
+  const [screen, setScreen] = React.useState("overview");
 
   const isCreate = id === "-1";
 
@@ -129,6 +124,10 @@ const Upsert = () => {
     setSelectedHazard(null);
   }
 
+  function selectScreen(screen) {
+    setScreen(screen);
+  }
+
   if (isLoading) {
     return <ActivityIndicator animating={true} />;
   }
@@ -138,82 +137,28 @@ const Upsert = () => {
   }
 
   return (
-    <ScrollView style={styles.rootContainer}>
-      <TextInput
-        style={styles.textInput}
-        label="Title"
-        placeholder="Enter title"
-        value={title}
-        onChangeText={(text) => handleTitleChange(text)}
-      />
-      <TextInput
-        style={[styles.textInput, styles.descInput]}
-        label="Description"
-        placeholder="Enter description"
-        multiline
-        numberOfLines={10}
-        value={description}
-        onChangeText={(text) => handleDescriptionChange(text)}
-        scrollEnabled={false}
-      />
-      <Header text="Safety information" textStyle={{ color: "black" }} />
-      {hazards.map((hazard, index) => {
-        return (
-          <HazardItem
-            key={hazard.key}
-            hazard={hazard}
-            onEdit={() => handleSelectHazard(hazard.key)}
+    <>
+      <ScrollView style={styles.rootContainer}>
+        {screen === "overview" && (
+          <EditOverview
+            title={title}
+            description={description}
+            handleTitleChange={handleTitleChange}
+            handleDescriptionChange={handleDescriptionChange}
+            hazards={hazards}
+            selectedHazard={selectedHazard}
+            handleSelectHazard={handleSelectHazard}
+            setSelectedHazard={setSelectedHazard}
+            handleAddHazard={handleAddHazard}
+            handleUpdateHazard={handleUpdateHazard}
+            handleRemoveHazard={handleRemoveHazard}
           />
-        );
-      })}
-      <Button icon="plus" onPress={handleAddHazard}>
-        Add hazard
-      </Button>
-      <Portal>
-        <Modal
-          visible={selectedHazard !== null}
-          onDismiss={() => setSelectedHazard(null)}
-          contentContainerStyle={styles.modalContainer}
-        >
-          <Button
-            icon="trash-can"
-            onPress={() => handleRemoveHazard(selectedHazard)}
-            style={{ alignSelf: "flex-end", marginBottom: 10 }}
-            mode="contained"
-          >
-            Delete
-          </Button>
-          <TextInput
-            label="Hazard"
-            placeholder="Hazard description"
-            style={styles.textInput}
-            value={
-              hazards.find((hazard) => hazard.key === selectedHazard)?.name
-            }
-            onChangeText={(text) =>
-              handleUpdateHazard(selectedHazard, "name", text)
-            }
-          />
-          <TextInput
-            label="Control measure"
-            placeholder="Control measure"
-            style={[styles.textInput, styles.controlMeasureInput]}
-            multiline
-            numberOfLines={3}
-            value={
-              hazards.find((hazard) => hazard.key === selectedHazard)
-                ?.controlMeasure
-            }
-            onChangeText={(text) =>
-              handleUpdateHazard(selectedHazard, "controlMeasure", text)
-            }
-          />
-          <Button mode="text" onPress={() => setSelectedHazard(null)}>
-            Close
-          </Button>
-        </Modal>
-      </Portal>
-    </ScrollView>
+        )}
+
+        {screen === "steps" && <Text>Steps</Text>}
+      </ScrollView>
+      <BottomBar selectedScreen={screen} onSelectScreen={selectScreen} />
+    </>
   );
 };
 
@@ -222,19 +167,5 @@ export default Upsert;
 const styles = StyleSheet.create({
   rootContainer: {
     margin: 20,
-  },
-  modalContainer: {
-    backgroundColor: "white",
-    padding: 20,
-    margin: 20,
-  },
-  textInput: {
-    marginBottom: 10,
-  },
-  descInput: {
-    height: 150,
-  },
-  controlMeasureInput: {
-    height: 100,
   },
 });
