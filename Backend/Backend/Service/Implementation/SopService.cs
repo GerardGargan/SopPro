@@ -149,6 +149,7 @@ namespace Backend.Service.Implementation
                 Description = latestSopVersion.Description,
                 IsApproved = latestSopVersion.Status == SopStatus.Approved,
                 Status = latestSopVersion.Status,
+                Version = latestSopVersion.Version,
                 DepartmentId = sopEntity.DepartmentId ?? 0,
                 isAiGenerated = sopEntity.isAiGenerated,
                 SopHazards = latestSopVersion.SopHazards.Select(sopHazard => new SopHazardDto
