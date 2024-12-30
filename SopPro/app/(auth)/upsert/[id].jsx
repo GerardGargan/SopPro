@@ -5,7 +5,6 @@ import {
   Button,
   Modal,
   Portal,
-  IconButton,
   ActivityIndicator,
 } from "react-native-paper";
 import { useQuery } from "@tanstack/react-query";
@@ -28,11 +27,14 @@ const Upsert = () => {
   useLayoutEffect(() => {
     navigation.setOptions({
       title: isCreate ? "Create SOP" : "Edit SOP",
-      headerRight: () => <Button onPress={handleSave}>Save</Button>,
+      headerRight: () => (
+        <Button onPress={handleSave}>{isCreate ? "Save" : "Update"}</Button>
+      ),
     });
   }, [navigation, handleSave]);
 
   const { data, isError, isLoading } = useQuery({
+    enabled: !isCreate,
     queryKey: ["sop", id],
     queryFn: () => fetchSop(id),
   });
@@ -41,7 +43,11 @@ const Upsert = () => {
     if (data) {
       setTitle(data?.title || "");
       setDescription(data?.description || "");
-      setHazards(data?.sopHazards || []);
+      setHazards(
+        data?.sopHazards.map((hazard) => {
+          return { ...hazard, key: hazard.id };
+        }) || []
+      );
     }
   }, [data]);
 
@@ -63,12 +69,13 @@ const Upsert = () => {
 
   function handleAddHazard(hazard) {
     setHazards((prevState) => {
-      const maxId =
+      const maxKey =
         prevState.length > 0
-          ? Math.max(...prevState.map((hazard) => hazard.id))
+          ? Math.max(...prevState.map((hazard) => hazard.key))
           : 1;
       const newHazard = {
-        id: maxId + 1,
+        id: null,
+        key: maxKey + 1,
         name: "",
         controlMeasure: "",
         riskLevel: 1,
@@ -77,18 +84,18 @@ const Upsert = () => {
     });
   }
 
-  function handleUpdateHazard(id, key, value) {
+  function handleUpdateHazard(key, identifier, value) {
     setHazards((prevState) => {
       const hazards = [...prevState];
-      const index = hazards.findIndex((hazard) => hazard.id === id);
-      hazards[index][key] = value;
+      const index = hazards.findIndex((hazard) => hazard.key === identifier);
+      hazards[index][identifier] = value;
       return hazards;
     });
   }
 
-  function handleRemoveHazard(id) {
+  function handleRemoveHazard(key) {
     setHazards((prevState) => {
-      return prevState.filter((hazard) => hazard.id !== id);
+      return prevState.filter((hazard) => hazard.key !== key);
     });
     setSelectedHazard(null);
   }
@@ -124,13 +131,15 @@ const Upsert = () => {
       {hazards.map((hazard, index) => {
         return (
           <HazardItem
-            key={hazard.id}
+            key={hazard.key}
             hazard={hazard}
-            onEdit={() => handleSelectHazard(hazard.id)}
+            onEdit={() => handleSelectHazard(hazard.key)}
           />
         );
       })}
-      <Button onPress={handleAddHazard}>Add hazard</Button>
+      <Button icon="plus" onPress={handleAddHazard}>
+        Add hazard
+      </Button>
       <Portal>
         <Modal
           visible={selectedHazard !== null}
@@ -149,7 +158,9 @@ const Upsert = () => {
             label="Hazard"
             placeholder="Hazard description"
             style={styles.textInput}
-            value={hazards.find((hazard) => hazard.id === selectedHazard)?.name}
+            value={
+              hazards.find((hazard) => hazard.key === selectedHazard)?.name
+            }
             onChangeText={(text) =>
               handleUpdateHazard(selectedHazard, "name", text)
             }
@@ -161,7 +172,7 @@ const Upsert = () => {
             multiline
             numberOfLines={3}
             value={
-              hazards.find((hazard) => hazard.id === selectedHazard)
+              hazards.find((hazard) => hazard.key === selectedHazard)
                 ?.controlMeasure
             }
             onChangeText={(text) =>
