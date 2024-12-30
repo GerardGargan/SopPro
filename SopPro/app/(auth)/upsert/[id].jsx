@@ -26,7 +26,7 @@ const Upsert = () => {
     navigation.setOptions({
       title: isCreate ? "Create SOP" : "Edit SOP",
       headerRight: () => (
-        <Button onPress={handleSave}>{isCreate ? "Save" : "Update"}</Button>
+        <Button onPressIn={handleSave}>{isCreate ? "Save" : "Update"}</Button>
       ),
     });
   }, [navigation, handleSave]);

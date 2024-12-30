@@ -1,6 +1,5 @@
 import { StyleSheet, View, Text } from "react-native";
 import { TextInput, Modal, Portal, Button, Chip } from "react-native-paper";
-import React from "react";
 import Header from "../../UI/Header";
 import HazardItem from "./hazardItem";
 
@@ -97,6 +96,8 @@ const EditOverview = ({
           visible={selectedHazard !== null}
           onDismiss={() => setSelectedHazard(null)}
           contentContainerStyle={styles.modalContainer}
+          dismissable={false}
+          dismissableBackButton={true}
         >
           <Button
             icon="trash-can"
@@ -110,7 +111,7 @@ const EditOverview = ({
             label="Hazard"
             placeholder="Hazard description"
             style={styles.textInput}
-            value={
+            defaultValue={
               hazards.find((hazard) => hazard.key === selectedHazard)?.name
             }
             onChangeText={(text) =>
@@ -123,7 +124,7 @@ const EditOverview = ({
             style={[styles.textInput, styles.controlMeasureInput]}
             multiline
             numberOfLines={3}
-            value={
+            defaultValue={
               hazards.find((hazard) => hazard.key === selectedHazard)
                 ?.controlMeasure
             }
