@@ -6,6 +6,7 @@ import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { createSop, fetchSop, updateSop } from "../../../util/httpRequests";
 import EditOverview from "../../../components/sops/upsert/EditOverview";
 import BottomBar from "../../../components/sops/upsert/BottomBar";
+import EditSteps from "../../../components/sops/upsert/EditSteps";
 
 const Upsert = () => {
   const { id } = useLocalSearchParams();
@@ -13,6 +14,7 @@ const Upsert = () => {
   const [title, setTitle] = React.useState("");
   const [description, setDescription] = React.useState("");
   const [hazards, setHazards] = React.useState([]);
+  const [steps, setSteps] = React.useState([]);
   const [selectedHazard, setSelectedHazard] = React.useState(null);
   const [screen, setScreen] = React.useState("overview");
   const [version, setVersion] = React.useState(1);
@@ -62,6 +64,7 @@ const Upsert = () => {
       );
       setStatus(data?.status || 1);
       setVersion(data?.version || 1);
+      setSteps(data?.sopSteps || []);
     }
   }, [data]);
 
@@ -162,7 +165,7 @@ const Upsert = () => {
           />
         )}
 
-        {screen === "steps" && <Text>Steps</Text>}
+        {screen === "steps" && <EditSteps steps={steps} />}
       </ScrollView>
       <BottomBar selectedScreen={screen} onSelectScreen={selectScreen} />
     </>
