@@ -7,6 +7,7 @@ import { createSop, fetchSop, updateSop } from "../../../util/httpRequests";
 import EditOverview from "../../../components/sops/upsert/EditOverview";
 import BottomBar from "../../../components/sops/upsert/BottomBar";
 import EditSteps from "../../../components/sops/upsert/EditSteps";
+import ErrorBlock from "../../../components/UI/ErrorBlock";
 
 const Upsert = () => {
   const { id } = useLocalSearchParams();
@@ -28,25 +29,37 @@ const Upsert = () => {
     navigation.setOptions({
       title: isCreate ? "Create SOP" : "Edit SOP",
       headerRight: () => (
-        <Button onPressIn={handleSave}>{isCreate ? "Save" : "Update"}</Button>
+        <Button disabled={isError && isFetched} onPressIn={handleSave}>
+          {isCreate ? "Save" : "Update"}
+        </Button>
       ),
     });
-  }, [navigation, handleSave]);
+  }, [navigation, handleSave, isError, isFetched]);
 
-  const { data, isError, isLoading } = useQuery({
+  const { data, isError, isFetching, isFetched, error } = useQuery({
     enabled: !isCreate,
     queryKey: ["sop", id],
     queryFn: () => fetchSop(id),
   });
 
-  const { mutate: mutateUpdate } = useMutation({
+  const {
+    mutate: mutateUpdate,
+    isPending: isPendingPut,
+    isError: isErrorPut,
+    error: errorPut,
+  } = useMutation({
     mutationFn: updateSop,
     onSuccess: () => {
       router.navigate("/(auth)");
     },
   });
 
-  const { mutate: mutateCreate } = useMutation({
+  const {
+    mutate: mutateCreate,
+    isPending: isPendingPost,
+    isError: isErrorPost,
+    error: errorPost,
+  } = useMutation({
     mutationFn: createSop,
     onSuccess: () => {
       router.navigate("/(auth)");
@@ -142,17 +155,34 @@ const Upsert = () => {
     setScreen(screen);
   }
 
-  if (isLoading) {
-    return <ActivityIndicator animating={true} />;
+  function getUpdateErrorMessage() {
+    if (isErrorPut) return errorPut.message;
+    if (isErrorPost) return errorPost.message;
+    return null;
+  }
+
+  const errorMessage = getUpdateErrorMessage();
+
+  if (isFetching || isPendingPut || isPendingPost) {
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator animating={true} size="large" />
+      </View>
+    );
   }
 
   if (isError) {
-    return <Text>Error fetching SOP</Text>;
+    return (
+      <View style={styles.centered}>
+        <ErrorBlock>{error.message}</ErrorBlock>
+      </View>
+    );
   }
 
   return (
     <>
       <ScrollView style={styles.rootContainer}>
+        {errorMessage && <ErrorBlock>{errorMessage}</ErrorBlock>}
         {screen === "overview" && (
           <EditOverview
             title={title}
@@ -185,5 +215,10 @@ const styles = StyleSheet.create({
   rootContainer: {
     flex: 1,
     margin: 20,
+  },
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });

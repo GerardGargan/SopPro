@@ -7,8 +7,6 @@ import { useState } from "react";
 const EditSteps = ({ steps, setSteps }) => {
   const [selectedItem, setSelectedItem] = useState(null);
 
-  console.log(steps);
-
   function handlePositionMove(direction) {
     setSteps((prevState) => {
       const index = prevState.findIndex((step) => step.key === selectedItem);
