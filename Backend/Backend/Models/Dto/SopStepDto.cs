@@ -6,6 +6,7 @@ namespace Backend.Models.Dto
     {
         public int? SopVersionId { get; set; }
         public int? Position { get; set; }
+        public string Title { get; set; }
         public string Text { get; set; }
         public string ImageUrl { get; set; }
 
@@ -17,6 +18,7 @@ namespace Backend.Models.Dto
                 SopVersionId = sopStep.SopVersionId,
                 Position = sopStep.Position,
                 Text = sopStep.Text,
+                Title = sopStep.Title,
                 ImageUrl = sopStep.ImageUrl
             };
 
