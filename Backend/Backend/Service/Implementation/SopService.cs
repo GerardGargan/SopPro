@@ -152,7 +152,7 @@ namespace Backend.Service.Implementation
                 Version = latestSopVersion.Version,
                 DepartmentId = sopEntity.DepartmentId ?? 0,
                 isAiGenerated = sopEntity.isAiGenerated,
-                SopSteps = latestSopVersion.SopSteps.Select(sopStep => new SopStep
+                SopSteps = latestSopVersion.SopSteps.Select(sopStep => new SopStepDto
                 {
                     Id = sopStep.Id,
                     SopVersionId = sopStep.SopVersionId,
