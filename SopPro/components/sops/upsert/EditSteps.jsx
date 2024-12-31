@@ -134,6 +134,7 @@ const EditSteps = ({ steps, setSteps }) => {
             />
           );
         })}
+        <View style={{ height: 100 }} />
       </View>
       <Portal>
         <FAB icon="plus" style={styles.fab} onPress={handleAddStep} />

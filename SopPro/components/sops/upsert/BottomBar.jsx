@@ -3,7 +3,7 @@ import { StyleSheet, View } from "react-native";
 import { Appbar, Button, FAB, useTheme } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-const BOTTOM_APPBAR_HEIGHT = 80;
+const BOTTOM_APPBAR_HEIGHT = 60;
 const MEDIUM_FAB_HEIGHT = 56;
 
 const BottomBar = ({ selectedScreen, onSelectScreen }) => {
