@@ -252,8 +252,8 @@ namespace Backend.Service.Implementation
                     await _unitOfWork.SopVersions.AddAsync(newVersion);
                     await _unitOfWork.SaveAsync();
 
-                    // duplicate sop steps
-                    List<SopStep> sopSteps = DuplicateSteps(latestVersion, newVersion.Id);
+                    // create sop steps with new version id
+                    List<SopStep> sopSteps = CreateSteps(model, newVersion.Id);
                     await _unitOfWork.SopSteps.AddRangeAsync(sopSteps);
 
                     // create sop hazards from model
@@ -320,6 +320,47 @@ namespace Backend.Service.Implementation
 
                         await _unitOfWork.SopHazards.AddRangeAsync(newHazards);
                     }
+
+                    // update sop steps
+                    var existingStepIds = latestVersion.SopSteps.Select(s => s.Id).ToList();
+                    var modelStepIds = model.SopSteps.Select(s => s.Id).ToList();
+
+                    var stepIdsToDelete = existingStepIds.Where(id => !modelStepIds.Contains(id)).ToList();
+                    var stepIdsToUpdate = existingStepIds.Where(id => modelStepIds.Contains(id)).ToList();
+                    var stepsToAdd = model.SopSteps.Where(step => step.Id == null || step.Id == 0).ToList();
+
+                    // delete steps
+                    if (stepIdsToDelete.Count > 0)
+                    {
+                        var stepsToDelete = latestVersion.SopSteps.Where(s => stepIdsToDelete.Contains(s.Id)).ToList();
+                        _unitOfWork.SopSteps.RemoveRange(stepsToDelete);
+                    }
+
+                    // update steps
+                    if (stepIdsToUpdate.Count > 0)
+                    {
+                        foreach (var stepId in stepIdsToUpdate)
+                        {
+                            var step = latestVersion.SopSteps.FirstOrDefault(s => s.Id == stepId);
+                            var modelStep = model.SopSteps.FirstOrDefault(s => s.Id == stepId);
+
+                            if (step != null && modelStep != null)
+                            {
+                                step.Position = modelStep.Position;
+                                step.ImageUrl = modelStep.ImageUrl;
+                                step.Text = modelStep.Text;
+                                step.Title = modelStep.Title;
+                            }
+                        }
+                    }
+
+                    // create new steps
+                    if (stepsToAdd != null && stepsToAdd.Count > 0)
+                    {
+                        var newSteps = CreateSteps(stepsToAdd, latestVersion.Id);
+                        await _unitOfWork.SopSteps.AddRangeAsync(newSteps);
+                    }
+
                     await _unitOfWork.SaveAsync();
 
                     var updatedSop = await _unitOfWork.Sops.GetAsync(s => s.Id == model.Id, includeProperties: "SopVersions,SopVersions.SopHazards");
@@ -404,6 +445,32 @@ namespace Backend.Service.Implementation
                 Name = hazard.Name,
                 ControlMeasure = hazard.ControlMeasure,
                 RiskLevel = hazard.RiskLevel,
+                OrganisationId = _tenancyResolver.GetOrganisationid().Value
+            }).ToList();
+        }
+
+        public List<SopStep> CreateSteps(SopDto model, int sopVersionId)
+        {
+            return model.SopSteps.Select(step => new SopStep
+            {
+                SopVersionId = sopVersionId,
+                Position = step.Position,
+                ImageUrl = step.ImageUrl,
+                Text = step.Text,
+                Title = step.Title,
+                OrganisationId = _tenancyResolver.GetOrganisationid().Value
+            }).ToList();
+        }
+
+        public List<SopStep> CreateSteps(List<SopStepDto> model, int sopVersionId)
+        {
+            return model.Select(step => new SopStep
+            {
+                SopVersionId = sopVersionId,
+                Position = step.Position,
+                ImageUrl = step.ImageUrl,
+                Text = step.Text,
+                Title = step.Title,
                 OrganisationId = _tenancyResolver.GetOrganisationid().Value
             }).ToList();
         }
