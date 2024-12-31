@@ -64,7 +64,14 @@ const Upsert = () => {
       );
       setStatus(data?.status || 1);
       setVersion(data?.version || 1);
-      setSteps(data?.sopSteps || []);
+      setSteps(
+        // sort steps by position
+        data?.sopSteps
+          .sort((a, b) => a.position - b.position)
+          .map((step) => {
+            return { ...step, key: step.id };
+          }) || []
+      );
     }
   }, [data]);
 
@@ -165,7 +172,7 @@ const Upsert = () => {
           />
         )}
 
-        {screen === "steps" && <EditSteps steps={steps} />}
+        {screen === "steps" && <EditSteps steps={steps} setSteps={setSteps} />}
       </ScrollView>
       <BottomBar selectedScreen={screen} onSelectScreen={selectScreen} />
     </>
@@ -176,6 +183,7 @@ export default Upsert;
 
 const styles = StyleSheet.create({
   rootContainer: {
+    flex: 1,
     margin: 20,
   },
 });
