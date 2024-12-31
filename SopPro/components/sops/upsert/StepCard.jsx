@@ -4,11 +4,13 @@ import { Icon, RadioButton } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
 
 const StepCard = ({
+  title,
   text,
   imageUrl,
   selected,
   isAnyItemSelected,
   handleSelect,
+  handleStartEdit,
 }) => {
   return (
     <TouchableOpacity
@@ -18,6 +20,7 @@ const StepCard = ({
         if (isAnyItemSelected) {
           return handleSelect();
         }
+        return handleStartEdit();
       }}
     >
       {selected && (
@@ -29,11 +32,11 @@ const StepCard = ({
         <Icon source="camera" size={25} />
       </View>
       <View style={styles.textContainer}>
-        <Text>{text}</Text>
-        <Text>Details</Text>
+        <Text style={styles.titleText}>{title ? title : "New step"}</Text>
+        <Text>{text ? text : "Click to edit details"}</Text>
       </View>
       <View style={styles.iconContainer}>
-        <Ionicons name="menu" size={35} color="grey" />
+        <Ionicons name="chevron-forward" size={35} color="grey" />
       </View>
     </TouchableOpacity>
   );
@@ -74,5 +77,9 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     textAlign: "left",
+  },
+  titleText: {
+    fontSize: 16,
+    fontWeight: "bold",
   },
 });

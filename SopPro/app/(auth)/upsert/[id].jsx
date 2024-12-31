@@ -50,7 +50,7 @@ const Upsert = () => {
   } = useMutation({
     mutationFn: updateSop,
     onSuccess: () => {
-      router.navigate("/(auth)");
+      router.replace("/(auth)");
     },
   });
 
@@ -104,6 +104,7 @@ const Upsert = () => {
       reference: Math.random().toString(36).substring(7),
       isAiGenerated: false,
       sopHazards: hazards,
+      sopSteps: steps,
       id: +id,
     };
 

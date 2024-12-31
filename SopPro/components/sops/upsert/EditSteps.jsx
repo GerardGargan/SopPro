@@ -1,11 +1,51 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import StepCard from "./StepCard";
-import { Button, FAB, IconButton, Portal } from "react-native-paper";
+import {
+  Button,
+  FAB,
+  IconButton,
+  Portal,
+  Modal,
+  TextInput,
+} from "react-native-paper";
 import { useState } from "react";
 
 const EditSteps = ({ steps, setSteps }) => {
   const [selectedItem, setSelectedItem] = useState(null);
+  const [editItem, setEditItem] = useState(null);
+
+  function handleEditStep(key, identifier, value) {
+    setSteps((prevState) => {
+      const index = prevState.findIndex((step) => step.key === key);
+      const newSteps = [...prevState];
+      newSteps[index][identifier] = value;
+      return newSteps;
+    });
+  }
+
+  function handleAddStep() {
+    setSteps((prevState) => {
+      const maxKey =
+        prevState.length > 0
+          ? Math.max(...prevState.map((step) => step.key))
+          : 0;
+      const maxPosition =
+        prevState.length > 0
+          ? Math.max(...prevState.map((step) => step.position))
+          : 0;
+
+      const newStep = {
+        id: null,
+        key: maxKey + 1,
+        text: "",
+        imageUrl: "",
+        position: maxPosition + 1,
+      };
+
+      return [...prevState, newStep];
+    });
+  }
 
   function handlePositionMove(direction) {
     setSteps((prevState) => {
@@ -81,10 +121,14 @@ const EditSteps = ({ steps, setSteps }) => {
         {steps.map((step) => {
           return (
             <StepCard
-              key={step.id}
+              key={step.key}
               text={step.text}
+              title={step.title}
               imageUrl={step.imageUrl}
               handleSelect={() => setSelectedItem(step.key)}
+              handleStartEdit={() => {
+                setEditItem(step.key);
+              }}
               isAnyItemSelected={selectedItem !== null}
               selected={selectedItem === step.key}
             />
@@ -92,11 +136,36 @@ const EditSteps = ({ steps, setSteps }) => {
         })}
       </View>
       <Portal>
-        <FAB
-          icon="plus"
-          style={styles.fab}
-          onPress={() => console.log("Pressed")}
-        />
+        <FAB icon="plus" style={styles.fab} onPress={handleAddStep} />
+      </Portal>
+      <Portal>
+        <Modal
+          visible={editItem !== null}
+          onDismiss={() => setEditItem(null)}
+          contentContainerStyle={styles.modalContainer}
+          dismissable={false}
+          dismissableBackButton={true}
+        >
+          <TextInput
+            label="Title"
+            placeholder="Step title"
+            style={styles.textInput}
+            defaultValue={steps.find((step) => step.key === editItem)?.title}
+            onChangeText={(value) => handleEditStep(editItem, "title", value)}
+          />
+          <TextInput
+            label="Details"
+            placeholder="Enter details or instructions"
+            style={[styles.textInput, styles.detailInput]}
+            multiline
+            numberOfLines={5}
+            defaultValue={steps.find((step) => step.key === editItem)?.text}
+            onChangeText={(value) => handleEditStep(editItem, "text", value)}
+          />
+          <Button mode="text" onPress={() => setEditItem(null)}>
+            Close
+          </Button>
+        </Modal>
       </Portal>
     </>
   );
@@ -110,5 +179,19 @@ const styles = StyleSheet.create({
     margin: 16,
     right: 0,
     bottom: 80,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "flex-start",
+    backgroundColor: "white",
+    borderRadius: 5,
+    padding: 20,
+    margin: 20,
+  },
+  textInput: {
+    marginBottom: 10,
+  },
+  detailInput: {
+    height: 150,
   },
 });
