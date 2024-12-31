@@ -62,7 +62,7 @@ const Upsert = () => {
   } = useMutation({
     mutationFn: createSop,
     onSuccess: () => {
-      router.navigate("/(auth)");
+      router.replace("/(auth)");
     },
   });
 

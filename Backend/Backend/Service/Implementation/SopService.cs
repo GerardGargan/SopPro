@@ -75,8 +75,17 @@ namespace Backend.Service.Implementation
                     }).ToList();
 
                     await _unitOfWork.SopHazards.AddRangeAsync(sopHazards);
-                    await _unitOfWork.SaveAsync();
                 }
+
+                // Create SopStep records
+
+                if (model.SopSteps != null && model.SopSteps.Count > 0)
+                {
+                    var sopSteps = CreateSteps(model, sopVersion.Id);
+                    await _unitOfWork.SopSteps.AddRangeAsync(sopSteps);
+                }
+
+                await _unitOfWork.SaveAsync();
             });
 
             return new ApiResponse
