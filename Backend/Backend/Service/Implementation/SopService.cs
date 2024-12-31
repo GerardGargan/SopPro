@@ -158,6 +158,7 @@ namespace Backend.Service.Implementation
                     SopVersionId = sopStep.SopVersionId,
                     Position = sopStep.Position,
                     Text = sopStep.Text,
+                    Title = sopStep.Title,
                     ImageUrl = sopStep.ImageUrl,
                 }).ToList(),
                 SopHazards = latestSopVersion.SopHazards.Select(sopHazard => new SopHazardDto
@@ -415,6 +416,7 @@ namespace Backend.Service.Implementation
                 Position = s.Position,
                 ImageUrl = s.ImageUrl,
                 Text = s.Text,
+                Title = s.Title,
                 OrganisationId = _tenancyResolver.GetOrganisationid().Value,
             }).ToList();
         }
