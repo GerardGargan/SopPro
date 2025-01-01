@@ -39,7 +39,6 @@ const sops = () => {
         data={data}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => <SopCard sop={item} />}
-        ListFooterComponent={<View style={{ height: 20 }} />}
       />
       {isFocused && <Fab />}
     </View>

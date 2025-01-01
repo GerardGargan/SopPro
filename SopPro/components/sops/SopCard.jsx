@@ -3,6 +3,7 @@ import React from "react";
 import { Icon } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import SopStatusChip from "./SopStatusChip";
 
 const SopCard = ({ sop }) => {
   const router = useRouter();
@@ -26,6 +27,9 @@ const SopCard = ({ sop }) => {
         <View style={styles.textContainer}>
           <Text style={styles.titleText}>{sop.title}</Text>
           <Text>{sop.description}</Text>
+        </View>
+        <View style={styles.chipContainer}>
+          <SopStatusChip status={sop.status} />
         </View>
         <View style={styles.iconContainer}>
           <Ionicons name="chevron-forward" size={35} color="grey" />
@@ -64,5 +68,10 @@ const styles = StyleSheet.create({
   iconContainer: {
     justifyContent: "center",
     alignItems: "center",
+  },
+  chipContainer: {
+    justifyContent: "center",
+    alignItems: "center",
+    marginHorizontal: 10,
   },
 });

@@ -97,7 +97,7 @@ namespace Backend.Service.Implementation
 
         public async Task<ApiResponse<List<SopDto>>> GetAllSops()
         {
-            List<SopDto> sops = await _unitOfWork.Sops.GetAll().Select(sop => new SopDto
+            List<SopDto> sops = await _unitOfWork.Sops.GetAll().OrderByDescending(sop => sop.Id).Select(sop => new SopDto
             {
                 Id = sop.Id,
                 Reference = sop.Reference,
