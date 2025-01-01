@@ -1,44 +1,28 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import StepCard from "./StepCard";
-import {
-  Button,
-  FAB,
-  IconButton,
-  Portal,
-  Modal,
-  TextInput,
-} from "react-native-paper";
+import { Button, FAB, IconButton, Portal } from "react-native-paper";
 import { useState } from "react";
-import ImagePickerComponent from "../../UI/ImagePicker";
-import { uploadImage } from "../../../util/httpRequests";
-import { useMutation } from "@tanstack/react-query";
+import EditStep from "./EditStep";
 
 const EditSteps = ({ steps, setSteps }) => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [editItem, setEditItem] = useState(null);
-
-  const {
-    mutate: uploadMutate,
-    data: imageData,
-    isError,
-    error,
-    isPending,
-  } = useMutation({
-    mutationFn: uploadImage,
-    onSuccess: (data) => {
-      console.log("Image uploaded successfully:", data);
-    },
-    onError: (error) => {
-      console.error("Error uploading image:", error);
-    },
-  });
 
   function handleEditStep(key, identifier, value) {
     setSteps((prevState) => {
       const index = prevState.findIndex((step) => step.key === key);
       const newSteps = [...prevState];
       newSteps[index][identifier] = value;
+      return newSteps;
+    });
+  }
+
+  function handleSetImageUrl(key, imageUrl) {
+    setSteps((prevState) => {
+      const index = prevState.findIndex((step) => step.key === key);
+      const newSteps = [...prevState];
+      newSteps[index].imageUrl = imageUrl;
       return newSteps;
     });
   }
@@ -94,17 +78,6 @@ const EditSteps = ({ steps, setSteps }) => {
 
       return prevState;
     });
-  }
-
-  function handleImageUpload(imageUri) {
-    const formData = new FormData();
-    formData.append("file", {
-      uri: imageUri,
-      name: "image.jpg",
-      type: "image/jpeg",
-    });
-
-    uploadMutate(formData);
   }
 
   const ReorderSection = () => {
@@ -169,39 +142,14 @@ const EditSteps = ({ steps, setSteps }) => {
       <Portal>
         <FAB icon="plus" style={styles.fab} onPress={handleAddStep} />
       </Portal>
-      <Portal>
-        <Modal
-          visible={editItem !== null}
-          onDismiss={() => setEditItem(null)}
-          contentContainerStyle={styles.modalContainer}
-          dismissable={false}
-          dismissableBackButton={true}
-        >
-          <TextInput
-            label="Title"
-            placeholder="Step title"
-            style={styles.textInput}
-            defaultValue={steps.find((step) => step.key === editItem)?.title}
-            onChangeText={(value) => handleEditStep(editItem, "title", value)}
-          />
-          <TextInput
-            label="Details"
-            placeholder="Enter details or instructions"
-            style={[styles.textInput, styles.detailInput]}
-            multiline
-            numberOfLines={5}
-            defaultValue={steps.find((step) => step.key === editItem)?.text}
-            onChangeText={(value) => handleEditStep(editItem, "text", value)}
-          />
-          <ImagePickerComponent
-            imageUrl={steps.find((step) => step.key == editItem)?.imageUrl}
-            onSelect={(image) => handleImageUpload(image)}
-          />
-          <Button mode="text" onPress={() => setEditItem(null)}>
-            Close
-          </Button>
-        </Modal>
-      </Portal>
+      <EditStep
+        onDismiss={() => setEditItem(null)}
+        visible={editItem !== null}
+        step={steps.find((step) => step.key === editItem)}
+        handleEditStep={handleEditStep}
+        handleClose={() => setEditItem(null)}
+        handleSetImageUrl={handleSetImageUrl}
+      />
     </>
   );
 };
@@ -214,19 +162,5 @@ const styles = StyleSheet.create({
     margin: 16,
     right: 0,
     bottom: 80,
-  },
-  modalContainer: {
-    flex: 1,
-    justifyContent: "flex-start",
-    backgroundColor: "white",
-    borderRadius: 5,
-    padding: 20,
-    margin: 20,
-  },
-  textInput: {
-    marginBottom: 10,
-  },
-  detailInput: {
-    height: 150,
   },
 });

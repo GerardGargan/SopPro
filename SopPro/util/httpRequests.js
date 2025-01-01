@@ -81,7 +81,7 @@ export async function uploadImage(formData) {
   try {
     console.log("sending");
 
-    const response = await api.post("/image/upload", formData, {
+    const response = await api.post("/sop/upload", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },

@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
 import { Icon, RadioButton } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
@@ -12,6 +12,17 @@ const StepCard = ({
   handleSelect,
   handleStartEdit,
 }) => {
+  let image = <Icon source="camera" size={25} />;
+  if (imageUrl) {
+    image = (
+      <Image
+        source={{ uri: imageUrl }}
+        style={styles.image}
+        resizeMode="cover"
+      />
+    );
+  }
+
   return (
     <TouchableOpacity
       style={styles.container}
@@ -28,9 +39,7 @@ const StepCard = ({
           <RadioButton status="checked" />
         </View>
       )}
-      <View style={styles.pictureContainer}>
-        <Icon source="camera" size={25} />
-      </View>
+      <View style={styles.pictureContainer}>{image}</View>
       <View style={styles.textContainer}>
         <Text style={styles.titleText}>{title ? title : "New step"}</Text>
         <Text>{text ? text : "Click to edit details"}</Text>
@@ -81,5 +90,10 @@ const styles = StyleSheet.create({
   titleText: {
     fontSize: 16,
     fontWeight: "bold",
+  },
+  image: {
+    width: 75,
+    height: 75, // Set dimensions for the image
+    borderRadius: 10, // Optional styling
   },
 });
