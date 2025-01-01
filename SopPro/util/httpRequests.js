@@ -58,3 +58,19 @@ export async function createSop(sop) {
     throw error;
   }
 }
+
+export async function uploadImage(formData) {
+  try {
+    const response = await api.post("/upload", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error uploading image"
+    );
+    throw error;
+  }
+}
