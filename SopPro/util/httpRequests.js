@@ -79,7 +79,9 @@ export async function fetchSops({ search, status }) {
 
 export async function uploadImage(formData) {
   try {
-    const response = await api.post("/upload", formData, {
+    console.log("sending");
+
+    const response = await api.post("/image/upload", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
       },

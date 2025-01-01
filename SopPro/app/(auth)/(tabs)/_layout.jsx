@@ -2,7 +2,6 @@ import { Tabs } from "expo-router";
 import React from "react";
 import { FontAwesome5, FontAwesome6 } from "@expo/vector-icons";
 import SafeAreaHeader from "../../../components/UI/SareAreaHeader";
-import { StatusBar } from "expo-status-bar";
 
 function TabBarIcon({ ...props }) {
   return <FontAwesome5 size={28} style={{ marginBottom: -3 }} {...props} />;

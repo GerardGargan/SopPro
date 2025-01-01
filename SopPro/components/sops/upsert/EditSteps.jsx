@@ -10,10 +10,29 @@ import {
   TextInput,
 } from "react-native-paper";
 import { useState } from "react";
+import ImagePickerComponent from "../../UI/ImagePicker";
+import { uploadImage } from "../../../util/httpRequests";
+import { useMutation } from "@tanstack/react-query";
 
 const EditSteps = ({ steps, setSteps }) => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [editItem, setEditItem] = useState(null);
+
+  const {
+    mutate: uploadMutate,
+    data: imageData,
+    isError,
+    error,
+    isPending,
+  } = useMutation({
+    mutationFn: uploadImage,
+    onSuccess: (data) => {
+      console.log("Image uploaded successfully:", data);
+    },
+    onError: (error) => {
+      console.error("Error uploading image:", error);
+    },
+  });
 
   function handleEditStep(key, identifier, value) {
     setSteps((prevState) => {
@@ -75,6 +94,17 @@ const EditSteps = ({ steps, setSteps }) => {
 
       return prevState;
     });
+  }
+
+  function handleImageUpload(imageUri) {
+    const formData = new FormData();
+    formData.append("file", {
+      uri: imageUri,
+      name: "image.jpg",
+      type: "image/jpeg",
+    });
+
+    uploadMutate(formData);
   }
 
   const ReorderSection = () => {
@@ -162,6 +192,10 @@ const EditSteps = ({ steps, setSteps }) => {
             numberOfLines={5}
             defaultValue={steps.find((step) => step.key === editItem)?.text}
             onChangeText={(value) => handleEditStep(editItem, "text", value)}
+          />
+          <ImagePickerComponent
+            imageUrl={steps.find((step) => step.key == editItem)?.imageUrl}
+            onSelect={(image) => handleImageUpload(image)}
           />
           <Button mode="text" onPress={() => setEditItem(null)}>
             Close

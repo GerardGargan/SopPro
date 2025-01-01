@@ -1,13 +1,13 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { Link } from "expo-router";
-import ImagePickerExample from "../../../components/UI/ImagePickerExample";
+import ImagePicker from "../../../components/UI/ImagePicker";
 
 const More = () => {
   return (
     <View style={styles.container}>
       <Link href="logout">Logout</Link>
-      <ImagePickerExample />
+      <ImagePicker />
     </View>
   );
 };

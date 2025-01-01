@@ -1,10 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Image, View, StyleSheet } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Icon, Button } from "react-native-paper";
 
-export default function ImagePickerExample() {
-  const [image, setImage] = useState(null);
+export default function ImagePickerComponent({ imageUrl, onSelect }) {
+  const [image, setImage] = useState(imageUrl);
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -16,6 +16,7 @@ export default function ImagePickerExample() {
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
+      onSelect(result.assets[0].uri);
     }
   };
 
@@ -30,11 +31,10 @@ export default function ImagePickerExample() {
 
       if (!result.canceled) {
         setImage(result.assets[0].uri);
+        onSelect(result.assets[0].uri);
       }
     }
   };
-
-  console.log(image);
 
   return (
     <View style={styles.container}>
@@ -61,7 +61,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: "center",
-    justifyContent: "center",
   },
   buttonContainer: {
     flexDirection: "row",
