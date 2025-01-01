@@ -1,4 +1,5 @@
 using Backend.Models;
+using Microsoft.AspNetCore.Http;
 using Backend.Models.Dto;
 using Backend.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
@@ -54,6 +55,14 @@ namespace Backend.Controllers
         public async Task<IActionResult> DeleteSop(int id)
         {
             var apiResponse = await _sopService.DeleteSop(id);
+            return Ok(apiResponse);
+        }
+
+        [HttpPost]
+        [Route("upload")]
+        public async Task<IActionResult> UploadImage([FromForm] FileDto file)
+        {
+            var apiResponse = await _sopService.UploadImage(file);
             return Ok(apiResponse);
         }
     }
