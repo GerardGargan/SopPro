@@ -1,6 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
-import { Chip } from "react-native-paper";
 
 const SopStatusChip = ({ status }) => {
   function getStatus(identifier) {

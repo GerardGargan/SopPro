@@ -53,16 +53,15 @@ export default function RootLayout() {
 }
 
 function RootLayoutNav() {
-
   return (
     <>
-      <StatusBar style="light" />
-        <Stack>
-          <Stack.Screen name="(auth)" options={{headerShown: false}} />
-          <Stack.Screen name="home" options={{headerShown: false}} />
-          <Stack.Screen name="login" options={{ title: "Log in" }} />
-          <Stack.Screen name="register" options={{ title: "Sign up "}} />
-        </Stack>
+      <StatusBar style="dark" />
+      <Stack>
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="home" options={{ headerShown: false }} />
+        <Stack.Screen name="login" options={{ title: "Log in" }} />
+        <Stack.Screen name="register" options={{ title: "Sign up " }} />
+      </Stack>
     </>
   );
 }
