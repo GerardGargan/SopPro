@@ -9,5 +9,6 @@
         public int JwtAuthExpireDays { get; set; }
         public string PostmarkFromEmail { get; set; }
         public string PostmarkApiToken { get; set; }
+        public string AzureBlobStorageContainer { get; set; }
     }
 }

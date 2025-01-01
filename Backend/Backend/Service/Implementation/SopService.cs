@@ -3,10 +3,12 @@ using Backend.Data;
 using Backend.Models;
 using Backend.Models.DatabaseModels;
 using Backend.Models.Dto;
+using Backend.Models.Settings;
 using Backend.Models.Tenancy;
 using Backend.Repository.Interface;
 using Backend.Service.Interface;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 
 namespace Backend.Service.Implementation
 {
@@ -15,12 +17,16 @@ namespace Backend.Service.Implementation
         private readonly IUnitOfWork _unitOfWork;
         private readonly ITenancyResolver _tenancyResolver;
         private readonly ApplicationDbContext _db;
+        private readonly IBlobService _blobService;
+        private readonly ApplicationSettings _appSettings;
 
-        public SopService(IUnitOfWork unitOfWork, ITenancyResolver tenancyResolver, ApplicationDbContext db)
+        public SopService(IUnitOfWork unitOfWork, ITenancyResolver tenancyResolver, ApplicationDbContext db, IBlobService blobService, IOptions<ApplicationSettings> appSettings)
         {
             _unitOfWork = unitOfWork;
             _tenancyResolver = tenancyResolver;
             _db = db;
+            _blobService = blobService;
+            _appSettings = appSettings.Value;
         }
 
         public async Task<ApiResponse> CreateSop(SopDto model)
@@ -458,6 +464,24 @@ namespace Backend.Service.Implementation
             });
 
             return response;
+        }
+
+        public async Task<ApiResponse> UploadImage(FileDto file)
+        {
+            if (file.File == null)
+            {
+                throw new Exception("File is required");
+            }
+            var fileName = $"{Guid.NewGuid()}_{file.File.FileName}";
+
+            var path = await _blobService.UploadBlob(fileName, _appSettings.AzureBlobStorageContainer, file.File);
+
+            return new ApiResponse<string>
+            {
+                IsSuccess = true,
+                StatusCode = HttpStatusCode.OK,
+                Result = path
+            };
         }
 
         private List<SopHazard> CreateHazards(SopDto model, int sopVersionId)

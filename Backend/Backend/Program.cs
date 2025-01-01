@@ -67,6 +67,7 @@ builder.Services.AddScoped<ISopService, SopService>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
 builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddScoped<ITenancyResolver, TenancyResolver>();
+builder.Services.AddSingleton<IBlobService, BlobService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
