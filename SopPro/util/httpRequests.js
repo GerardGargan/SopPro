@@ -59,6 +59,24 @@ export async function createSop(sop) {
   }
 }
 
+export async function fetchSops({ search, status }) {
+  try {
+    const params = {};
+    if (search) params.search = search;
+    if (status !== null) params.status = status;
+
+    const response = await api.get("/sop", {
+      params,
+    });
+    return response.data.result;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error fetching SOPs"
+    );
+    throw error;
+  }
+}
+
 export async function uploadImage(formData) {
   try {
     const response = await api.post("/upload", formData, {

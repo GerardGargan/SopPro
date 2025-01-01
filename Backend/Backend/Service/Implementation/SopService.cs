@@ -124,6 +124,20 @@ namespace Backend.Service.Implementation
                 }).ToList()
             }).ToListAsync();
 
+            // add latest version to each sop
+            foreach (var sop in sops)
+            {
+                var latestVersion = sop.SopVersions.OrderByDescending(sv => sv.Version).FirstOrDefault();
+                if (latestVersion != null)
+                {
+                    sop.Title = latestVersion.Title;
+                    sop.Description = latestVersion.Description;
+                    sop.IsApproved = latestVersion.Status == SopStatus.Approved;
+                    sop.Version = latestVersion.Version;
+                    sop.Status = latestVersion.Status;
+                }
+            }
+
 
             return new ApiResponse<List<SopDto>>
             {
