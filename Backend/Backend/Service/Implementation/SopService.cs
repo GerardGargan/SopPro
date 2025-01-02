@@ -266,7 +266,7 @@ namespace Backend.Service.Implementation
                 throw new Exception("Invalid id");
             }
 
-            var sopFromDb = await _unitOfWork.Sops.GetAsync(s => s.Id == model.Id);
+            var sopFromDb = await _unitOfWork.Sops.GetAsync(s => s.Id == model.Id, tracked: true);
             if (sopFromDb == null)
             {
                 throw new Exception("Sop not found");
@@ -282,6 +282,8 @@ namespace Backend.Service.Implementation
 
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
+                sopFromDb.DepartmentId = model.DepartmentId == 0 ? null : model.DepartmentId;
+
                 if (latestVersion.Status == SopStatus.Approved)
                 {
                     // Create new version, duplicate steps, hazards

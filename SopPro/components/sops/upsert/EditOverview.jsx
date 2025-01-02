@@ -2,6 +2,7 @@ import { StyleSheet, View, Text } from "react-native";
 import { TextInput, Modal, Portal, Button, Chip } from "react-native-paper";
 import Header from "../../UI/Header";
 import HazardItem from "./hazardItem";
+import { Picker } from "@react-native-picker/picker";
 
 function getStatus(identifier) {
   switch (identifier) {
@@ -33,6 +34,9 @@ const EditOverview = ({
   version,
   isApproved,
   status,
+  departments,
+  selectedDepartment,
+  handleSelectDepartment,
 }) => {
   let versionChip = (
     <Chip
@@ -74,6 +78,22 @@ const EditOverview = ({
         onChangeText={(text) => handleDescriptionChange(text)}
         scrollEnabled={false}
       />
+      <Picker
+        selectedValue={selectedDepartment}
+        onValueChange={handleSelectDepartment}
+        mode="dropdown"
+      >
+        <Picker.Item label="Select department" value={-1} />
+        {departments.map((department) => {
+          return (
+            <Picker.Item
+              key={department.id}
+              label={department.name}
+              value={department.id}
+            />
+          );
+        })}
+      </Picker>
       <Header text="Safety information" textStyle={{ color: "black" }} />
       {hazards.length === 0 && (
         <Text style={{ textAlign: "center" }}>No hazards to show yet</Text>

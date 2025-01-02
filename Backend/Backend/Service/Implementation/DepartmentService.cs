@@ -11,7 +11,7 @@ namespace Backend.Service.Implementation
     public class DepartmentService : IDepartmentService
     {
         private readonly IUnitOfWork _unitOfWork;
-        
+
         public DepartmentService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
@@ -23,16 +23,16 @@ namespace Backend.Service.Implementation
 
             // Check for duplicate departments
             var duplicateDepartment = await _unitOfWork.Departments.GetAsync(d => d.Name.ToLower().Trim() == model.Name.ToLower().Trim() && d.OrganisationId == orgId);
-            if(duplicateDepartment != null)
+            if (duplicateDepartment != null)
             {
                 throw new Exception("This department already exists");
             }
-            
+
             Department newDepartment = new Department()
-                {
-                    Name = model.Name,
-                    OrganisationId = orgId
-                };
+            {
+                Name = model.Name,
+                OrganisationId = orgId
+            };
             await _unitOfWork.Departments.AddAsync(newDepartment);
             await _unitOfWork.SaveAsync();
 
@@ -46,7 +46,7 @@ namespace Backend.Service.Implementation
 
         public async Task<ApiResponse<Department>> Update(DepartmentDto model)
         {
-            if(model.Id == null)
+            if (model.Id == null)
             {
                 throw new Exception("Id is required");
             }
@@ -54,7 +54,7 @@ namespace Backend.Service.Implementation
             // Check is the department exists
             Department deptToUpdate = await _unitOfWork.Departments.GetAsync(d => d.Id == model.Id, tracked: true);
 
-            if(deptToUpdate == null)
+            if (deptToUpdate == null)
             {
                 throw new Exception("Department does not exist");
             }
@@ -73,10 +73,15 @@ namespace Backend.Service.Implementation
             };
         }
 
-        public async Task<ApiResponse<List<Department>>> GetAll()
+        public async Task<ApiResponse<List<DepartmentDto>>> GetAll()
         {
-            List<Department> departments = await _unitOfWork.Departments.GetAll().ToListAsync();
-            var result = new ApiResponse<List<Department>>
+            List<DepartmentDto> departments = await _unitOfWork.Departments.GetAll().Select(dept => new DepartmentDto
+            {
+                Id = dept.Id,
+                Name = dept.Name
+            }).ToListAsync();
+
+            var result = new ApiResponse<List<DepartmentDto>>
             {
                 IsSuccess = true,
                 Result = departments,
@@ -88,14 +93,14 @@ namespace Backend.Service.Implementation
 
         public async Task<ApiResponse<Department>> GetById(int id)
         {
-            if(id <= 0)
+            if (id <= 0)
             {
                 throw new Exception("Invalid id");
             }
 
             Department deptFromDb = await _unitOfWork.Departments.GetAsync(d => d.Id == id);
 
-            if(deptFromDb == null)
+            if (deptFromDb == null)
             {
                 throw new Exception("Department does not exist");
             }
@@ -113,7 +118,7 @@ namespace Backend.Service.Implementation
             // obtain department record from db
             var deptFromDb = await _unitOfWork.Departments.GetAsync(d => d.Id == id, tracked: true);
 
-            if(deptFromDb == null)
+            if (deptFromDb == null)
             {
                 throw new Exception("Department does not exist");
             }
@@ -131,7 +136,7 @@ namespace Backend.Service.Implementation
 
         public void validateModel(DepartmentDto model)
         {
-            if(string.IsNullOrWhiteSpace(model.Name))
+            if (string.IsNullOrWhiteSpace(model.Name))
             {
                 throw new Exception("Department name must not be empty");
             }

@@ -1,9 +1,14 @@
 import { ScrollView, StyleSheet, Text, View } from "react-native";
-import React, { useEffect, useLayoutEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect } from "react";
 import { Button, ActivityIndicator } from "react-native-paper";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { createSop, fetchSop, updateSop } from "../../../util/httpRequests";
+import {
+  createSop,
+  fetchDepartments,
+  fetchSop,
+  updateSop,
+} from "../../../util/httpRequests";
 import EditOverview from "../../../components/sops/upsert/EditOverview";
 import BottomBar from "../../../components/sops/upsert/BottomBar";
 import EditSteps from "../../../components/sops/upsert/EditSteps";
@@ -12,14 +17,16 @@ import ErrorBlock from "../../../components/UI/ErrorBlock";
 const Upsert = () => {
   const { id } = useLocalSearchParams();
 
-  const [title, setTitle] = React.useState("");
-  const [description, setDescription] = React.useState("");
-  const [hazards, setHazards] = React.useState([]);
-  const [steps, setSteps] = React.useState([]);
-  const [selectedHazard, setSelectedHazard] = React.useState(null);
-  const [screen, setScreen] = React.useState("overview");
-  const [version, setVersion] = React.useState(1);
-  const [status, setStatus] = React.useState(1);
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [hazards, setHazards] = useState([]);
+  const [steps, setSteps] = useState([]);
+  const [selectedHazard, setSelectedHazard] = useState(null);
+  const [screen, setScreen] = useState("overview");
+  const [version, setVersion] = useState(1);
+  const [status, setStatus] = useState(1);
+  const [departments, setDepartments] = useState([]);
+  const [selectedDepartment, setSelectedDepartment] = useState(null);
 
   const isCreate = id === "-1";
 
@@ -42,6 +49,11 @@ const Upsert = () => {
     enabled: !isCreate,
     queryKey: ["sop", id],
     queryFn: () => fetchSop(id),
+  });
+
+  const { data: departmentsData } = useQuery({
+    queryKey: ["departments"],
+    queryFn: fetchDepartments,
   });
 
   const {
@@ -74,6 +86,7 @@ const Upsert = () => {
     if (data) {
       setTitle(data?.title || "");
       setDescription(data?.description || "");
+      setSelectedDepartment(data?.departmentId || null);
       setHazards(
         data?.sopHazards.map((hazard) => {
           return { ...hazard, key: hazard.id };
@@ -92,6 +105,12 @@ const Upsert = () => {
     }
   }, [data]);
 
+  useEffect(() => {
+    if (departmentsData) {
+      setDepartments(departmentsData);
+    }
+  }, [departmentsData]);
+
   function handleTitleChange(text) {
     setTitle(text);
   }
@@ -109,6 +128,7 @@ const Upsert = () => {
       isAiGenerated: false,
       sopHazards: hazards,
       sopSteps: steps,
+      departmentId: selectedDepartment,
       id: +id,
     };
 
@@ -154,6 +174,14 @@ const Upsert = () => {
       return prevState.filter((hazard) => hazard.key !== key);
     });
     setSelectedHazard(null);
+  }
+
+  function handleSelectDepartment(departmentId) {
+    if (departmentId === -1) {
+      setSelectedDepartment(null);
+    } else {
+      setSelectedDepartment(departmentId);
+    }
   }
 
   function selectScreen(screen) {
@@ -204,6 +232,9 @@ const Upsert = () => {
             version={version}
             status={status}
             isApproved={data?.isApproved}
+            departments={departments}
+            selectedDepartment={selectedDepartment}
+            handleSelectDepartment={handleSelectDepartment}
           />
         )}
 

@@ -94,3 +94,15 @@ export async function uploadImage(formData) {
     throw error;
   }
 }
+
+export async function fetchDepartments() {
+  try {
+    const response = await api.get("/department");
+    return response.data.result;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error fetching departments"
+    );
+    throw error;
+  }
+}
