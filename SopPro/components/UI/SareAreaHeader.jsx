@@ -3,13 +3,19 @@ import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { FontAwesome6 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
+import { Avatar } from "react-native-paper";
 
 const SareAreaHeader = () => {
   const router = useRouter();
   return (
     <SafeAreaView style={styles.container}>
       <TouchableOpacity onPress={() => router.navigate("/more")}>
-        <FontAwesome6 name="user-circle" size={28} color="black" />
+        <Avatar.Icon
+          icon="account"
+          color="black"
+          size={35}
+          style={styles.avatar}
+        />
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -24,5 +30,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     paddingVertical: 5,
+  },
+  avatar: {
+    backgroundColor: "lightgrey",
+    color: "white",
   },
 });
