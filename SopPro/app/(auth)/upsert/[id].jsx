@@ -9,9 +9,9 @@ import {
   fetchSop,
   updateSop,
 } from "../../../util/httpRequests";
-import EditOverview from "../../../components/sops/upsert/EditOverview";
+import EditOverview from "../../../components/sops/upsert/overview/EditOverview";
 import BottomBar from "../../../components/sops/upsert/BottomBar";
-import EditSteps from "../../../components/sops/upsert/EditSteps";
+import EditSteps from "../../../components/sops/upsert/steps/EditSteps";
 import ErrorBlock from "../../../components/UI/ErrorBlock";
 
 const Upsert = () => {

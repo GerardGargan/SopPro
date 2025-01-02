@@ -1,9 +1,9 @@
 import { StyleSheet, Modal, ScrollView } from "react-native";
 import React from "react";
 import { useMutation } from "@tanstack/react-query";
-import { uploadImage } from "../../../util/httpRequests";
+import { uploadImage } from "../../../../util/httpRequests";
 import { Button, TextInput } from "react-native-paper";
-import ImagePickerComponent from "../../UI/ImagePicker";
+import ImagePickerComponent from "../../../UI/ImagePicker";
 
 const EditStep = ({
   visible,

@@ -1,77 +1,19 @@
-import { StyleSheet, View, Text } from "react-native";
-import { TextInput, Modal, Portal, Button, Chip } from "react-native-paper";
-import Header from "../../UI/Header";
-import HazardItem from "./hazardItem";
-import { Picker } from "@react-native-picker/picker";
-import SopForm from "./SopForm";
+import { StyleSheet, Text, View } from "react-native";
+import React from "react";
+import HazardItem from "./HazardItem";
+import { Button, Modal, Portal, TextInput } from "react-native-paper";
 
-function getStatus(identifier) {
-  switch (identifier) {
-    case 1:
-      return "Draft";
-    case 2:
-      return "In review";
-    case 3:
-      return "Approved";
-    case 4:
-      return "Archived";
-    default:
-      return "Unknown";
-  }
-}
-
-const EditOverview = ({
-  title,
-  description,
+const HazardSection = ({
   hazards,
-  handleTitleChange,
-  handleDescriptionChange,
-  handleSelectHazard,
-  setSelectedHazard,
-  handleAddHazard,
   selectedHazard,
-  handleUpdateHazard,
+  setSelectedHazard,
+  handleSelectHazard,
+  handleAddHazard,
   handleRemoveHazard,
-  version,
-  isApproved,
-  status,
-  departments,
-  selectedDepartment,
-  handleSelectDepartment,
+  handleUpdateHazard,
 }) => {
-  let versionChip = (
-    <Chip
-      icon="information-outline"
-      mode="outlined"
-      style={{ alignSelf: "flex-end" }}
-    >
-      Version {version}
-    </Chip>
-  );
-
-  let newVersionChip = (
-    <Chip icon="information-outline" mode="outlined">
-      A new version will be created (V{version + 1})
-    </Chip>
-  );
-  let statusChip = <Chip>{getStatus(status)}</Chip>;
-
   return (
     <>
-      <View style={styles.chipContainer}>
-        {statusChip}
-        {isApproved ? newVersionChip : versionChip}
-      </View>
-      <SopForm
-        selectedDepartment={selectedDepartment}
-        departments={departments}
-        handleSelectDepartment={handleSelectDepartment}
-        handleDescriptionChange={handleDescriptionChange}
-        handleTitleChange={handleTitleChange}
-        title={title}
-        description={description}
-      />
-      <Header text="Safety information" textStyle={{ color: "black" }} />
       {hazards.length === 0 && (
         <Text style={{ textAlign: "center" }}>No hazards to show yet</Text>
       )}
@@ -138,7 +80,7 @@ const EditOverview = ({
   );
 };
 
-export default EditOverview;
+export default HazardSection;
 
 const styles = StyleSheet.create({
   textInput: {
@@ -151,11 +93,5 @@ const styles = StyleSheet.create({
   },
   controlMeasureInput: {
     height: 100,
-  },
-  chipContainer: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    gap: 10,
-    marginBottom: 10,
   },
 });

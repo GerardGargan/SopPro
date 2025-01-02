@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { IconButton } from "react-native-paper";
 
-const hazardItem = ({ hazard, onEdit }) => {
+const HazardItem = ({ hazard, onEdit }) => {
   return (
     <View style={styles.hazardItem}>
       <View style={styles.hazardDetails}>
@@ -20,7 +20,7 @@ const hazardItem = ({ hazard, onEdit }) => {
   );
 };
 
-export default hazardItem;
+export default HazardItem;
 
 const styles = StyleSheet.create({
   hazardItem: {
