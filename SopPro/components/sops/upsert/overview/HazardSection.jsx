@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import HazardItem from "./HazardItem";
 import { Button, Modal, Portal, TextInput } from "react-native-paper";
 
@@ -12,6 +12,13 @@ const HazardSection = ({
   handleRemoveHazard,
   handleUpdateHazard,
 }) => {
+  const [showDeleteWarning, setShowDeleteWarning] = useState(false);
+
+  function deleteHazard() {
+    handleRemoveHazard(selectedHazard);
+    setShowDeleteWarning(false);
+  }
+
   return (
     <>
       {hazards.length === 0 && (
@@ -32,7 +39,24 @@ const HazardSection = ({
       <View style={{ height: 100 }} />
       <Portal>
         <Modal
-          visible={selectedHazard !== null}
+          visible={showDeleteWarning}
+          onDismiss={() => setShowDeleteWarning(false)}
+          contentContainerStyle={styles.modalContainer}
+          dismissable={false}
+          dismissableBackButton={false}
+        >
+          <Text style={styles.warningText}>
+            Are you sure you want to delete this?
+          </Text>
+          <View style={styles.deleteButtonsContainer}>
+            <Button onPress={deleteHazard}>Yes</Button>
+            <Button onPress={() => setShowDeleteWarning(false)}>No</Button>
+          </View>
+        </Modal>
+      </Portal>
+      <Portal>
+        <Modal
+          visible={selectedHazard !== null && showDeleteWarning === false}
           onDismiss={() => setSelectedHazard(null)}
           contentContainerStyle={styles.modalContainer}
           dismissable={false}
@@ -40,7 +64,7 @@ const HazardSection = ({
         >
           <Button
             icon="trash-can"
-            onPress={() => handleRemoveHazard(selectedHazard)}
+            onPress={() => setShowDeleteWarning(true)}
             style={{ alignSelf: "flex-end", marginBottom: 10 }}
             mode="contained"
           >
@@ -93,5 +117,14 @@ const styles = StyleSheet.create({
   },
   controlMeasureInput: {
     height: 100,
+  },
+  deleteButtonsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+  },
+  warningText: {
+    textAlign: "center",
+    fontSize: 18,
+    marginBottom: 20,
   },
 });
