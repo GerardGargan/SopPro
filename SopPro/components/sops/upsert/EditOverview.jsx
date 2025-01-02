@@ -3,6 +3,7 @@ import { TextInput, Modal, Portal, Button, Chip } from "react-native-paper";
 import Header from "../../UI/Header";
 import HazardItem from "./hazardItem";
 import { Picker } from "@react-native-picker/picker";
+import SopForm from "./SopForm";
 
 function getStatus(identifier) {
   switch (identifier) {
@@ -61,39 +62,15 @@ const EditOverview = ({
         {statusChip}
         {isApproved ? newVersionChip : versionChip}
       </View>
-      <TextInput
-        style={styles.textInput}
-        label="Title"
-        placeholder="Enter title"
-        value={title}
-        onChangeText={(text) => handleTitleChange(text)}
+      <SopForm
+        selectedDepartment={selectedDepartment}
+        departments={departments}
+        handleSelectDepartment={handleSelectDepartment}
+        handleDescriptionChange={handleDescriptionChange}
+        handleTitleChange={handleTitleChange}
+        title={title}
+        description={description}
       />
-      <TextInput
-        style={[styles.textInput, styles.descInput]}
-        label="Description"
-        placeholder="Enter description"
-        multiline
-        numberOfLines={10}
-        value={description}
-        onChangeText={(text) => handleDescriptionChange(text)}
-        scrollEnabled={false}
-      />
-      <Picker
-        selectedValue={selectedDepartment}
-        onValueChange={handleSelectDepartment}
-        mode="dropdown"
-      >
-        <Picker.Item label="Select department" value={-1} />
-        {departments.map((department) => {
-          return (
-            <Picker.Item
-              key={department.id}
-              label={department.name}
-              value={department.id}
-            />
-          );
-        })}
-      </Picker>
       <Header text="Safety information" textStyle={{ color: "black" }} />
       {hazards.length === 0 && (
         <Text style={{ textAlign: "center" }}>No hazards to show yet</Text>
@@ -171,9 +148,6 @@ const styles = StyleSheet.create({
     backgroundColor: "white",
     padding: 20,
     margin: 20,
-  },
-  descInput: {
-    height: 150,
   },
   controlMeasureInput: {
     height: 100,
