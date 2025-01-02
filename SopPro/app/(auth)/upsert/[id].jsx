@@ -1,7 +1,7 @@
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import React, { useEffect, useLayoutEffect } from "react";
 import { Button, ActivityIndicator } from "react-native-paper";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { createSop, fetchSop, updateSop } from "../../../util/httpRequests";
 import EditOverview from "../../../components/sops/upsert/EditOverview";
@@ -25,6 +25,8 @@ const Upsert = () => {
 
   const router = useRouter();
   const navigation = useNavigation();
+  const queryClient = useQueryClient();
+
   useLayoutEffect(() => {
     navigation.setOptions({
       title: isCreate ? "Create SOP" : "Edit SOP",
@@ -50,6 +52,7 @@ const Upsert = () => {
   } = useMutation({
     mutationFn: updateSop,
     onSuccess: () => {
+      queryClient.invalidateQueries(["sops"]);
       router.replace("/(auth)");
     },
   });
@@ -62,6 +65,7 @@ const Upsert = () => {
   } = useMutation({
     mutationFn: createSop,
     onSuccess: () => {
+      queryClient.invalidateQueries(["sops"]);
       router.replace("/(auth)");
     },
   });
