@@ -6,7 +6,6 @@ import { Button, Modal, Portal, TextInput } from "react-native-paper";
 import ImagePickerComponent from "../../UI/ImagePicker";
 
 const EditStep = ({
-  onDismiss,
   visible,
   step,
   handleEditStep,
@@ -40,14 +39,15 @@ const EditStep = ({
 
     uploadMutate(formData);
   }
+
   return (
     <Portal>
       <Modal
         visible={visible}
-        onDismiss={() => onDismiss(null)}
+        onDismiss={handleClose}
         contentContainerStyle={styles.modalContainer}
         dismissable={false}
-        dismissableBackButton={true}
+        dismissableBackButton={false}
       >
         <TextInput
           label="Title"

@@ -143,9 +143,8 @@ const EditSteps = ({ steps, setSteps }) => {
         <FAB icon="plus" style={styles.fab} onPress={handleAddStep} />
       </Portal>
       <EditStep
-        onDismiss={() => setEditItem(null)}
-        visible={editItem !== null}
-        step={steps.find((step) => step.key === editItem)}
+        visible={!!editItem}
+        step={editItem ? steps.find((step) => step.key === editItem) : null}
         handleEditStep={handleEditStep}
         handleClose={() => setEditItem(null)}
         handleSetImageUrl={handleSetImageUrl}
