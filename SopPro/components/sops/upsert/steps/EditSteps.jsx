@@ -9,6 +9,17 @@ const EditSteps = ({ steps, setSteps }) => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [editItem, setEditItem] = useState(null);
 
+  function handleDeleteStep(key) {
+    setEditItem(null);
+    setSteps((prevState) => {
+      const newSteps = prevState.filter((step) => step.key !== key);
+      const updatedSteps = newSteps.map((step, index) => {
+        return { ...step, position: index + 1 };
+      });
+      return updatedSteps;
+    });
+  }
+
   function handleEditStep(key, identifier, value) {
     setSteps((prevState) => {
       const index = prevState.findIndex((step) => step.key === key);
@@ -148,6 +159,7 @@ const EditSteps = ({ steps, setSteps }) => {
         handleEditStep={handleEditStep}
         handleClose={() => setEditItem(null)}
         handleSetImageUrl={handleSetImageUrl}
+        handleDeleteStep={handleDeleteStep}
       />
     </>
   );

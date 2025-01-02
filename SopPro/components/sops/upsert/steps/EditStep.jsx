@@ -1,9 +1,11 @@
-import { StyleSheet, Modal, ScrollView } from "react-native";
-import React from "react";
+import { StyleSheet, Modal, ScrollView, Text, View } from "react-native";
+import React, { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { uploadImage } from "../../../../util/httpRequests";
 import { Button, TextInput } from "react-native-paper";
 import ImagePickerComponent from "../../../UI/ImagePicker";
+import { Modal as PaperModal } from "react-native-paper";
+import { Portal } from "react-native-paper";
 
 const EditStep = ({
   visible,
@@ -11,7 +13,10 @@ const EditStep = ({
   handleEditStep,
   handleClose,
   handleSetImageUrl,
+  handleDeleteStep,
 }) => {
+  const [showDeleteWarning, setShowDeleteWarning] = useState(false);
+
   const {
     mutate: uploadMutate,
     data: imageData,
@@ -40,41 +45,74 @@ const EditStep = ({
     uploadMutate(formData);
   }
 
+  function deleteStep() {
+    handleDeleteStep(step.key);
+    setShowDeleteWarning(false);
+  }
+
   return (
-    <Modal
-      visible={visible}
-      onDismiss={handleClose}
-      contentContainerStyle={styles.modalContainer}
-      onRequestClose={handleClose}
-      animationType="slide"
-      presentationStyle="fullScreen"
-    >
-      <ScrollView style={styles.scrollViewContainer}>
-        <TextInput
-          label="Title"
-          placeholder="Step title"
-          style={styles.textInput}
-          defaultValue={step?.title}
-          onChangeText={(value) => handleEditStep(step.key, "title", value)}
-        />
-        <TextInput
-          label="Details"
-          placeholder="Enter details or instructions"
-          style={[styles.textInput, styles.detailInput]}
-          multiline
-          numberOfLines={5}
-          defaultValue={step?.text}
-          onChangeText={(value) => handleEditStep(step.key, "text", value)}
-        />
-        <ImagePickerComponent
-          imageUrl={step?.imageUrl}
-          onSelect={(image) => handleImageUpload(image)}
-        />
-        <Button mode="text" onPress={handleClose}>
-          Close
-        </Button>
-      </ScrollView>
-    </Modal>
+    <>
+      <Portal>
+        <PaperModal
+          visible={showDeleteWarning}
+          onDismiss={() => setShowDeleteWarning(false)}
+          contentContainerStyle={styles.modalPaperContainer}
+          dismissable={false}
+          dismissableBackButton={false}
+        >
+          <Text style={styles.warningText}>
+            Are you sure you want to delete this?
+          </Text>
+          <View style={styles.deleteButtonsContainer}>
+            <Button onPress={deleteStep}>Yes</Button>
+            <Button onPress={() => setShowDeleteWarning(false)}>No</Button>
+          </View>
+        </PaperModal>
+      </Portal>
+
+      <Modal
+        visible={visible && !showDeleteWarning}
+        onDismiss={handleClose}
+        contentContainerStyle={styles.modalContainer}
+        onRequestClose={handleClose}
+        animationType="slide"
+        presentationStyle="fullScreen"
+      >
+        <ScrollView style={styles.scrollViewContainer}>
+          <Button
+            icon="trash-can"
+            onPress={() => setShowDeleteWarning(true)}
+            style={{ alignSelf: "flex-end", marginBottom: 10 }}
+            mode="contained"
+          >
+            Delete
+          </Button>
+          <TextInput
+            label="Title"
+            placeholder="Step title"
+            style={styles.textInput}
+            defaultValue={step?.title}
+            onChangeText={(value) => handleEditStep(step.key, "title", value)}
+          />
+          <TextInput
+            label="Details"
+            placeholder="Enter details or instructions"
+            style={[styles.textInput, styles.detailInput]}
+            multiline
+            numberOfLines={5}
+            defaultValue={step?.text}
+            onChangeText={(value) => handleEditStep(step.key, "text", value)}
+          />
+          <ImagePickerComponent
+            imageUrl={step?.imageUrl}
+            onSelect={(image) => handleImageUpload(image)}
+          />
+          <Button mode="text" onPress={handleClose}>
+            Close
+          </Button>
+        </ScrollView>
+      </Modal>
+    </>
   );
 };
 
@@ -98,5 +136,19 @@ const styles = StyleSheet.create({
   },
   detailInput: {
     height: 150,
+  },
+  modalPaperContainer: {
+    backgroundColor: "white",
+    padding: 20,
+    margin: 20,
+  },
+  deleteButtonsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-evenly",
+  },
+  warningText: {
+    textAlign: "center",
+    fontSize: 18,
+    marginBottom: 20,
   },
 });
