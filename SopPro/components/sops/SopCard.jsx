@@ -47,6 +47,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     borderTopColor: "lightgrey",
     borderTopWidth: 1,
+    backgroundColor: "white",
   },
   pictureContainer: {
     width: 75,

@@ -101,9 +101,17 @@ namespace Backend.Service.Implementation
             };
         }
 
-        public async Task<ApiResponse<List<SopDto>>> GetAllSops()
+        public async Task<ApiResponse<List<SopDto>>> GetAllSops(string search, string status)
         {
-            List<SopDto> sops = await _unitOfWork.Sops.GetAll().OrderByDescending(sop => sop.Id).Select(sop => new SopDto
+
+            var query = _unitOfWork.Sops.GetAll();
+
+            if (!string.IsNullOrEmpty(search))
+            {
+                query = query.Where(sop => sop.Reference.Contains(search) || sop.SopVersions.Any(sv => sv.Title.Contains(search) || sv.Description.Contains(search)));
+            }
+
+            var sops = await query.OrderByDescending(sop => sop.Id).Select(sop => new SopDto
             {
                 Id = sop.Id,
                 Reference = sop.Reference,
