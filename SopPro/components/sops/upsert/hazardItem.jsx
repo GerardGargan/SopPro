@@ -6,10 +6,10 @@ const hazardItem = ({ hazard, onEdit }) => {
   return (
     <View style={styles.hazardItem}>
       <View style={styles.hazardDetails}>
-        <Text style={styles.hazardName}>
+        <Text style={styles.hazardName} numberOfLines={1}>
           {hazard.name ? hazard.name : "New hazard"}
         </Text>
-        <Text style={styles.hazardControl}>
+        <Text style={styles.hazardControl} numberOfLines={1}>
           {hazard.controlMeasure ? hazard.controlMeasure : "Control measure"}
         </Text>
       </View>

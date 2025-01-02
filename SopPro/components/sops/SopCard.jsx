@@ -36,8 +36,13 @@ const SopCard = ({ sop }) => {
         onPress={onPress}
       >
         <View style={styles.textContainer}>
-          <Text style={styles.titleText}>{sop.title}</Text>
-          <Text>{sop.description}</Text>
+          <Text style={styles.refText} numberOfLines={1}>
+            {sop.reference}
+          </Text>
+          <Text style={styles.titleText} numberOfLines={1}>
+            {sop.title}
+          </Text>
+          <Text numberOfLines={1}>{sop.description}</Text>
         </View>
         <View style={styles.chipContainer}>
           <SopStatusChip status={sop.status} />
@@ -89,5 +94,9 @@ const styles = StyleSheet.create({
   image: {
     width: 75,
     height: 75,
+  },
+  refText: {
+    color: "grey",
+    fontSize: 11,
   },
 });

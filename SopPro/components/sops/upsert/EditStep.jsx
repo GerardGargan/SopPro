@@ -1,8 +1,8 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Modal, ScrollView } from "react-native";
 import React from "react";
 import { useMutation } from "@tanstack/react-query";
 import { uploadImage } from "../../../util/httpRequests";
-import { Button, Modal, Portal, TextInput } from "react-native-paper";
+import { Button, TextInput } from "react-native-paper";
 import ImagePickerComponent from "../../UI/ImagePicker";
 
 const EditStep = ({
@@ -41,14 +41,15 @@ const EditStep = ({
   }
 
   return (
-    <Portal>
-      <Modal
-        visible={visible}
-        onDismiss={handleClose}
-        contentContainerStyle={styles.modalContainer}
-        dismissable={false}
-        dismissableBackButton={false}
-      >
+    <Modal
+      visible={visible}
+      onDismiss={handleClose}
+      contentContainerStyle={styles.modalContainer}
+      onRequestClose={handleClose}
+      animationType="slide"
+      presentationStyle="fullScreen"
+    >
+      <ScrollView style={styles.scrollViewContainer}>
         <TextInput
           label="Title"
           placeholder="Step title"
@@ -72,8 +73,8 @@ const EditStep = ({
         <Button mode="text" onPress={handleClose}>
           Close
         </Button>
-      </Modal>
-    </Portal>
+      </ScrollView>
+    </Modal>
   );
 };
 
@@ -83,10 +84,14 @@ const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
     justifyContent: "flex-start",
-    backgroundColor: "white",
-    borderRadius: 5,
+    backgroundColor: "grey",
+  },
+  keyboardAvoidingView: {
+    flex: 1,
+    margin: 10,
+  },
+  scrollViewContainer: {
     padding: 20,
-    margin: 20,
   },
   textInput: {
     marginBottom: 10,
