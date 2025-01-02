@@ -1,4 +1,4 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
 import { Icon } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
@@ -15,11 +15,22 @@ const SopCard = ({ sop }) => {
       },
     });
   }
+
+  let image = <Icon source="camera" size={25} />;
+
+  if (sop.imageUrl) {
+    image = (
+      <Image
+        source={{ uri: sop.imageUrl }}
+        style={styles.image}
+        resizeMode="cover"
+      />
+    );
+  }
+
   return (
     <View style={styles.cardContainer}>
-      <View style={styles.pictureContainer}>
-        <Icon source="camera" size={25} />
-      </View>
+      <View style={styles.pictureContainer}>{image}</View>
       <TouchableOpacity
         style={{ flexDirection: "row", flex: 1, justifyContent: "flex-start" }}
         onPress={onPress}
@@ -74,5 +85,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     marginHorizontal: 10,
+  },
+  image: {
+    width: 75,
+    height: 75,
   },
 });
