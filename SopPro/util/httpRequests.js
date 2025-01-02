@@ -59,10 +59,10 @@ export async function createSop(sop) {
   }
 }
 
-export async function fetchSops({ search, status }) {
+export async function fetchSops({ searchQuery, status }) {
   try {
     const params = {};
-    if (search) params.search = search;
+    if (searchQuery) params.search = searchQuery;
     if (status !== null) params.status = status;
 
     const response = await api.get("/sop", {
