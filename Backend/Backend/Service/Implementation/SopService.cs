@@ -159,7 +159,7 @@ namespace Backend.Service.Implementation
                     sop.IsApproved = latestVersion.Status == SopStatus.Approved;
                     sop.Version = latestVersion.Version;
                     sop.Status = latestVersion.Status;
-                    sop.ImageUrl = latestVersion.SopSteps.FirstOrDefault()?.ImageUrl;
+                    sop.ImageUrl = latestVersion.SopSteps.OrderBy(s => s.Position).FirstOrDefault()?.ImageUrl;
                 }
             }
 

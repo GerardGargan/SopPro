@@ -132,6 +132,9 @@ const EditSteps = ({ steps, setSteps }) => {
     <>
       <View style={{ flex: 1 }}>
         {selectedItem && <ReorderSection />}
+        {steps && steps.length === 0 && (
+          <Text style={styles.noStepsText}>No steps added yet</Text>
+        )}
         {steps.map((step) => {
           return (
             <StepCard
@@ -173,5 +176,10 @@ const styles = StyleSheet.create({
     margin: 16,
     right: 0,
     bottom: 80,
+  },
+  noStepsText: {
+    marginTop: 10,
+    textAlign: "center",
+    fontSize: 20,
   },
 });
