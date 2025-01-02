@@ -41,8 +41,10 @@ const StepCard = ({
       )}
       <View style={styles.pictureContainer}>{image}</View>
       <View style={styles.textContainer}>
-        <Text style={styles.titleText}>{title ? title : "New step"}</Text>
-        <Text>{text ? text : "Click to edit details"}</Text>
+        <Text style={styles.titleText} numberOfLines={1}>
+          {title ? title : "New step"}
+        </Text>
+        <Text numberOfLines={1}>{text ? text : "Click to edit details"}</Text>
       </View>
       <View style={styles.iconContainer}>
         <Ionicons name="chevron-forward" size={35} color="grey" />
@@ -93,7 +95,6 @@ const styles = StyleSheet.create({
   },
   image: {
     width: 75,
-    height: 75, // Set dimensions for the image
-    borderRadius: 10, // Optional styling
+    height: 75,
   },
 });

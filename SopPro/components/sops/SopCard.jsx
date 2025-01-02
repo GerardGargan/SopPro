@@ -37,7 +37,7 @@ const SopCard = ({ sop }) => {
       >
         <View style={styles.textContainer}>
           <Text style={styles.refText} numberOfLines={1}>
-            {sop.reference}
+            Ref: {sop.reference}
           </Text>
           <Text style={styles.titleText} numberOfLines={1}>
             {sop.title}
