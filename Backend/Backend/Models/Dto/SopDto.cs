@@ -10,6 +10,7 @@ namespace Backend.Models.Dto
         public bool? IsApproved { get; set; }
         public SopStatus? Status { get; set; }
         public string Reference { get; set; }
+        public string ImageUrl { get; set; }
         public bool? isAiGenerated { get; set; }
         public int? Version { get; set; }
         public List<SopStepDto> SopSteps { get; set; }

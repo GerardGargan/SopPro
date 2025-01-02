@@ -134,6 +134,15 @@ namespace Backend.Service.Implementation
                         Name = sopHazard.Name,
                         ControlMeasure = sopHazard.ControlMeasure,
                         RiskLevel = sopHazard.RiskLevel,
+                    }).ToList(),
+                    SopSteps = sopVersion.SopSteps.Select(sopStep => new SopStepDto
+                    {
+                        Id = sopStep.Id,
+                        SopVersionId = sopStep.SopVersionId,
+                        Position = sopStep.Position,
+                        Text = sopStep.Text,
+                        Title = sopStep.Title,
+                        ImageUrl = sopStep.ImageUrl,
                     }).ToList()
                 }).ToList()
             }).ToListAsync();
@@ -145,10 +154,12 @@ namespace Backend.Service.Implementation
                 if (latestVersion != null)
                 {
                     sop.Title = latestVersion.Title;
+                    sop.ImageUrl = latestVersion.SopSteps.FirstOrDefault()?.ImageUrl;
                     sop.Description = latestVersion.Description;
                     sop.IsApproved = latestVersion.Status == SopStatus.Approved;
                     sop.Version = latestVersion.Version;
                     sop.Status = latestVersion.Status;
+                    sop.ImageUrl = latestVersion.SopSteps.FirstOrDefault()?.ImageUrl;
                 }
             }
 
