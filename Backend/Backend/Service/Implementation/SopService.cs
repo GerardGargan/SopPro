@@ -446,6 +446,8 @@ namespace Backend.Service.Implementation
 
             var sopStepPpe = _db.SopStepPpe.Where(x => sopStepIds.Contains(x.SopStepId)).ToList();
 
+            var imageUrisToDelete = sopSteps.Where(x => !string.IsNullOrWhiteSpace(x.ImageUrl)).Select(x => x.ImageUrl).ToList();
+
             // perform deletion in order
 
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
@@ -483,6 +485,15 @@ namespace Backend.Service.Implementation
                 response.IsSuccess = true;
                 response.SuccessMessage = $"Sop id: {id} deleted successfully";
             });
+
+            // delete images from blob storage
+
+            foreach (var blobUrl in imageUrisToDelete)
+            {
+                Uri uri = new Uri(blobUrl);
+                string blobName = string.Join("", uri.Segments.Skip(2));
+                var deleted = await _blobService.DeleteBlob(blobName, _appSettings.AzureBlobStorageContainer);
+            };
 
             return response;
         }
