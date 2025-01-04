@@ -51,10 +51,22 @@ namespace Backend.Controllers
         }
 
         [HttpDelete]
+        [Route("delete")]
+        public async Task<IActionResult> DeleteSops([FromBody] List<int> ids)
+        {
+            var apiResponse = await _sopService.DeleteSops(ids);
+            return Ok(apiResponse);
+        }
+
+        [HttpDelete]
         [Route("{id:int}")]
         public async Task<IActionResult> DeleteSop(int id)
         {
-            var apiResponse = await _sopService.DeleteSop(id);
+            List<int> ids = new List<int>(1) {
+                id
+            };
+
+            var apiResponse = await _sopService.DeleteSops(ids);
             return Ok(apiResponse);
         }
 

@@ -426,18 +426,27 @@ namespace Backend.Service.Implementation
 
         }
 
-        public async Task<ApiResponse> DeleteSop(int id)
+        /// <summary>
+        /// Deletes sops and associated data from the database and blob storage
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public async Task<ApiResponse> DeleteSops(List<int> ids)
         {
             var response = new ApiResponse();
 
-            var sop = await _unitOfWork.Sops.GetAsync(x => x.Id == id);
+            var sops = await _unitOfWork.Sops.GetAll(x => ids.Contains(x.Id)).ToListAsync();
+            var validSops = sops.Where(x => x != null).ToList();
+            var sopIds = sops.Select(x => x.Id).ToList();
 
-            if (sop == null)
+            if (sops == null || sops.Count == 0)
             {
-                throw new Exception("Sop not found");
+                throw new Exception("No sops found");
             }
 
-            var sopVersions = await _unitOfWork.SopVersions.GetAll(x => x.SopId == id).ToListAsync();
+
+            var sopVersions = await _unitOfWork.SopVersions.GetAll(x => sopIds.Contains(x.SopId)).ToListAsync();
             var sopVersionIds = sopVersions.Select(x => x.Id).ToList();
 
             var sopHazards = await _unitOfWork.SopHazards.GetAll(x => sopVersionIds.Contains(x.SopVersionId)).ToListAsync();
@@ -477,13 +486,13 @@ namespace Backend.Service.Implementation
                 }
 
                 // delete sop
-                _unitOfWork.Sops.Remove(sop);
+                _unitOfWork.Sops.RemoveRange(validSops);
 
                 await _unitOfWork.SaveAsync();
 
                 response.StatusCode = HttpStatusCode.OK;
                 response.IsSuccess = true;
-                response.SuccessMessage = $"Sop id: {id} deleted successfully";
+                response.SuccessMessage = $"Sops deleted successfully";
             });
 
             // delete images from blob storage
