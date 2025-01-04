@@ -6,6 +6,7 @@ import { Button, TextInput } from "react-native-paper";
 import ImagePickerComponent from "../../../UI/ImagePicker";
 import { Modal as PaperModal } from "react-native-paper";
 import { Portal } from "react-native-paper";
+import Toast from "react-native-toast-message";
 
 const EditStep = ({
   visible,
@@ -24,17 +25,25 @@ const EditStep = ({
     error,
     isPending,
   } = useMutation({
-    mutationFn: uploadImage,
+    mutationFn: ({ formData, key }) => {
+      return uploadImage(formData).then((data) => ({ ...data, key }));
+    },
     onSuccess: (data) => {
-      console.log("Image uploaded successfully:", data);
-      handleSetImageUrl(step.key, data.result);
+      if (step.key == null) {
+        console.log("step key is null");
+      }
+      handleSetImageUrl(data.key, data.result);
     },
     onError: (error) => {
-      console.error("Error uploading image:", error);
+      Toast.show({
+        type: "error",
+        text1: error.message,
+        visibilityTime: 3000,
+      });
     },
   });
 
-  function handleImageUpload(imageUri) {
+  function handleImageUpload(imageUri, key) {
     const formData = new FormData();
     formData.append("file", {
       uri: imageUri,
@@ -42,7 +51,7 @@ const EditStep = ({
       type: "image/jpeg",
     });
 
-    uploadMutate(formData);
+    uploadMutate({ formData, key });
   }
 
   function deleteStep() {
@@ -105,7 +114,7 @@ const EditStep = ({
           />
           <ImagePickerComponent
             imageUrl={step?.imageUrl}
-            onSelect={(image) => handleImageUpload(image)}
+            onSelect={(image) => handleImageUpload(image, step.key)}
           />
           <Button mode="text" onPress={handleClose}>
             Close
