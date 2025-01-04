@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { Appbar, Button, Modal, Portal } from "react-native-paper";
 import { useIsFocused } from "@react-navigation/native";
 import Fab from "../../../components/sops/fab";
 import SearchInput from "../../../components/UI/SearchInput.jsx";
 import SopList from "../../../components/sops/SopList.jsx";
 import { deleteSops } from "../../../util/httpRequests.js";
+import Toast from "react-native-toast-message";
 
 const APPBAR_HEIGHT = 50;
 
@@ -18,11 +19,28 @@ const Sops = () => {
   const statusFilter = 1;
 
   const isFocused = useIsFocused();
+  const queryClient = useQueryClient();
 
-  const { data, isError, isPending, error } = useMutation({
+  const {
+    mutate: mutateDelete,
+    data,
+    isPending,
+  } = useMutation({
     mutationFn: deleteSops,
     onSuccess: () => {
-      console.log("Sops deleted successfully");
+      Toast.show({
+        type: "success",
+        text1: "Sops deleted successfully",
+        visibilityTime: 3000,
+      });
+      queryClient.invalidateQueries("sops");
+    },
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: error.message,
+        visibilityTime: 3000,
+      });
     },
   });
 
@@ -56,7 +74,7 @@ const Sops = () => {
   }
 
   function deleteSelected() {
-    console.log("Deleting selected sops");
+    mutateDelete(selectedIds);
     setShowDeleteWarning(false);
     resetSelected();
   }

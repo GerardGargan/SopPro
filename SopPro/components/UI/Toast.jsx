@@ -1,4 +1,4 @@
-import Toast, { BaseToast } from "react-native-toast-message";
+import Toast, { BaseToast, ErrorToast } from "react-native-toast-message";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function ToastWithInsets() {

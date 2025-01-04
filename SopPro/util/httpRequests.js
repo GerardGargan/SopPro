@@ -110,7 +110,11 @@ export async function fetchDepartments() {
 export async function deleteSops(ids) {
   try {
     if (!ids || ids.length === 0) throw Error("No ids provided");
-    const response = await api.delete("/sop/delete", ids);
+
+    const response = await api.delete("/sop/delete", {
+      data: ids,
+    });
+
     return response.data;
   } catch (e) {
     const error = new Error(
