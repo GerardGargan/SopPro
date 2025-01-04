@@ -60,7 +60,7 @@ const SopList = ({
             sop={item}
             toggleSelect={toggleSelect}
             selected={selectedIds.includes(item.id)}
-            isSelectedItems={selectedIds > 0}
+            isSelectedItems={selectedIds.length > 0}
           />
         )}
       />
