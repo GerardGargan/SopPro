@@ -106,3 +106,16 @@ export async function fetchDepartments() {
     throw error;
   }
 }
+
+export async function deleteSops(ids) {
+  try {
+    if (!ids || ids.length === 0) throw Error("No ids provided");
+    const response = await api.delete("/sop/delete", ids);
+    return response.data;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error deleting SOPs"
+    );
+    throw error;
+  }
+}

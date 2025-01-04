@@ -1,12 +1,19 @@
 import { StyleSheet, Text, View, FlatList } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { fetchSops } from "../../util/httpRequests";
 import SopCard from "./SopCard";
 import { ActivityIndicator } from "react-native-paper";
 import ErrorBlock from "../UI/ErrorBlock";
 
-const SopList = ({ debouncedSearchQuery, statusFilter, searchQuery }) => {
+const SopList = ({
+  debouncedSearchQuery,
+  statusFilter,
+  searchQuery,
+  selectedIds,
+  selectSop,
+  deselectSop,
+}) => {
   const { data, isPending, isError, error } = useQuery({
     queryKey: ["sops", { debouncedSearchQuery, statusFilter }],
     queryFn: () =>
@@ -15,6 +22,14 @@ const SopList = ({ debouncedSearchQuery, statusFilter, searchQuery }) => {
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
   });
+
+  function toggleSelect(id) {
+    if (selectedIds.includes(id)) {
+      deselectSop(id);
+    } else {
+      selectSop(id);
+    }
+  }
 
   if (isPending) {
     return (
@@ -40,7 +55,14 @@ const SopList = ({ debouncedSearchQuery, statusFilter, searchQuery }) => {
       <FlatList
         data={data}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <SopCard sop={item} />}
+        renderItem={({ item }) => (
+          <SopCard
+            sop={item}
+            toggleSelect={toggleSelect}
+            selected={selectedIds.includes(item.id)}
+            isSelectedItems={selectedIds > 0}
+          />
+        )}
       />
     </>
   );
