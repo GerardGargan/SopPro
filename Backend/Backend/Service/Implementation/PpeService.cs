@@ -24,6 +24,7 @@ namespace Backend.Service.Implementation
             {
                 StatusCode = HttpStatusCode.OK,
                 Result = ppeFromDb,
+                IsSuccess = true
             };
         }
     }
