@@ -31,9 +31,9 @@ api.interceptors.response.use(
   (error) => {
     if (error.response) {
       // Server responded with a status other than 2xx
-      console.error("Response Error Data:", JSON.stringify(error.response.data, null, 2));
-      console.error("Response Error Status:", error.response.status);
-      console.error("Response Error Headers:", JSON.stringify(error.response.headers, null, 2));
+      console?.error("Response Error Data:", JSON.stringify(error.response.data, null, 2));
+      console?.error("Response Error Status:", error.response.status);
+      console?.error("Response Error Headers:", JSON.stringify(error.response.headers, null, 2));
     } else if (error.request) {
       // No response received
       console.error("No Response Received:", error.request);

@@ -7,6 +7,7 @@ namespace Backend.Repository.Interface
         IQueryable<T> GetAll(Expression<Func<T, bool>> filter = null, string includeProperties = null, bool tracked = false);
         Task<T> GetAsync(Expression<Func<T, bool>> filter, string includeProperties = null, bool tracked = false);
         Task AddAsync(T entity);
+        Task AddRangeAsync(IEnumerable<T> entities);
         void Remove(T entity);
         void RemoveRange(IEnumerable<T> entities);
     }

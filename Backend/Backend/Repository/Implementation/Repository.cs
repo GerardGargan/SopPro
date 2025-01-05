@@ -1,5 +1,4 @@
 ﻿using Backend.Data;
-using Backend.Models.DatabaseModels;
 using Backend.Repository.Interface;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,6 +22,16 @@ namespace Backend.Repository.Implementation
         public async Task AddAsync(T entity)
         {
             await dbSet.AddAsync(entity);
+        }
+
+        /// <summary>
+        /// Add a range of entities
+        /// </summary>
+        /// <param name="entities"></param>
+        /// <returns></returns>
+        public async Task AddRangeAsync(IEnumerable<T> entities)
+        {
+            await dbSet.AddRangeAsync(entities);
         }
 
         /// <summary>

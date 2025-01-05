@@ -1,6 +1,6 @@
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { useFonts } from "expo-font";
-import { Slot, Stack } from "expo-router";
+import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
@@ -9,15 +9,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "react-native-reanimated";
 import { Provider } from "react-redux";
 import store from "../store/index";
+import Toast from "../components/UI/Toast";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 const queryClient = new QueryClient();
 
-export {
-  // Catch any errors thrown by the Layout component.
-  ErrorBoundary,
-} from "expo-router";
+export { ErrorBoundary } from "expo-router";
 
-// Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
@@ -26,7 +24,6 @@ export default function RootLayout() {
     ...FontAwesome.font,
   });
 
-  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
   }, [error]);
@@ -42,27 +39,29 @@ export default function RootLayout() {
   }
 
   return (
-    <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <PaperProvider>
-          <RootLayoutNav />
-        </PaperProvider>
-      </QueryClientProvider>
-    </Provider>
+    <SafeAreaProvider>
+      <Provider store={store}>
+        <QueryClientProvider client={queryClient}>
+          <PaperProvider>
+            <RootLayoutNav />
+            <Toast />
+          </PaperProvider>
+        </QueryClientProvider>
+      </Provider>
+    </SafeAreaProvider>
   );
 }
 
 function RootLayoutNav() {
-
   return (
     <>
-      <StatusBar style="light" />
-        <Stack>
-          <Stack.Screen name="(auth)" options={{headerShown: false}} />
-          <Stack.Screen name="home" options={{headerShown: false}} />
-          <Stack.Screen name="login" options={{ title: "Log in" }} />
-          <Stack.Screen name="register" options={{ title: "Sign up "}} />
-        </Stack>
+      <StatusBar style="dark" />
+      <Stack>
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="home" options={{ headerShown: false }} />
+        <Stack.Screen name="login" options={{ title: "Log in" }} />
+        <Stack.Screen name="register" options={{ title: "Sign up " }} />
+      </Stack>
     </>
   );
 }

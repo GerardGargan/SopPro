@@ -10,5 +10,7 @@ namespace Backend.Models.DatabaseModels
         public int OrganisationId { get; set; }
         [ForeignKey("OrganisationId")]
         public Organisation Organisation { get; set; }
+        public List<SopVersion> AuthoredSopVersions { get; set; }
+        public List<SopVersion> ApprovedSopVersions { get; set; }
     }
 }

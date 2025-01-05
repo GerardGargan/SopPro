@@ -98,6 +98,27 @@ namespace Backend.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
+            modelBuilder.Entity("Backend.Models.DatabaseModels.Department", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OrganisationId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganisationId");
+
+                    b.ToTable("Departments");
+                });
+
             modelBuilder.Entity("Backend.Models.DatabaseModels.Invitation", b =>
                 {
                     b.Property<int>("Id")
@@ -152,6 +173,203 @@ namespace Backend.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Organisations");
+                });
+
+            modelBuilder.Entity("Backend.Models.DatabaseModels.Ppe", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Icon")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Ppe");
+                });
+
+            modelBuilder.Entity("Backend.Models.DatabaseModels.Sop", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("DepartmentId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrganisationId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reference")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool?>("isAiGenerated")
+                        .HasColumnType("bit");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DepartmentId");
+
+                    b.HasIndex("OrganisationId");
+
+                    b.ToTable("Sops");
+                });
+
+            modelBuilder.Entity("Backend.Models.DatabaseModels.SopHazard", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ControlMeasure")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OrganisationId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("RiskLevel")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SopVersionId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganisationId");
+
+                    b.HasIndex("SopVersionId");
+
+                    b.ToTable("SopHazards");
+                });
+
+            modelBuilder.Entity("Backend.Models.DatabaseModels.SopStep", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OrganisationId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("Position")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SopVersionId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Text")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganisationId");
+
+                    b.HasIndex("SopVersionId");
+
+                    b.ToTable("SopSteps");
+                });
+
+            modelBuilder.Entity("Backend.Models.DatabaseModels.SopStepPpe", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("OrganisationId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("PpeId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SopStepId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrganisationId");
+
+                    b.HasIndex("PpeId");
+
+                    b.HasIndex("SopStepId");
+
+                    b.ToTable("SopStepPpe");
+                });
+
+            modelBuilder.Entity("Backend.Models.DatabaseModels.SopVersion", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("ApprovalDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ApprovedById")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("AuthorId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime?>("CreateDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("OrganisationId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("RequestApprovalDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("SopId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("Version")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApprovedById");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("OrganisationId");
+
+                    b.HasIndex("SopId");
+
+                    b.ToTable("SopVersions");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -292,7 +510,18 @@ namespace Backend.Migrations
                     b.HasOne("Backend.Models.DatabaseModels.Organisation", "Organisation")
                         .WithMany("Users")
                         .HasForeignKey("OrganisationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Organisation");
+                });
+
+            modelBuilder.Entity("Backend.Models.DatabaseModels.Department", b =>
+                {
+                    b.HasOne("Backend.Models.DatabaseModels.Organisation", "Organisation")
+                        .WithMany("Departments")
+                        .HasForeignKey("OrganisationId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Organisation");
@@ -303,10 +532,126 @@ namespace Backend.Migrations
                     b.HasOne("Backend.Models.DatabaseModels.Organisation", "Organisation")
                         .WithMany("Invitations")
                         .HasForeignKey("OrganisationId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Organisation");
+                });
+
+            modelBuilder.Entity("Backend.Models.DatabaseModels.Sop", b =>
+                {
+                    b.HasOne("Backend.Models.DatabaseModels.Department", "Department")
+                        .WithMany("Sops")
+                        .HasForeignKey("DepartmentId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Backend.Models.DatabaseModels.Organisation", "Organisation")
+                        .WithMany("Sops")
+                        .HasForeignKey("OrganisationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Department");
+
+                    b.Navigation("Organisation");
+                });
+
+            modelBuilder.Entity("Backend.Models.DatabaseModels.SopHazard", b =>
+                {
+                    b.HasOne("Backend.Models.DatabaseModels.Organisation", "Organisation")
+                        .WithMany("SopHazards")
+                        .HasForeignKey("OrganisationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Backend.Models.DatabaseModels.SopVersion", "SopVersion")
+                        .WithMany("SopHazards")
+                        .HasForeignKey("SopVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Organisation");
+
+                    b.Navigation("SopVersion");
+                });
+
+            modelBuilder.Entity("Backend.Models.DatabaseModels.SopStep", b =>
+                {
+                    b.HasOne("Backend.Models.DatabaseModels.Organisation", "Organisation")
+                        .WithMany("SopSteps")
+                        .HasForeignKey("OrganisationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Backend.Models.DatabaseModels.SopVersion", "SopVersion")
+                        .WithMany("SopSteps")
+                        .HasForeignKey("SopVersionId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Organisation");
+
+                    b.Navigation("SopVersion");
+                });
+
+            modelBuilder.Entity("Backend.Models.DatabaseModels.SopStepPpe", b =>
+                {
+                    b.HasOne("Backend.Models.DatabaseModels.Organisation", "Organisation")
+                        .WithMany("SopStepPpe")
+                        .HasForeignKey("OrganisationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Backend.Models.DatabaseModels.Ppe", "Ppe")
+                        .WithMany("SopStepPpe")
+                        .HasForeignKey("PpeId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Backend.Models.DatabaseModels.SopStep", "SopStep")
+                        .WithMany("SopStepPpe")
+                        .HasForeignKey("SopStepId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Organisation");
+
+                    b.Navigation("Ppe");
+
+                    b.Navigation("SopStep");
+                });
+
+            modelBuilder.Entity("Backend.Models.DatabaseModels.SopVersion", b =>
+                {
+                    b.HasOne("Backend.Models.DatabaseModels.ApplicationUser", "ApprovedBy")
+                        .WithMany("ApprovedSopVersions")
+                        .HasForeignKey("ApprovedById")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Backend.Models.DatabaseModels.ApplicationUser", "Author")
+                        .WithMany("AuthoredSopVersions")
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Backend.Models.DatabaseModels.Organisation", "Organisation")
+                        .WithMany("SopVersions")
+                        .HasForeignKey("OrganisationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Backend.Models.DatabaseModels.Sop", "Sop")
+                        .WithMany("SopVersions")
+                        .HasForeignKey("SopId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ApprovedBy");
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Organisation");
+
+                    b.Navigation("Sop");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -360,11 +705,57 @@ namespace Backend.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("Backend.Models.DatabaseModels.ApplicationUser", b =>
+                {
+                    b.Navigation("ApprovedSopVersions");
+
+                    b.Navigation("AuthoredSopVersions");
+                });
+
+            modelBuilder.Entity("Backend.Models.DatabaseModels.Department", b =>
+                {
+                    b.Navigation("Sops");
+                });
+
             modelBuilder.Entity("Backend.Models.DatabaseModels.Organisation", b =>
                 {
+                    b.Navigation("Departments");
+
                     b.Navigation("Invitations");
 
+                    b.Navigation("SopHazards");
+
+                    b.Navigation("SopStepPpe");
+
+                    b.Navigation("SopSteps");
+
+                    b.Navigation("SopVersions");
+
+                    b.Navigation("Sops");
+
                     b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("Backend.Models.DatabaseModels.Ppe", b =>
+                {
+                    b.Navigation("SopStepPpe");
+                });
+
+            modelBuilder.Entity("Backend.Models.DatabaseModels.Sop", b =>
+                {
+                    b.Navigation("SopVersions");
+                });
+
+            modelBuilder.Entity("Backend.Models.DatabaseModels.SopStep", b =>
+                {
+                    b.Navigation("SopStepPpe");
+                });
+
+            modelBuilder.Entity("Backend.Models.DatabaseModels.SopVersion", b =>
+                {
+                    b.Navigation("SopHazards");
+
+                    b.Navigation("SopSteps");
                 });
 #pragma warning restore 612, 618
         }

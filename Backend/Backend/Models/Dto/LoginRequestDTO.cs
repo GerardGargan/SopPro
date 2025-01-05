@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
+﻿
 namespace Backend.Models.Dto
 {
     public class LoginRequestDTO
@@ -8,3 +7,4 @@ namespace Backend.Models.Dto
         public string Password { get; set; }
     }
 }
+    

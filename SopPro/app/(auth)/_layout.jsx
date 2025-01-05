@@ -1,15 +1,17 @@
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { useFonts } from "expo-font";
-import { Tabs } from "expo-router";
-import * as SplashScreen from "expo-splash-screen";
-import { useEffect, useState } from "react";
 import "react-native-reanimated";
-import { authActions } from "../../store/authSlice";
-import { useSelector, useDispatch } from "react-redux";
-import { Text } from "react-native";
+import * as SplashScreen from "expo-splash-screen";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Redirect } from "expo-router";
+import { useFonts } from "expo-font";
+
+import { useEffect, useState } from "react";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigation } from "expo-router";
+import { authActions } from "../../store/authSlice";
+
+import { Stack, Redirect } from "expo-router";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { FontAwesome5 } from "@expo/vector-icons";
+import { Text } from "react-native";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -19,12 +21,11 @@ export {
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
-function TabBarIcon({ ...props }) {
-  return <FontAwesome size={28} style={{ marginBottom: -3 }} {...props} />;
-}
-
 export default function RootLayout() {
-
+  const navigator = useNavigation();
+  const dispatch = useDispatch();
+  const [authChecked, setAuthChecked] = useState(false);
+  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const [loaded, error] = useFonts({
     SpaceMono: require("../../assets/fonts/SpaceMono-Regular.ttf"),
     ...FontAwesome.font,
@@ -41,23 +42,9 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
-  if (!loaded) {
-    return null;
-  }
-
-  return <RootLayoutNav />;
-}
-
-function RootLayoutNav() {
- const navigator = useNavigation();
-  const dispatch = useDispatch();
-  const [authChecked, setAuthChecked] = useState(false);
-  const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
-
   useEffect(() => {
     const checkAuth = async () => {
       const token = await AsyncStorage.getItem("authToken");
-      console.log(token);
       dispatch(authActions.initialiseAuth(token));
       setAuthChecked(true);
     };
@@ -72,33 +59,14 @@ function RootLayoutNav() {
     return <Redirect href="/home" />;
   }
 
+  if (!loaded) {
+    return null;
+  }
+
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: false,
-      }}
-    >
-      <Tabs.Screen
-        name="index"
-        options={{
-          title: "Index",
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-        }}
-      />
-      <Tabs.Screen
-        name="test"
-        options={{
-          title: "Tab test",
-          tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-        }}
-      />
-        <Tabs.Screen
-          name="logout"
-          options={{
-            title: "Logout",
-            tabBarIcon: ({ color }) => <TabBarIcon name="code" color={color} />,
-          }}
-        />
-    </Tabs>
+    <Stack>
+      <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      <Stack.Screen name="upsert/[id]" options={{ title: "Create SOP" }} />
+    </Stack>
   );
 }

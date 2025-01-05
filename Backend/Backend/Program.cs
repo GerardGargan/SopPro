@@ -1,6 +1,8 @@
+using Azure.Storage.Blobs;
 using Backend.Data;
 using Backend.Models.DatabaseModels;
 using Backend.Models.Settings;
+using Backend.Models.Tenancy;
 using Backend.Repository.Implementation;
 using Backend.Repository.Interface;
 using Backend.Service.Implementation;
@@ -16,11 +18,12 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
-});
+}, ServiceLifetime.Scoped);
+builder.Services.AddSingleton(u => new BlobServiceClient(builder.Configuration.GetConnectionString("AzureBlobStorage")));
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>();
 builder.Services.Configure<IdentityOptions>(options =>
 {
@@ -60,7 +63,12 @@ builder.Services.AddSingleton(resolver => resolver.GetRequiredService<IOptions<A
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ISopService, SopService>();
+builder.Services.AddScoped<IDepartmentService, DepartmentService>();
+builder.Services.AddScoped<IPpeService, PpeService>();
 builder.Services.AddTransient<IEmailService, EmailService>();
+builder.Services.AddScoped<ITenancyResolver, TenancyResolver>();
+builder.Services.AddSingleton<IBlobService, BlobService>();
 
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
