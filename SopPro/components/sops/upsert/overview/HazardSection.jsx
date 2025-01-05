@@ -49,8 +49,8 @@ const HazardSection = ({
             Are you sure you want to delete this?
           </Text>
           <View style={styles.deleteButtonsContainer}>
-            <Button onPress={deleteHazard}>Yes</Button>
             <Button onPress={() => setShowDeleteWarning(false)}>No</Button>
+            <Button onPress={deleteHazard}>Yes</Button>
           </View>
         </Modal>
       </Portal>

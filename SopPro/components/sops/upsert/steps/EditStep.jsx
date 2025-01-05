@@ -81,8 +81,8 @@ const EditStep = ({
             Are you sure you want to delete this?
           </Text>
           <View style={styles.deleteButtonsContainer}>
-            <Button onPress={deleteStep}>Yes</Button>
             <Button onPress={() => setShowDeleteWarning(false)}>No</Button>
+            <Button onPress={deleteStep}>Yes</Button>
           </View>
         </PaperModal>
       </Portal>

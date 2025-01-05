@@ -97,8 +97,8 @@ const Sops = () => {
             All versions will be deleted
           </Text>
           <View style={styles.deleteButtonsContainer}>
-            <Button onPress={deleteSelected}>Yes</Button>
             <Button onPress={closeDeleteWarning}>No</Button>
+            <Button onPress={deleteSelected}>Yes</Button>
           </View>
         </Modal>
       </Portal>
