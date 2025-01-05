@@ -158,6 +158,26 @@ const Upsert = () => {
   }
 
   function handleSave() {
+    const errors = [];
+    console.log("title", title);
+
+    if (!title || title.trim() === "") {
+      errors.push("Title is required");
+    }
+
+    if (!description || description.trim() === "") {
+      errors.push("Description is required");
+    }
+
+    if (errors.length > 0) {
+      Toast.show({
+        type: "error",
+        text1: errors.join("\n"),
+        visibilityTime: 3000,
+      });
+      return;
+    }
+
     const sop = {
       title: title,
       description: description,
