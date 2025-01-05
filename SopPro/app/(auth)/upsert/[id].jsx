@@ -13,6 +13,7 @@ import EditOverview from "../../../components/sops/upsert/overview/EditOverview"
 import BottomBar from "../../../components/sops/upsert/BottomBar";
 import EditSteps from "../../../components/sops/upsert/steps/EditSteps";
 import ErrorBlock from "../../../components/UI/ErrorBlock";
+import Toast from "react-native-toast-message";
 
 const Upsert = () => {
   const { id } = useLocalSearchParams();
@@ -65,6 +66,11 @@ const Upsert = () => {
     mutationFn: updateSop,
     onSuccess: () => {
       queryClient.invalidateQueries(["sops"]);
+      Toast.show({
+        type: "success",
+        text1: "SOP updated successfully",
+        visibilityTime: 3000,
+      });
       router.replace("/(auth)");
     },
   });
@@ -78,6 +84,11 @@ const Upsert = () => {
     mutationFn: createSop,
     onSuccess: () => {
       queryClient.invalidateQueries(["sops"]);
+      Toast.show({
+        type: "success",
+        text1: "SOP created successfully",
+        visibilityTime: 3000,
+      });
       router.replace("/(auth)");
     },
   });

@@ -26,7 +26,7 @@ const Sops = () => {
     onSuccess: () => {
       Toast.show({
         type: "success",
-        text1: "Sops deleted successfully",
+        text1: "Deleted successfully",
         visibilityTime: 3000,
       });
       queryClient.invalidateQueries("sops");

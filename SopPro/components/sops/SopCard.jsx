@@ -47,7 +47,7 @@ const SopCard = ({ sop, toggleSelect, selected, isSelectedItems }) => {
       >
         <View style={styles.textContainer}>
           <Text style={styles.refText} numberOfLines={1}>
-            Ref: {sop.reference} {selected ? "selected" : ""}
+            Ref: {sop.reference} - V{sop.version}
           </Text>
           <Text style={styles.titleText} numberOfLines={1}>
             {sop.title}
@@ -108,6 +108,7 @@ const styles = StyleSheet.create({
   refText: {
     color: "grey",
     fontSize: 11,
+    fontStyle: "italic",
   },
   radioButton: {
     justifyContent: "center",
