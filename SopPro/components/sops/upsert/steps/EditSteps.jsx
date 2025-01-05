@@ -5,7 +5,7 @@ import { Button, FAB, IconButton, Portal } from "react-native-paper";
 import { useState } from "react";
 import EditStep from "./EditStep";
 
-const EditSteps = ({ steps, setSteps }) => {
+const EditSteps = ({ steps, setSteps, ppeList }) => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [editItem, setEditItem] = useState(null);
 
@@ -163,6 +163,7 @@ const EditSteps = ({ steps, setSteps }) => {
         handleClose={() => setEditItem(null)}
         handleSetImageUrl={handleSetImageUrl}
         handleDeleteStep={handleDeleteStep}
+        ppeList={ppeList}
       />
     </>
   );

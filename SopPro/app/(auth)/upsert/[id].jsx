@@ -6,6 +6,7 @@ import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import {
   createSop,
   fetchDepartments,
+  fetchPpe,
   fetchSop,
   updateSop,
 } from "../../../util/httpRequests";
@@ -28,6 +29,7 @@ const Upsert = () => {
   const [status, setStatus] = useState(1);
   const [departments, setDepartments] = useState([]);
   const [selectedDepartment, setSelectedDepartment] = useState(null);
+  const [ppeList, setPpeList] = useState([]);
 
   const isCreate = id === "-1";
 
@@ -55,6 +57,11 @@ const Upsert = () => {
   const { data: departmentsData } = useQuery({
     queryKey: ["departments"],
     queryFn: fetchDepartments,
+  });
+
+  const { data: ppeData } = useQuery({
+    queryKey: ["ppe"],
+    queryFn: fetchPpe,
   });
 
   const {
@@ -135,6 +142,12 @@ const Upsert = () => {
       setDepartments(departmentsData);
     }
   }, [departmentsData]);
+
+  useEffect(() => {
+    if (ppeData) {
+      setPpeList(ppeData);
+    }
+  }, [ppeData]);
 
   function handleTitleChange(text) {
     setTitle(text);
@@ -263,7 +276,9 @@ const Upsert = () => {
           />
         )}
 
-        {screen === "steps" && <EditSteps steps={steps} setSteps={setSteps} />}
+        {screen === "steps" && (
+          <EditSteps steps={steps} setSteps={setSteps} ppeList={ppeList} />
+        )}
       </ScrollView>
       <BottomBar selectedScreen={screen} onSelectScreen={selectScreen} />
     </>

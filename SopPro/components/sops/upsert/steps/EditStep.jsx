@@ -15,9 +15,10 @@ const EditStep = ({
   handleClose,
   handleSetImageUrl,
   handleDeleteStep,
+  ppeList,
 }) => {
   const [showDeleteWarning, setShowDeleteWarning] = useState(false);
-
+  console.log("ppe", ppeList);
   const {
     mutate: uploadMutate,
     data: imageData,

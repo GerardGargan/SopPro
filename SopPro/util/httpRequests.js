@@ -123,3 +123,15 @@ export async function deleteSops(ids) {
     throw error;
   }
 }
+
+export async function fetchPpe() {
+  try {
+    const response = await api.get("/ppe");
+    return response.data.result;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error fetching PPE"
+    );
+    throw error;
+  }
+}
