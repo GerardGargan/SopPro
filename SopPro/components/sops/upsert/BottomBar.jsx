@@ -1,10 +1,9 @@
 import * as React from "react";
-import { StyleSheet, View } from "react-native";
-import { Appbar, Button, FAB, useTheme } from "react-native-paper";
+import { StyleSheet, View, Pressable } from "react-native";
+import { Appbar, Text, useTheme } from "react-native-paper";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const BOTTOM_APPBAR_HEIGHT = 60;
-const MEDIUM_FAB_HEIGHT = 56;
 
 const BottomBar = ({ selectedScreen, onSelectScreen }) => {
   const { bottom } = useSafeAreaInsets();
@@ -21,31 +20,26 @@ const BottomBar = ({ selectedScreen, onSelectScreen }) => {
       ]}
       safeAreaInsets={{ bottom }}
     >
-      <View style={styles.buttonContainer}>
-        <View>
-          {selectedScreen === "steps" && (
-            <Button
-              icon="arrow-left"
-              mode="text"
-              onPress={() => onSelectScreen("overview")}
-            >
-              Edit overview
-            </Button>
-          )}
-        </View>
+      <View style={styles.rootContainer}>
+        <Pressable
+          style={[
+            styles.buttonContainer,
+            selectedScreen === "overview" && styles.selected,
+          ]}
+          onPress={() => onSelectScreen("overview")}
+        >
+          <Text style={styles.buttonText}>Edit overview</Text>
+        </Pressable>
 
-        <View>
-          {selectedScreen === "overview" && (
-            <Button
-              icon="arrow-right"
-              mode="text"
-              contentStyle={{ flexDirection: "row-reverse" }}
-              onPress={() => onSelectScreen("steps")}
-            >
-              Edit steps
-            </Button>
-          )}
-        </View>
+        <Pressable
+          style={[
+            styles.buttonContainer,
+            selectedScreen === "steps" && styles.selected,
+          ]}
+          onPress={() => onSelectScreen("steps")}
+        >
+          <Text style={styles.buttonText}>Edit steps</Text>
+        </Pressable>
       </View>
     </Appbar>
   );
@@ -59,14 +53,21 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
-  fab: {
-    position: "absolute",
-    right: 16,
-  },
-  buttonContainer: {
+  rootContainer: {
     width: "100%",
     flexDirection: "row",
-    justifyContent: "space-between",
+    height: "100%",
+  },
+  buttonContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  selected: {
+    backgroundColor: "lightgrey",
+  },
+  buttonText: {
+    fontSize: 16,
   },
 });
 
