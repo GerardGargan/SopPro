@@ -101,7 +101,7 @@ namespace Backend.Service.Implementation
             };
         }
 
-        public async Task<ApiResponse<List<SopDto>>> GetAllSops(string search, string status)
+        public async Task<ApiResponse<List<SopDto>>> GetAllSops(string search, string status, int page, int pageSize)
         {
 
             var query = _unitOfWork.Sops.GetAll();
@@ -111,7 +111,10 @@ namespace Backend.Service.Implementation
                 query = query.Where(sop => sop.Reference.Contains(search) || sop.SopVersions.Any(sv => sv.Title.Contains(search) || sv.Description.Contains(search)));
             }
 
-            var sops = await query.OrderByDescending(sop => sop.Id).Select(sop => new SopDto
+            var sops = await query
+            .OrderByDescending(sop => sop.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize).Select(sop => new SopDto
             {
                 Id = sop.Id,
                 Reference = sop.Reference,

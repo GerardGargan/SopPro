@@ -59,11 +59,18 @@ export async function createSop(sop) {
   }
 }
 
-export async function fetchSops({ searchQuery, status }) {
+export async function fetchSops({
+  searchQuery,
+  status,
+  page = 1,
+  pageSize = 20,
+}) {
   try {
     const params = {};
     if (searchQuery) params.search = searchQuery;
     if (status !== null) params.status = status;
+    params.page = page;
+    params.pageSize = pageSize;
 
     const response = await api.get("/sop", {
       params,

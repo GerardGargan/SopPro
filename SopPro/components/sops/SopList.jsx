@@ -1,10 +1,12 @@
 import { StyleSheet, Text, View, FlatList } from "react-native";
 import React, { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { fetchSops } from "../../util/httpRequests";
 import SopCard from "./SopCard";
 import { ActivityIndicator } from "react-native-paper";
 import ErrorBlock from "../UI/ErrorBlock";
+
+const PAGE_SIZE = 20;
 
 const SopList = ({
   debouncedSearchQuery,
@@ -14,10 +16,29 @@ const SopList = ({
   selectSop,
   deselectSop,
 }) => {
-  const { data, isPending, isError, error } = useQuery({
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isPending,
+    isError,
+    error,
+  } = useInfiniteQuery({
     queryKey: ["sops", { debouncedSearchQuery, statusFilter }],
-    queryFn: () =>
-      fetchSops({ searchQuery: debouncedSearchQuery, statusFilter }),
+    queryFn: ({ pageParam = 1 }) =>
+      fetchSops({
+        searchQuery: debouncedSearchQuery,
+        statusFilter,
+        page: pageParam,
+        pageSize: PAGE_SIZE,
+      }),
+    getNextPageParam: (lastPage, allPages) => {
+      if (lastPage.length < PAGE_SIZE) {
+        return undefined;
+      }
+      return allPages.length + 1;
+    },
     enabled: !!debouncedSearchQuery || searchQuery === "",
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
@@ -30,6 +51,24 @@ const SopList = ({
       selectSop(id);
     }
   }
+
+  // Flatten the pages array into a single array of items
+  const flattenedData = data?.pages.flatMap((page) => page) ?? [];
+
+  const loadMore = () => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage();
+    }
+  };
+
+  const renderFooter = () => {
+    if (!isFetchingNextPage) return null;
+    return (
+      <View style={styles.footer}>
+        <ActivityIndicator animating={true} />
+      </View>
+    );
+  };
 
   if (isPending) {
     return (
@@ -49,11 +88,11 @@ const SopList = ({
 
   return (
     <>
-      {data && data.length === 0 && (
+      {flattenedData.length === 0 && (
         <Text style={styles.noSopText}>No items found</Text>
       )}
       <FlatList
-        data={data}
+        data={flattenedData}
         keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <SopCard
@@ -63,6 +102,9 @@ const SopList = ({
             isSelectedItems={selectedIds.length > 0}
           />
         )}
+        onEndReached={loadMore}
+        onEndReachedThreshold={0.3}
+        ListFooterComponent={renderFooter}
       />
     </>
   );
@@ -80,5 +122,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textAlign: "center",
     fontSize: 20,
+  },
+  footer: {
+    padding: 10,
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
