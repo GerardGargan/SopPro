@@ -21,11 +21,7 @@ const Sops = () => {
   const isFocused = useIsFocused();
   const queryClient = useQueryClient();
 
-  const {
-    mutate: mutateDelete,
-    data,
-    isPending,
-  } = useMutation({
+  const { mutate: mutateDelete } = useMutation({
     mutationFn: deleteSops,
     onSuccess: () => {
       Toast.show({
@@ -48,6 +44,11 @@ const Sops = () => {
     const handler = setTimeout(() => setDebouncedSearchQuery(searchQuery), 500);
     return () => clearTimeout(handler);
   }, [searchQuery]);
+
+  useEffect(() => {
+    // reset selected ids when search query changes
+    resetSelected();
+  }, [debouncedSearchQuery]);
 
   function selectSop(id) {
     setSelectedIds((prevState) => {
