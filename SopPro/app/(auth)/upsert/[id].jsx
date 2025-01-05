@@ -232,6 +232,15 @@ const Upsert = () => {
     return null;
   }
 
+  function handleEditStepPpe(stepKey, ppe) {
+    setSteps((prevState) => {
+      const index = prevState.findIndex((step) => step.key === stepKey);
+      const newSteps = [...prevState];
+      newSteps[index].ppeIds = ppe || [];
+      return newSteps;
+    });
+  }
+
   const errorMessage = getUpdateErrorMessage();
 
   if (isFetching || isPendingPut || isPendingPost) {
@@ -277,7 +286,12 @@ const Upsert = () => {
         )}
 
         {screen === "steps" && (
-          <EditSteps steps={steps} setSteps={setSteps} ppeList={ppeList} />
+          <EditSteps
+            steps={steps}
+            setSteps={setSteps}
+            ppeList={ppeList}
+            handleEditStepPpe={handleEditStepPpe}
+          />
         )}
       </ScrollView>
       <BottomBar selectedScreen={screen} onSelectScreen={selectScreen} />

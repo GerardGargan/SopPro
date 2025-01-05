@@ -274,7 +274,7 @@ namespace Backend.Service.Implementation
             }
 
             // get latest sop version from db
-            var latestVersion = await _unitOfWork.SopVersions.GetAll(sv => sv.SopId == model.Id, includeProperties: "SopHazards,SopSteps", tracked: true).OrderByDescending(sv => sv.Version).FirstOrDefaultAsync();
+            var latestVersion = await _unitOfWork.SopVersions.GetAll(sv => sv.SopId == model.Id, includeProperties: "SopHazards,SopSteps,SopSteps.SopStepPpe", tracked: true).OrderByDescending(sv => sv.Version).FirstOrDefaultAsync();
 
             if (latestVersion == null)
             {
@@ -383,6 +383,11 @@ namespace Backend.Service.Implementation
                     // delete steps
                     if (stepIdsToDelete.Count > 0)
                     {
+                        // delete any ppe records associated with the steps
+                        var stepPpeToDelete = _db.SopStepPpe.Where(x => stepIdsToDelete.Contains(x.SopStepId)).ToList();
+                        _db.SopStepPpe.RemoveRange(stepPpeToDelete);
+
+                        // delete steps
                         var stepsToDelete = latestVersion.SopSteps.Where(s => stepIdsToDelete.Contains(s.Id)).ToList();
                         _unitOfWork.SopSteps.RemoveRange(stepsToDelete);
                     }
@@ -401,6 +406,40 @@ namespace Backend.Service.Implementation
                                 step.ImageUrl = modelStep.ImageUrl;
                                 step.Text = modelStep.Text;
                                 step.Title = modelStep.Title;
+                            }
+                        }
+                    }
+
+                    // update step ppe
+                    foreach (var step in latestVersion.SopSteps)
+                    {
+                        var modelStep = model.SopSteps.FirstOrDefault(s => s.Id == step.Id);
+                        if (modelStep != null)
+                        {
+                            var existingPpeIds = step.SopStepPpe.Select(x => x.PpeId).ToList();
+                            var modelPpeIds = modelStep.PpeIds ?? new List<int>();
+
+                            var ppeIdsToDelete = existingPpeIds.Where(id => !modelPpeIds.Contains(id)).ToList();
+                            var ppeIdsToAdd = modelPpeIds.Where(id => !existingPpeIds.Contains(id)).ToList();
+
+                            // delete ppe
+                            if (ppeIdsToDelete.Count > 0)
+                            {
+                                var ppeToDelete = step.SopStepPpe.Where(x => ppeIdsToDelete.Contains(x.PpeId)).ToList();
+                                _db.SopStepPpe.RemoveRange(ppeToDelete);
+                            }
+
+                            // add ppe
+                            if (ppeIdsToAdd.Count > 0)
+                            {
+                                var ppeToAdd = ppeIdsToAdd.Select(ppeId => new SopStepPpe
+                                {
+                                    SopStepId = step.Id,
+                                    PpeId = ppeId,
+                                    OrganisationId = _tenancyResolver.GetOrganisationid().Value
+                                }).ToList();
+
+                                _db.SopStepPpe.AddRange(ppeToAdd);
                             }
                         }
                     }
@@ -547,7 +586,12 @@ namespace Backend.Service.Implementation
                 ImageUrl = step.ImageUrl,
                 Text = step.Text,
                 Title = step.Title,
-                OrganisationId = _tenancyResolver.GetOrganisationid().Value
+                OrganisationId = _tenancyResolver.GetOrganisationid().Value,
+                SopStepPpe = step.PpeIds?.Select(ppeId => new SopStepPpe
+                {
+                    PpeId = ppeId,
+                    OrganisationId = _tenancyResolver.GetOrganisationid().Value
+                }).ToList()
             }).ToList();
         }
 

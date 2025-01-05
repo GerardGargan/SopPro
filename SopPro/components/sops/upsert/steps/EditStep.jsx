@@ -7,6 +7,7 @@ import ImagePickerComponent from "../../../UI/ImagePicker";
 import { Modal as PaperModal } from "react-native-paper";
 import { Portal } from "react-native-paper";
 import Toast from "react-native-toast-message";
+import { MultiSelect } from "react-native-element-dropdown";
 
 const EditStep = ({
   visible,
@@ -16,9 +17,10 @@ const EditStep = ({
   handleSetImageUrl,
   handleDeleteStep,
   ppeList,
+  handleEditStepPpe,
 }) => {
   const [showDeleteWarning, setShowDeleteWarning] = useState(false);
-  console.log("ppe", ppeList);
+
   const {
     mutate: uploadMutate,
     data: imageData,
@@ -43,6 +45,11 @@ const EditStep = ({
       });
     },
   });
+
+  function onPpeChange(item) {
+    const ppeIds = item.map((i) => i.id);
+    handleEditStepPpe(step.key, ppeIds);
+  }
 
   function handleImageUpload(imageUri, key) {
     const formData = new FormData();
@@ -113,10 +120,26 @@ const EditStep = ({
             defaultValue={step?.text}
             onChangeText={(value) => handleEditStep(step.key, "text", value)}
           />
+          <MultiSelect
+            style={styles.dropdown}
+            placeholderStyle={styles.placeholderStyle}
+            selectedTextStyle={styles.selectedTextStyle}
+            inputSearchStyle={styles.inputSearchStyle}
+            search
+            searchPlaceholder="Search..."
+            data={ppeList}
+            labelField="name"
+            valueField="id"
+            placeholder="Select PPE"
+            value={step?.ppeIds || []}
+            onChange={(item) => handleEditStepPpe(step.key, item)}
+            selectedStyle={styles.selectedStyle}
+          />
           <ImagePickerComponent
             imageUrl={step?.imageUrl}
             onSelect={(image) => handleImageUpload(image, step.key)}
           />
+
           <Button mode="text" onPress={handleClose}>
             Close
           </Button>
@@ -160,5 +183,33 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 18,
     marginBottom: 20,
+  },
+
+  container: { padding: 16 },
+  dropdown: {
+    height: 50,
+    backgroundColor: "transparent",
+    borderBottomColor: "gray",
+    borderBottomWidth: 0.5,
+  },
+  placeholderStyle: {
+    fontSize: 16,
+  },
+  selectedTextStyle: {
+    fontSize: 14,
+  },
+  iconStyle: {
+    width: 20,
+    height: 20,
+  },
+  inputSearchStyle: {
+    height: 40,
+    fontSize: 16,
+  },
+  icon: {
+    marginRight: 5,
+  },
+  selectedStyle: {
+    borderRadius: 12,
   },
 });
