@@ -73,6 +73,13 @@ const Upsert = () => {
       });
       router.replace("/(auth)");
     },
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: error.message,
+        visibilityTime: 3000,
+      });
+    },
   });
 
   const {
@@ -90,6 +97,13 @@ const Upsert = () => {
         visibilityTime: 3000,
       });
       router.replace("/(auth)");
+    },
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: error.message,
+        visibilityTime: 3000,
+      });
     },
   });
 

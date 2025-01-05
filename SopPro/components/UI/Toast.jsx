@@ -22,6 +22,7 @@ export default function ToastWithInsets() {
           <ErrorToast
             {...props}
             style={{
+              borderLeftColor: "red",
               marginTop: insets.top,
             }}
           />
