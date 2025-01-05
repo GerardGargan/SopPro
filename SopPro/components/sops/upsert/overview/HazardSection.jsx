@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from "react-native";
 import React, { useState } from "react";
 import HazardItem from "./HazardItem";
 import { Button, Modal, Portal, TextInput } from "react-native-paper";
-
+import { Picker } from "@react-native-picker/picker";
 const HazardSection = ({
   hazards,
   selectedHazard,
@@ -95,6 +95,20 @@ const HazardSection = ({
               handleUpdateHazard(selectedHazard, "controlMeasure", text)
             }
           />
+          <Text>Risk level</Text>
+          <Picker
+            selectedValue={
+              hazards.find((hazard) => hazard.key === selectedHazard)
+                ?.riskLevel || 1
+            }
+            onValueChange={(value) =>
+              handleUpdateHazard(selectedHazard, "riskLevel", value)
+            }
+          >
+            <Picker.Item label="Low" value={1} />
+            <Picker.Item label="Medium" value={2} />
+            <Picker.Item label="High" value={3} />
+          </Picker>
           <Button mode="text" onPress={() => setSelectedHazard(null)}>
             Close
           </Button>
