@@ -65,6 +65,7 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ISopService, SopService>();
 builder.Services.AddScoped<IDepartmentService, DepartmentService>();
+builder.Services.AddScoped<IPpeService, PpeService>();
 builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddScoped<ITenancyResolver, TenancyResolver>();
 builder.Services.AddSingleton<IBlobService, BlobService>();
