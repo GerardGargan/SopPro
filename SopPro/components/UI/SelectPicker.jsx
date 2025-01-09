@@ -5,6 +5,7 @@ import { View } from "react-native";
 
 const SelectPicker = ({ children, ...props }) => {
   const theme = useTheme();
+
   return (
     <View
       style={{
