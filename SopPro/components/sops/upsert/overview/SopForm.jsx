@@ -2,6 +2,7 @@ import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { TextInput } from "react-native-paper";
 import { Picker } from "@react-native-picker/picker";
+import SelectPicker from "../../../UI/SelectPicker";
 const SopForm = ({
   selectedDepartment,
   departments,
@@ -30,7 +31,7 @@ const SopForm = ({
         onChangeText={(text) => handleDescriptionChange(text)}
         scrollEnabled={false}
       />
-      <Picker
+      <SelectPicker
         selectedValue={selectedDepartment}
         onValueChange={handleSelectDepartment}
         mode="dropdown"
@@ -45,7 +46,7 @@ const SopForm = ({
             />
           );
         })}
-      </Picker>
+      </SelectPicker>
     </>
   );
 };

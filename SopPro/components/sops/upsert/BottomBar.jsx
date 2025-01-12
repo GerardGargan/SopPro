@@ -15,7 +15,7 @@ const BottomBar = ({ selectedScreen, onSelectScreen }) => {
         styles.bottom,
         {
           height: BOTTOM_APPBAR_HEIGHT + bottom,
-          backgroundColor: theme.colors.elevation.level2,
+          backgroundColor: theme.colors.surface,
         },
       ]}
       safeAreaInsets={{ bottom }}
@@ -24,7 +24,9 @@ const BottomBar = ({ selectedScreen, onSelectScreen }) => {
         <Pressable
           style={[
             styles.buttonContainer,
-            selectedScreen === "overview" && styles.selected,
+            selectedScreen === "overview" && {
+              backgroundColor: theme.colors.surfaceVariant,
+            },
           ]}
           onPress={() => onSelectScreen("overview")}
         >
@@ -34,7 +36,9 @@ const BottomBar = ({ selectedScreen, onSelectScreen }) => {
         <Pressable
           style={[
             styles.buttonContainer,
-            selectedScreen === "steps" && styles.selected,
+            selectedScreen === "steps" && {
+              backgroundColor: theme.colors.surfaceVariant,
+            },
           ]}
           onPress={() => onSelectScreen("steps")}
         >
@@ -62,9 +66,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-  },
-  selected: {
-    backgroundColor: "lightgrey",
   },
   buttonText: {
     fontSize: 16,

@@ -11,7 +11,7 @@ import { Provider } from "react-redux";
 import store from "../store/index";
 import Toast from "../components/UI/Toast";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-
+import { customLightTheme, customDarkTheme } from "../util/customTheme";
 const queryClient = new QueryClient();
 
 export { ErrorBoundary } from "expo-router";
@@ -42,7 +42,7 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <Provider store={store}>
         <QueryClientProvider client={queryClient}>
-          <PaperProvider>
+          <PaperProvider theme={customLightTheme}>
             <RootLayoutNav />
             <Toast />
           </PaperProvider>

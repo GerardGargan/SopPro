@@ -2,7 +2,10 @@ import { StyleSheet, Text, View } from "react-native";
 import React, { useState } from "react";
 import HazardItem from "./HazardItem";
 import { Button, Modal, Portal, TextInput } from "react-native-paper";
+import SelectPicker from "../../../UI/SelectPicker";
 import { Picker } from "@react-native-picker/picker";
+import { useTheme } from "react-native-paper";
+
 const HazardSection = ({
   hazards,
   selectedHazard,
@@ -13,6 +16,8 @@ const HazardSection = ({
   handleUpdateHazard,
 }) => {
   const [showDeleteWarning, setShowDeleteWarning] = useState(false);
+
+  const theme = useTheme();
 
   function deleteHazard() {
     handleRemoveHazard(selectedHazard);
@@ -96,7 +101,7 @@ const HazardSection = ({
             }
           />
           <Text>Risk level</Text>
-          <Picker
+          <SelectPicker
             selectedValue={
               hazards.find((hazard) => hazard.key === selectedHazard)
                 ?.riskLevel || 1
@@ -108,7 +113,7 @@ const HazardSection = ({
             <Picker.Item label="Low" value={1} />
             <Picker.Item label="Medium" value={2} />
             <Picker.Item label="High" value={3} />
-          </Picker>
+          </SelectPicker>
           <Button mode="text" onPress={() => setSelectedHazard(null)}>
             Close
           </Button>

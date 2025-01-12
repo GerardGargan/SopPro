@@ -7,7 +7,7 @@ import ImagePickerComponent from "../../../UI/ImagePicker";
 import { Modal as PaperModal } from "react-native-paper";
 import { Portal } from "react-native-paper";
 import Toast from "react-native-toast-message";
-import { MultiSelect } from "react-native-element-dropdown";
+import MultiSelectPicker from "../../../UI/MultiSelectPicker";
 
 const EditStep = ({
   visible,
@@ -120,20 +120,10 @@ const EditStep = ({
             defaultValue={step?.text}
             onChangeText={(value) => handleEditStep(step.key, "text", value)}
           />
-          <MultiSelect
-            style={styles.dropdown}
-            placeholderStyle={styles.placeholderStyle}
-            selectedTextStyle={styles.selectedTextStyle}
-            inputSearchStyle={styles.inputSearchStyle}
-            search
-            searchPlaceholder="Search..."
+          <MultiSelectPicker
             data={ppeList}
-            labelField="name"
-            valueField="id"
-            placeholder="Select PPE"
-            value={step?.ppeIds || []}
             onChange={(item) => handleEditStepPpe(step.key, item)}
-            selectedStyle={styles.selectedStyle}
+            value={step?.ppeIds}
           />
           <ImagePickerComponent
             imageUrl={step?.imageUrl}
@@ -184,32 +174,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     marginBottom: 20,
   },
-
   container: { padding: 16 },
-  dropdown: {
-    height: 50,
-    backgroundColor: "transparent",
-    borderBottomColor: "gray",
-    borderBottomWidth: 0.5,
-  },
-  placeholderStyle: {
-    fontSize: 16,
-  },
-  selectedTextStyle: {
-    fontSize: 14,
-  },
   iconStyle: {
     width: 20,
     height: 20,
   },
-  inputSearchStyle: {
-    height: 40,
-    fontSize: 16,
-  },
   icon: {
     marginRight: 5,
-  },
-  selectedStyle: {
-    borderRadius: 12,
   },
 });
