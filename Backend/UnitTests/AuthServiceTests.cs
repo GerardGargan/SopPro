@@ -18,6 +18,8 @@ using Microsoft.Extensions.Configuration;
 using Backend.Models.Dto;
 using Backend.Utility;
 using System.Net;
+using Microsoft.AspNetCore.Identity.Data;
+using Backend.Repository.Implementation;
 
 namespace Backend.Tests
 {
@@ -240,6 +242,64 @@ namespace Backend.Tests
             var exception = Assert.ThrowsAsync<Exception>(async () => await _authService.SignupOrganisation(request, _modelState));
             Assert.That(exception.Message, Is.EqualTo("Password does not meet minimum requirements"));
 
+        }
+
+        [Test]
+        public async Task Login_WithValidCredentials_ShouldSucceed()
+        {
+            // Arrange
+            var loginRequest = new LoginRequestDTO()
+            {
+                Email = "test@example.com",
+                Password = "Test123!"
+            };
+
+            var applicationUser = new ApplicationUser()
+            {
+                Id = "userId",
+                Email = loginRequest.Email,
+                UserName = loginRequest.Email
+            };
+
+            var roles = new List<string> { StaticDetails.Role_Admin };
+            var expectedToken = "test-jwt-token";
+
+            _unitOfWorkMock.Setup(uow => uow.ApplicationUsers.GetAsync(It.IsAny<Expression<Func<ApplicationUser, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .ReturnsAsync(applicationUser);
+
+            _userManagerMock.Setup(um => um.CheckPasswordAsync(applicationUser, loginRequest.Password))
+                .ReturnsAsync(true);
+
+            _userManagerMock.Setup(um => um.GetRolesAsync(applicationUser))
+                .ReturnsAsync(roles);
+
+            _jwtServiceMock.Setup(jwt => jwt.GenerateAuthToken(applicationUser, roles, It.IsAny<string>(), It.IsAny<int>()))
+                .Returns(expectedToken);
+
+            // Act
+            var result = await _authService.Login(loginRequest, _modelState);
+
+            // Assert
+            Assert.That(result.IsSuccess, Is.True);
+
+        }
+
+        [Test]
+        public async Task Login_WithInvalidEmail_ShouldThrowException()
+        {
+            // Arrange
+            var loginRequest = new LoginRequestDTO()
+            {
+                Email = "invalid@example.com",
+                Password = "Password.01!"
+            };
+
+            _unitOfWorkMock.Setup(uow => uow.ApplicationUsers.GetAsync(It.IsAny<Expression<Func<ApplicationUser, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .ReturnsAsync((ApplicationUser)null);
+
+            // Act & Assert
+            var exception = Assert.ThrowsAsync<Exception>(async () => await _authService.Login(loginRequest, _modelState));
+            Assert.That(exception.Message, Is.EqualTo("Email or password is incorrect"));
         }
     }
 }
