@@ -1,13 +1,10 @@
-﻿using NUnit.Framework;
-using Moq;
+﻿using Moq;
 using Backend.Data;
 using Backend.Repository.Interface;
-using Backend.Models;
 using Backend.Models.DatabaseModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Options;
-using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 using Microsoft.AspNetCore.Http;
@@ -18,8 +15,6 @@ using Microsoft.Extensions.Configuration;
 using Backend.Models.Dto;
 using Backend.Utility;
 using System.Net;
-using Microsoft.AspNetCore.Identity.Data;
-using Backend.Repository.Implementation;
 
 namespace Backend.Tests
 {
