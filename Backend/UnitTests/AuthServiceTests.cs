@@ -301,5 +301,35 @@ namespace Backend.Tests
             var exception = Assert.ThrowsAsync<Exception>(async () => await _authService.Login(loginRequest, _modelState));
             Assert.That(exception.Message, Is.EqualTo("Email or password is incorrect"));
         }
+
+        [Test]
+        public async Task Login_WithInvalidPassword_ShouldThrowException()
+        {
+            // Arrange
+            var loginRequest = new LoginRequestDTO()
+            {
+                Email = "test@example.com",
+                Password = "InvalidPassword123!"
+            };
+
+            var applicationUser = new ApplicationUser()
+            {
+                Id = "userId",
+                Email = loginRequest.Email,
+                UserName = loginRequest.Email
+            };
+
+            _unitOfWorkMock.Setup(uow => uow.ApplicationUsers.GetAsync(It.IsAny<Expression<Func<ApplicationUser, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .ReturnsAsync(applicationUser);
+
+            _userManagerMock.Setup(um => um.CheckPasswordAsync(applicationUser, loginRequest.Password))
+                .ReturnsAsync(false);
+
+            // Act & Assert
+
+            var exception = Assert.ThrowsAsync<Exception>(async () => await _authService.Login(loginRequest, _modelState));
+            Assert.That(exception.Message, Is.EqualTo("Email or password is incorrect"));
+
+        }
     }
 }
