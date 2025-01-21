@@ -77,5 +77,21 @@ namespace Backend.Controllers
             var apiResponse = await _sopService.UploadImage(file);
             return Ok(apiResponse);
         }
+
+        [HttpGet]
+        [Route("{id:int}/favourite")]
+        public async Task<IActionResult> FavouriteSop(int id)
+        {
+            var apiResponse = await _sopService.AddToFavourites(id);
+            return Ok(apiResponse);
+        }
+
+        [HttpDelete]
+        [Route("{id:int}/favourite")]
+        public async Task<IActionResult> UnfavouriteSop(int id)
+        {
+            var apiResponse = await _sopService.RemoveFromFavourites(id);
+            return Ok(apiResponse);
+        }
     }
 }
