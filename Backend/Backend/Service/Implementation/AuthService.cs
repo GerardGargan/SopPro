@@ -42,7 +42,7 @@ namespace Backend.Service.Implementation
             ApplicationUser userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(user => user.UserName.ToLower() == model.Email.ToLower());
             bool isValid = await _userManager.CheckPasswordAsync(userFromDb, model.Password);
 
-            if(userFromDb == null || !isValid)
+            if (userFromDb == null || !isValid)
             {
                 throw new Exception("Email or password is incorrect");
             }
@@ -50,7 +50,7 @@ namespace Backend.Service.Implementation
             var roles = await _userManager.GetRolesAsync(userFromDb);
 
             // Generate JWT Token
-            
+
 
             string token = _jwtService.GenerateAuthToken(userFromDb, roles, _appSettings.JwtSecret, _appSettings.JwtAuthExpireDays);
 
@@ -60,7 +60,7 @@ namespace Backend.Service.Implementation
                 Token = token,
             };
 
-            if(loginResponse.Email == null || string.IsNullOrWhiteSpace(loginResponse.Token))
+            if (loginResponse.Email == null || string.IsNullOrWhiteSpace(loginResponse.Token))
             {
                 throw new Exception("Email or password is incorrect");
             }
@@ -153,7 +153,7 @@ namespace Backend.Service.Implementation
                 invitationFromDb.Status = Status.Accepted;
 
             });
-            
+
             return new ApiResponse
             {
                 StatusCode = HttpStatusCode.OK,
@@ -177,7 +177,7 @@ namespace Backend.Service.Implementation
                 throw new Exception("User already exists");
             }
 
-            if(orgFromDb == null)
+            if (orgFromDb == null)
             {
                 throw new Exception("Organisation does not exist");
             }
@@ -220,10 +220,10 @@ namespace Backend.Service.Implementation
         public async Task<ApiResponse> SignupOrganisation(OrganisationSignupRequest model, ModelStateDictionary modelState)
         {
             // Sanitise inputs
-            model.OrganisationName = model.OrganisationName.Trim();
-            model.Email = model.Email.Trim().ToLower();
-            model.Forename = model.Forename.Trim();
-            model.Surname = model.Surname.Trim();
+            model.OrganisationName = model.OrganisationName?.Trim();
+            model.Email = model.Email?.Trim().ToLower();
+            model.Forename = model.Forename?.Trim();
+            model.Surname = model.Surname?.Trim();
 
             // Perform validation and error handling
             if (!modelState.IsValid)
