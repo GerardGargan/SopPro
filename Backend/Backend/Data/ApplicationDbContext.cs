@@ -23,6 +23,7 @@ namespace Backend.Data
         public DbSet<Ppe> Ppe { get; set; }
         public DbSet<SopStepPpe> SopStepPpe { get; set; }
         public DbSet<SopHazard> SopHazards { get; set; }
+        public DbSet<SopUserFavourite> SopUserFavourites { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -154,6 +155,28 @@ namespace Backend.Data
                 .HasOne(h => h.SopVersion)
                 .WithMany(s => s.SopHazards)
                 .HasForeignKey(h => h.SopVersionId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
+
+            // Relationships for SopUserFavourites
+            modelBuilder.Entity<SopUserFavourite>()
+                .HasOne(s => s.Organisation)
+                .WithMany(o => o.SopUserFavourites)
+                .HasForeignKey(s => s.OrganisationId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
+
+            modelBuilder.Entity<SopUserFavourite>()
+                .HasOne(s => s.Sop)
+                .WithMany(s => s.SopUserFavourites)
+                .HasForeignKey(s => s.SopId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
+
+            modelBuilder.Entity<SopUserFavourite>()
+                .HasOne(s => s.ApplicationUser)
+                .WithMany(s => s.SopUserFavourites)
+                .HasForeignKey(s => s.ApplicationUserId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
         }

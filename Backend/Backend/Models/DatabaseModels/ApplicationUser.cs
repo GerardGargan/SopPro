@@ -12,5 +12,6 @@ namespace Backend.Models.DatabaseModels
         public Organisation Organisation { get; set; }
         public List<SopVersion> AuthoredSopVersions { get; set; }
         public List<SopVersion> ApprovedSopVersions { get; set; }
+        public List<SopUserFavourite> SopUserFavourites { get; set; }
     }
 }
