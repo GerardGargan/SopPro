@@ -1,7 +1,7 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
 import { Icon, RadioButton } from "react-native-paper";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import SopStatusChip from "./SopStatusChip";
 
@@ -47,7 +47,10 @@ const SopCard = ({ sop, toggleSelect, selected, isSelectedItems }) => {
       >
         <View style={styles.textContainer}>
           <Text style={styles.refText} numberOfLines={1}>
-            Ref: {sop.reference} - V{sop.version}
+            Ref: {sop.reference} - V{sop.version}{" "}
+            {sop.isFavourite && (
+              <MaterialCommunityIcons name="star" size={13} color="gold" />
+            )}
           </Text>
           <Text style={styles.titleText} numberOfLines={1}>
             {sop.title}
