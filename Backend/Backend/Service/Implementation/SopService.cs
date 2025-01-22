@@ -111,6 +111,10 @@ namespace Backend.Service.Implementation
                 query = query.Where(sop => sop.Reference.Contains(search) || sop.SopVersions.Any(sv => sv.Title.Contains(search) || sv.Description.Contains(search)));
             }
 
+            // Get a list of user favourited sop ids
+            var userId = _tenancyResolver.GetUserId();
+            var favouriteSopIds = await _unitOfWork.SopUserFavourites.GetAll(f => f.ApplicationUserId == userId).Select(f => f.SopId).ToListAsync();
+
             var sops = await query
             .OrderByDescending(sop => sop.Id)
             .Skip((page - 1) * pageSize)
@@ -120,6 +124,7 @@ namespace Backend.Service.Implementation
                 Reference = sop.Reference,
                 DepartmentId = sop.DepartmentId,
                 isAiGenerated = sop.isAiGenerated,
+                isFavourite = favouriteSopIds.Contains(sop.Id),
                 SopVersions = sop.SopVersions.Select(sopVersion => new SopVersionDto
                 {
                     Id = sopVersion.Id,

@@ -13,6 +13,7 @@ namespace Backend.Models.Dto
         public string ImageUrl { get; set; }
         public bool? isAiGenerated { get; set; }
         public int? Version { get; set; }
+        public bool? isFavourite { get; set; }
         public List<SopStepDto> SopSteps { get; set; }
         public List<SopHazardDto> SopHazards { get; set; }
         public List<SopVersionDto> SopVersions { get; set; }
