@@ -36,6 +36,24 @@ const _layout = () => {
     setIsSheetOpen(true);
   };
 
+  useFocusEffect(
+    useCallback(() => {
+      const onBackPress = () => {
+        if (isSheetOpen) {
+          closeBottomSheet();
+          return true; // Prevent default back button behavior
+        }
+        return false; // Allow default back button behavior
+      };
+
+      BackHandler.addEventListener("hardwareBackPress", onBackPress);
+
+      return () => {
+        BackHandler.removeEventListener("hardwareBackPress", onBackPress);
+      };
+    }, [isSheetOpen])
+  );
+
   return (
     <>
       <SafeAreaHeader />
