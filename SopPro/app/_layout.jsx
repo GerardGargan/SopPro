@@ -5,7 +5,6 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 import { StatusBar } from "expo-status-bar";
 import { PaperProvider } from "react-native-paper";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import "react-native-reanimated";
 import { Provider } from "react-redux";
@@ -40,18 +39,16 @@ export default function RootLayout() {
   }
 
   return (
-    <GestureHandlerRootView>
-      <SafeAreaProvider>
-        <Provider store={store}>
-          <QueryClientProvider client={queryClient}>
-            <PaperProvider theme={customLightTheme}>
-              <RootLayoutNav />
-              <Toast />
-            </PaperProvider>
-          </QueryClientProvider>
-        </Provider>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <SafeAreaProvider>
+      <Provider store={store}>
+        <QueryClientProvider client={queryClient}>
+          <PaperProvider theme={customLightTheme}>
+            <RootLayoutNav />
+            <Toast />
+          </PaperProvider>
+        </QueryClientProvider>
+      </Provider>
+    </SafeAreaProvider>
   );
 }
 
