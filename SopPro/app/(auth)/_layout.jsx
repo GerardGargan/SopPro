@@ -45,7 +45,12 @@ export default function RootLayout() {
   useEffect(() => {
     const checkAuth = async () => {
       const token = await AsyncStorage.getItem("authToken");
-      dispatch(authActions.initialiseAuth(token));
+      const userInfo = await AsyncStorage.getItem("userInfo");
+      const payload = {
+        token,
+        userInfo: JSON.parse(userInfo),
+      };
+      dispatch(authActions.initialiseAuth(payload));
       setAuthChecked(true);
     };
     checkAuth();
