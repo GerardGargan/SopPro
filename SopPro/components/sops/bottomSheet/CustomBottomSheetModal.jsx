@@ -8,9 +8,13 @@ import {
 import BottomSheetCard from "./BottomSheetCard";
 import { Divider } from "react-native-paper";
 import { useRouter } from "expo-router";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { addSopToFavourites } from "../../../util/httpRequests";
+import Toast from "react-native-toast-message";
 
 const CustomBottomSheetModal = forwardRef((props, ref) => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const snapPoints = useMemo(() => ["60%"], []);
   const sop = props.sop;
 
@@ -29,6 +33,29 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     []
   );
 
+  const { mutate: addFavouriteMutation } = useMutation({
+    mutationFn: addSopToFavourites,
+    onSuccess: () => {
+      Toast.show({
+        type: "success",
+        text1: "Added to favourites",
+        visibilityTime: 3000,
+      });
+      queryClient.invalidateQueries("sops");
+    },
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: error.message,
+        visibilityTime: 3000,
+      });
+    },
+  });
+
+  // TODO -> Later organise first by creating each card and storing in variables
+  // then group into admin and normal user cards/stacks
+  // then render based on the user role
+
   function handleEditPress() {
     closeSheet();
     router.push({
@@ -41,13 +68,29 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
 
   function handleAddToFavouritesPress() {
     closeSheet();
-    console.log("Add to favourites");
+    addFavouriteMutation(sop.id);
   }
 
   function handleRemoveFromFavouritesPress() {
     closeSheet();
     console.log("Remove from favourites");
   }
+
+  const favouritesCard = sop?.isFavourite ? (
+    <BottomSheetCard
+      icon="star"
+      solid
+      title="Remove from favourites"
+      onPress={handleRemoveFromFavouritesPress}
+    />
+  ) : (
+    <BottomSheetCard
+      icon="star"
+      solid
+      title="Add to favourites"
+      onPress={handleAddToFavouritesPress}
+    />
+  );
 
   return (
     <BottomSheetModal
@@ -61,11 +104,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
         <Text style={styles.headerText}>{sop?.title}</Text>
         <Divider style={styles.divider} />
         <BottomSheetCard icon="edit" title="Edit" onPress={handleEditPress} />
-        <BottomSheetCard
-          icon="star"
-          title="Add to favourites"
-          onPress={handleAddToFavouritesPress}
-        />
+        {favouritesCard}
       </BottomSheetView>
     </BottomSheetModal>
   );

@@ -142,3 +142,15 @@ export async function fetchPpe() {
     throw error;
   }
 }
+
+export async function addSopToFavourites(id) {
+  try {
+    const response = await api.get(`/sop/${id}/favourite`);
+    return response.data;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error adding SOP to favourites"
+    );
+    throw error;
+  }
+}
