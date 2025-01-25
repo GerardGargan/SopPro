@@ -11,6 +11,7 @@ import { useRouter } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   addSopToFavourites,
+  deleteSops,
   removeSopFromFavourites,
 } from "../../../util/httpRequests";
 import Toast from "react-native-toast-message";
@@ -74,9 +75,29 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     },
   });
 
-  // TODO -> Later organise first by creating each card and storing in variables
+  const { mutate: deleteSopsMutation } = useMutation({
+    mutationFn: deleteSops,
+    onSuccess: () => {
+      Toast.show({
+        type: "success",
+        text1: "Deleted successfully",
+        visibilityTime: 3000,
+      });
+      queryClient.invalidateQueries("sops");
+    },
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: error.message,
+        visibilityTime: 3000,
+      });
+    },
+  });
+
+  // TODO -> Later organise first by creating each card and storing in variables,
+  // handle any logic here on which version to show (e.g. add or remove favourite based on state)
   // then group into admin and normal user cards/stacks
-  // then render based on the user role
+  // then render stack based on the user role
 
   function handleEditPress() {
     closeSheet();
@@ -98,17 +119,32 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     removeFavouriteMutation(sop.id);
   }
 
+  function handleDeletePress() {
+    closeSheet();
+    deleteSopsMutation([sop.id]);
+  }
+
+  const editCard = (
+    <BottomSheetCard icon="edit" title="Edit" onPress={handleEditPress} />
+  );
+
+  const deleteCard = (
+    <BottomSheetCard
+      icon="trash-alt"
+      title="Delete"
+      onPress={handleDeletePress}
+    />
+  );
+
   const favouritesCard = sop?.isFavourite ? (
     <BottomSheetCard
       icon="star"
-      solid
       title="Remove from favourites"
       onPress={handleRemoveFromFavouritesPress}
     />
   ) : (
     <BottomSheetCard
       icon="star"
-      solid
       title="Add to favourites"
       onPress={handleAddToFavouritesPress}
     />
@@ -125,8 +161,9 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
       <BottomSheetView style={styles.contentContainer}>
         <Text style={styles.headerText}>{sop?.title}</Text>
         <Divider style={styles.divider} />
-        <BottomSheetCard icon="edit" title="Edit" onPress={handleEditPress} />
+        {editCard}
         {favouritesCard}
+        {deleteCard}
       </BottomSheetView>
     </BottomSheetModal>
   );

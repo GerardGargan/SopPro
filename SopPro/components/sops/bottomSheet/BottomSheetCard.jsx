@@ -24,6 +24,7 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   icon: {
+    width: 30,
     marginRight: 16,
   },
   optionText: {
