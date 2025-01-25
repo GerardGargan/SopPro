@@ -1,12 +1,10 @@
 import { Text, View } from "react-native";
 import React, { useCallback, useRef } from "react";
-import { SafeAreaView } from "react-native-safe-area-context";
 import Fab from "../../../components/sops/fab";
 import { useIsFocused } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { Button } from "react-native-paper";
-import Toast from "react-native-toast-message";
-import CustomBottomSheetModal from "../../../components/UI/CustomBottomSheetModal";
+import CustomBottomSheetModal from "../../../components/sops/bottomSheet/CustomBottomSheetModal";
 
 const index = () => {
   const isFocused = useIsFocused();
