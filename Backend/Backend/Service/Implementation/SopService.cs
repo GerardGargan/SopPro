@@ -504,11 +504,17 @@ namespace Backend.Service.Implementation
             var sopStepPpe = _db.SopStepPpe.Where(x => sopStepIds.Contains(x.SopStepId)).ToList();
 
             var imageUrisToDelete = sopSteps.Where(x => !string.IsNullOrWhiteSpace(x.ImageUrl)).Select(x => x.ImageUrl).ToList();
-
+            var UserSopFavourites = await _unitOfWork.SopUserFavourites.GetAll(x => sopIds.Contains(x.SopId)).ToListAsync();
             // perform deletion in order
 
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
+                // delete user sop favourite records
+                if (UserSopFavourites.Count > 0)
+                {
+                    _unitOfWork.SopUserFavourites.RemoveRange(UserSopFavourites);
+                }
+
                 // delete sop step ppe
                 if (sopStepPpe.Count > 0)
                 {
