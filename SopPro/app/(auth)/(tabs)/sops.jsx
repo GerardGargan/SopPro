@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { Appbar, Button, Modal, Portal } from "react-native-paper";
@@ -8,6 +8,8 @@ import SearchInput from "../../../components/UI/SearchInput.jsx";
 import SopList from "../../../components/sops/SopList.jsx";
 import { deleteSops } from "../../../util/httpRequests.js";
 import Toast from "react-native-toast-message";
+import CustomBottomSheetModal from "../../../components/sops/bottomSheet/CustomBottomSheetModal.jsx";
+import { useRef } from "react";
 
 const APPBAR_HEIGHT = 50;
 
@@ -16,10 +18,12 @@ const Sops = () => {
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState([]);
   const [showDeleteWarning, setShowDeleteWarning] = useState(false);
+  const [bottomSheetSelectedSop, setBottomSheetSelectedSop] = useState(null);
   const statusFilter = 1;
 
   const isFocused = useIsFocused();
   const queryClient = useQueryClient();
+  const bottomSheetModalRef = useRef();
 
   const { mutate: mutateDelete } = useMutation({
     mutationFn: deleteSops,
@@ -80,6 +84,11 @@ const Sops = () => {
     resetSelected();
   }
 
+  const handlePresentModalPress = useCallback((sop) => {
+    setBottomSheetSelectedSop(sop);
+    bottomSheetModalRef.current?.present();
+  }, []);
+
   return (
     <>
       <Portal>
@@ -123,9 +132,15 @@ const Sops = () => {
           selectedIds={selectedIds}
           selectSop={selectSop}
           deselectSop={deselectSop}
+          openBottomSheet={handlePresentModalPress}
         />
         {isFocused && <Fab />}
       </View>
+
+      <CustomBottomSheetModal
+        ref={bottomSheetModalRef}
+        sop={bottomSheetSelectedSop}
+      />
     </>
   );
 };

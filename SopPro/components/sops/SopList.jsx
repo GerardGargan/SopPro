@@ -15,6 +15,7 @@ const SopList = ({
   selectedIds,
   selectSop,
   deselectSop,
+  openBottomSheet,
 }) => {
   const {
     data,
@@ -100,6 +101,7 @@ const SopList = ({
             toggleSelect={toggleSelect}
             selected={selectedIds.includes(item.id)}
             isSelectedItems={selectedIds.length > 0}
+            openBottomSheet={openBottomSheet}
           />
         )}
         onEndReached={loadMore}

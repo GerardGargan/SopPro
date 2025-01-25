@@ -2,22 +2,21 @@ import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
 import { Icon, RadioButton } from "react-native-paper";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
 import SopStatusChip from "./SopStatusChip";
 
-const SopCard = ({ sop, toggleSelect, selected, isSelectedItems }) => {
-  const router = useRouter();
+const SopCard = ({
+  sop,
+  toggleSelect,
+  selected,
+  isSelectedItems,
+  openBottomSheet,
+}) => {
   function onPress() {
     if (selected || isSelectedItems) {
       return toggleSelect(sop.id);
     }
 
-    router.push({
-      pathname: "/(auth)/upsert/[id]",
-      params: {
-        id: sop.id,
-      },
-    });
+    openBottomSheet(sop);
   }
 
   let image = <Icon source="camera" size={25} />;
