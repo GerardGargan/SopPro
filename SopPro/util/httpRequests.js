@@ -166,3 +166,15 @@ export async function removeSopFromFavourites(id) {
     throw error;
   }
 }
+
+export async function approveSop(id) {
+  try {
+    const response = await api.get(`/sop/${id}/approve`);
+    return response.data;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error approving sop"
+    );
+    throw error;
+  }
+}

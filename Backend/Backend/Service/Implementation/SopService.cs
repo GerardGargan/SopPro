@@ -637,6 +637,36 @@ namespace Backend.Service.Implementation
             };
         }
 
+        public async Task<ApiResponse> ApproveSop(int id)
+        {
+            var sopEntity = await _unitOfWork.Sops.GetAsync(s => s.Id == id, includeProperties: "SopVersions", tracked: true);
+            if (sopEntity == null)
+            {
+                throw new Exception("Sop not found");
+            }
+
+            var latestSopVersion = sopEntity.SopVersions
+                .OrderByDescending(sv => sv.Version)
+                .FirstOrDefault();
+
+            if (latestSopVersion == null)
+            {
+                throw new Exception("No SopVersion found");
+            }
+
+            latestSopVersion.Status = SopStatus.Approved;
+
+            await _unitOfWork.SaveAsync();
+
+            return new ApiResponse()
+            {
+                IsSuccess = true,
+                StatusCode = HttpStatusCode.OK,
+                SuccessMessage = "Sop approved"
+            };
+
+        }
+
         public async Task<ApiResponse> UploadImage(FileDto file)
         {
             if (file.File == null)

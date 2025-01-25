@@ -11,6 +11,7 @@ import { useRouter } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
   addSopToFavourites,
+  approveSop,
   deleteSops,
   removeSopFromFavourites,
 } from "../../../util/httpRequests";
@@ -97,6 +98,25 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     },
   });
 
+  const { mutate: mutateApproveSop } = useMutation({
+    mutationFn: approveSop,
+    onSuccess: () => {
+      Toast.show({
+        type: "success",
+        text1: "Sop approved",
+        visibilityTime: 3000,
+      });
+      queryClient.invalidateQueries("sops");
+    },
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: error.message,
+        visibilityTime: 3000,
+      });
+    },
+  });
+
   function handleEditPress() {
     closeSheet();
     router.push({
@@ -105,6 +125,11 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
         id: sop.id,
       },
     });
+  }
+
+  function handleApproval() {
+    closeSheet();
+    mutateApproveSop(sop.id);
   }
 
   function handleAddToFavouritesPress() {
@@ -120,11 +145,6 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
   function handleDeletePress() {
     closeSheet();
     deleteSopsMutation([sop.id]);
-  }
-
-  function handleApproval() {
-    closeSheet();
-    console.log("Approval goes here..");
   }
 
   const editCard = (
@@ -161,15 +181,33 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     />
   );
 
+  const rejectApprovalCard = (
+    <BottomSheetCard icon="times" title="Reject" onPress={() => {}} />
+  );
+
+  const requestApprovalCard = (
+    <BottomSheetCard
+      icon="check-square"
+      title="Request Approval"
+      onPress={() => {}}
+    />
+  );
+
   // Group cards based on user role
   const userCardStack = (
     <>
       {editCard}
+      {sop?.status === 1 && requestApprovalCard}
       {favouritesCard}
       {deleteCard}
     </>
   );
-  const adminCardStack = <>{approvalCard}</>;
+  const adminCardStack = (
+    <>
+      {sop?.status === 1 && approvalCard}
+      {sop?.status === 2 && rejectApprovalCard}
+    </>
+  );
 
   return (
     <BottomSheetModal

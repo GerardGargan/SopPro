@@ -1,7 +1,9 @@
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Backend.Models.DatabaseModels {
-    public class SopVersion : BaseClass {
+namespace Backend.Models.DatabaseModels
+{
+    public class SopVersion : BaseClass
+    {
         public int SopId { get; set; }
         [ForeignKey("SopId")]
         public Sop Sop { get; set; }
@@ -27,6 +29,8 @@ namespace Backend.Models.DatabaseModels {
         Draft = 1,
         InReview = 2,
         Approved = 3,
-        Archived = 4
-    } 
+        Archived = 4,
+        Rejected = 5
+
+    }
 }
