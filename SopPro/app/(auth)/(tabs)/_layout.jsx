@@ -1,8 +1,8 @@
 import { Tabs } from "expo-router";
 import React from "react";
-import { FontAwesome5, FontAwesome6 } from "@expo/vector-icons";
+import { FontAwesome5 } from "@expo/vector-icons";
 import SafeAreaHeader from "../../../components/UI/SareAreaHeader";
-import { useTheme } from "react-native-paper";
+import { Button, useTheme } from "react-native-paper";
 
 function TabBarIcon({ ...props }) {
   return <FontAwesome5 size={28} style={{ marginBottom: -3 }} {...props} />;
@@ -10,6 +10,7 @@ function TabBarIcon({ ...props }) {
 
 const _layout = () => {
   const theme = useTheme();
+
   return (
     <>
       <SafeAreaHeader />

@@ -12,5 +12,7 @@ namespace Backend.Service.Interface
         public Task<ApiResponse<SopDto>> UpdateSop(int id, SopDto model);
         public Task<ApiResponse> DeleteSops(List<int> ids);
         public Task<ApiResponse> UploadImage(FileDto file);
+        public Task<ApiResponse> AddToFavourites(int id);
+        public Task<ApiResponse> RemoveFromFavourites(int id);
     };
 }

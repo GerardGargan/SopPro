@@ -111,6 +111,10 @@ namespace Backend.Service.Implementation
                 query = query.Where(sop => sop.Reference.Contains(search) || sop.SopVersions.Any(sv => sv.Title.Contains(search) || sv.Description.Contains(search)));
             }
 
+            // Get a list of user favourited sop ids
+            var userId = _tenancyResolver.GetUserId();
+            var favouriteSopIds = await _unitOfWork.SopUserFavourites.GetAll(f => f.ApplicationUserId == userId).Select(f => f.SopId).ToListAsync();
+
             var sops = await query
             .OrderByDescending(sop => sop.Id)
             .Skip((page - 1) * pageSize)
@@ -120,6 +124,7 @@ namespace Backend.Service.Implementation
                 Reference = sop.Reference,
                 DepartmentId = sop.DepartmentId,
                 isAiGenerated = sop.isAiGenerated,
+                isFavourite = favouriteSopIds.Contains(sop.Id),
                 SopVersions = sop.SopVersions.Select(sopVersion => new SopVersionDto
                 {
                     Id = sopVersion.Id,
@@ -499,11 +504,17 @@ namespace Backend.Service.Implementation
             var sopStepPpe = _db.SopStepPpe.Where(x => sopStepIds.Contains(x.SopStepId)).ToList();
 
             var imageUrisToDelete = sopSteps.Where(x => !string.IsNullOrWhiteSpace(x.ImageUrl)).Select(x => x.ImageUrl).ToList();
-
+            var UserSopFavourites = await _unitOfWork.SopUserFavourites.GetAll(x => sopIds.Contains(x.SopId)).ToListAsync();
             // perform deletion in order
 
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
+                // delete user sop favourite records
+                if (UserSopFavourites.Count > 0)
+                {
+                    _unitOfWork.SopUserFavourites.RemoveRange(UserSopFavourites);
+                }
+
                 // delete sop step ppe
                 if (sopStepPpe.Count > 0)
                 {
@@ -545,9 +556,85 @@ namespace Backend.Service.Implementation
                 Uri uri = new Uri(blobUrl);
                 string blobName = string.Join("", uri.Segments.Skip(2));
                 var deleted = await _blobService.DeleteBlob(blobName, _appSettings.AzureBlobStorageContainer);
-            };
+            }
+            ;
 
             return response;
+        }
+
+        /// <summary>
+        /// Adds a sop to the user's favourites
+        /// </summary>
+        /// <param name="id">The ID of the SOP to be added</param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public async Task<ApiResponse> AddToFavourites(int id)
+        {
+            // Check that the sop exists
+            var sop = await _unitOfWork.Sops.GetAsync(s => s.Id == id);
+            if (sop == null)
+            {
+                throw new Exception("Sop not found");
+            }
+
+            // Get the user id
+            var userId = _tenancyResolver.GetUserId();
+
+            var SopUserFavourite = new SopUserFavourite
+            {
+                SopId = id,
+                ApplicationUserId = userId,
+                OrganisationId = _tenancyResolver.GetOrganisationid().Value
+            };
+
+            // Check if it is a duplicate
+            var duplicateLookup = await _unitOfWork.SopUserFavourites.GetAsync(f => f.SopId == id && f.ApplicationUserId == userId);
+            if (duplicateLookup != null)
+            {
+                throw new Exception("Sop is already favourited");
+            }
+
+            // Add the sop to favourites
+            await _unitOfWork.SopUserFavourites.AddAsync(SopUserFavourite);
+            await _unitOfWork.SaveAsync();
+
+            return new ApiResponse
+            {
+                IsSuccess = true,
+                StatusCode = HttpStatusCode.OK,
+                SuccessMessage = "Sop added to favourites"
+            };
+        }
+
+        /// <summary>
+        /// Removes a sop from the user's favourites
+        /// </summary>
+        /// <param name="id">The ID of the SOP to be removed</param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        public async Task<ApiResponse> RemoveFromFavourites(int id)
+        {
+            // Get the user id
+            var userId = _tenancyResolver.GetUserId();
+
+            // Check that the sop favourite record exists
+            var sopFavourite = await _unitOfWork.SopUserFavourites.GetAsync(x => x.SopId == id && x.ApplicationUserId == userId);
+
+            if (sopFavourite == null)
+            {
+                throw new Exception("Sop favourite not found");
+            }
+
+            // delete the record
+            _unitOfWork.SopUserFavourites.Remove(sopFavourite);
+            await _unitOfWork.SaveAsync();
+
+            return new ApiResponse
+            {
+                IsSuccess = true,
+                StatusCode = HttpStatusCode.OK,
+                SuccessMessage = "Sop removed from favourites"
+            };
         }
 
         public async Task<ApiResponse> UploadImage(FileDto file)

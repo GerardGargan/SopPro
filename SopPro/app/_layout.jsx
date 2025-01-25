@@ -12,6 +12,8 @@ import store from "../store/index";
 import Toast from "../components/UI/Toast";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { customLightTheme, customDarkTheme } from "../util/customTheme";
+import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 const queryClient = new QueryClient();
 
 export { ErrorBoundary } from "expo-router";
@@ -39,16 +41,20 @@ export default function RootLayout() {
   }
 
   return (
-    <SafeAreaProvider>
-      <Provider store={store}>
-        <QueryClientProvider client={queryClient}>
-          <PaperProvider theme={customLightTheme}>
-            <RootLayoutNav />
-            <Toast />
-          </PaperProvider>
-        </QueryClientProvider>
-      </Provider>
-    </SafeAreaProvider>
+    <GestureHandlerRootView>
+      <BottomSheetModalProvider style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <Provider store={store}>
+            <QueryClientProvider client={queryClient}>
+              <PaperProvider theme={customLightTheme}>
+                <RootLayoutNav />
+                <Toast />
+              </PaperProvider>
+            </QueryClientProvider>
+          </Provider>
+        </SafeAreaProvider>
+      </BottomSheetModalProvider>
+    </GestureHandlerRootView>
   );
 }
 

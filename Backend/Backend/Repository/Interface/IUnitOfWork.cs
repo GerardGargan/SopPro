@@ -12,6 +12,7 @@ namespace Backend.Repository.Interface
         ISopHazardRepository SopHazards { get; }
         ISopStepRepository SopSteps { get; }
         ISopVersionRepository SopVersions { get; }
+        ISopUserFavouriteRepository SopUserFavourites { get; }
         public Task SaveAsync();
         public Task ExecuteInTransactionAsync(Func<Task> action);
         public Task<T> ExecuteInTransactionAsync<T>(Func<Task<T>> action);
