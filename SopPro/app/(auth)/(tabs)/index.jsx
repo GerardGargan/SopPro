@@ -1,7 +1,6 @@
 import { Text, View } from "react-native";
 import Fab from "../../../components/sops/fab";
 import { useIsFocused } from "@react-navigation/native";
-import { Button } from "react-native-paper";
 
 const index = () => {
   const isFocused = useIsFocused();

@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View, FlatList } from "react-native";
-import React, { useState } from "react";
+import React from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { fetchSops } from "../../util/httpRequests";
 import SopCard from "./SopCard";
