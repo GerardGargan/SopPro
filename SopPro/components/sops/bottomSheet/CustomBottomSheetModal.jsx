@@ -9,7 +9,10 @@ import BottomSheetCard from "./BottomSheetCard";
 import { Divider } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { addSopToFavourites } from "../../../util/httpRequests";
+import {
+  addSopToFavourites,
+  removeSopFromFavourites,
+} from "../../../util/httpRequests";
 import Toast from "react-native-toast-message";
 
 const CustomBottomSheetModal = forwardRef((props, ref) => {
@@ -52,6 +55,25 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     },
   });
 
+  const { mutate: removeFavouriteMutation } = useMutation({
+    mutationFn: removeSopFromFavourites,
+    onSuccess: () => {
+      Toast.show({
+        type: "success",
+        text1: "Removed from favourites",
+        visibilityTime: 3000,
+      });
+      queryClient.invalidateQueries("sops");
+    },
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: error.message,
+        visibilityTime: 3000,
+      });
+    },
+  });
+
   // TODO -> Later organise first by creating each card and storing in variables
   // then group into admin and normal user cards/stacks
   // then render based on the user role
@@ -73,7 +95,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
 
   function handleRemoveFromFavouritesPress() {
     closeSheet();
-    console.log("Remove from favourites");
+    removeFavouriteMutation(sop.id);
   }
 
   const favouritesCard = sop?.isFavourite ? (
