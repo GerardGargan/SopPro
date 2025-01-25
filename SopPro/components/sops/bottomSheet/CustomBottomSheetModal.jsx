@@ -15,12 +15,15 @@ import {
   removeSopFromFavourites,
 } from "../../../util/httpRequests";
 import Toast from "react-native-toast-message";
+import { useSelector } from "react-redux";
 
 const CustomBottomSheetModal = forwardRef((props, ref) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const snapPoints = useMemo(() => ["60%"], []);
   const sop = props.sop;
+  const userRole = useSelector((state) => state.auth.role);
+  const isAdmin = userRole === "admin";
 
   function closeSheet() {
     ref.current?.close();
@@ -94,11 +97,6 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     },
   });
 
-  // TODO -> Later organise first by creating each card and storing in variables,
-  // handle any logic here on which version to show (e.g. add or remove favourite based on state)
-  // then group into admin and normal user cards/stacks
-  // then render stack based on the user role
-
   function handleEditPress() {
     closeSheet();
     router.push({
@@ -122,6 +120,11 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
   function handleDeletePress() {
     closeSheet();
     deleteSopsMutation([sop.id]);
+  }
+
+  function handleApproval() {
+    closeSheet();
+    console.log("Approval goes here..");
   }
 
   const editCard = (
@@ -150,6 +153,24 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     />
   );
 
+  const approvalCard = (
+    <BottomSheetCard
+      icon="check-square"
+      title="Approve"
+      onPress={handleApproval}
+    />
+  );
+
+  // Group cards based on user role
+  const userCardStack = (
+    <>
+      {editCard}
+      {favouritesCard}
+      {deleteCard}
+    </>
+  );
+  const adminCardStack = <>{approvalCard}</>;
+
   return (
     <BottomSheetModal
       ref={ref}
@@ -161,9 +182,8 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
       <BottomSheetView style={styles.contentContainer}>
         <Text style={styles.headerText}>{sop?.title}</Text>
         <Divider style={styles.divider} />
-        {editCard}
-        {favouritesCard}
-        {deleteCard}
+        {userCardStack}
+        {isAdmin && adminCardStack}
       </BottomSheetView>
     </BottomSheetModal>
   );
