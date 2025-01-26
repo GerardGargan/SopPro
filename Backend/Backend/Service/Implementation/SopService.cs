@@ -19,14 +19,16 @@ namespace Backend.Service.Implementation
         private readonly ApplicationDbContext _db;
         private readonly IBlobService _blobService;
         private readonly ApplicationSettings _appSettings;
+        private readonly IEmailService _emailService;
 
-        public SopService(IUnitOfWork unitOfWork, ITenancyResolver tenancyResolver, ApplicationDbContext db, IBlobService blobService, IOptions<ApplicationSettings> appSettings)
+        public SopService(IUnitOfWork unitOfWork, ITenancyResolver tenancyResolver, ApplicationDbContext db, IBlobService blobService, IOptions<ApplicationSettings> appSettings, IEmailService emailService)
         {
             _unitOfWork = unitOfWork;
             _tenancyResolver = tenancyResolver;
             _db = db;
             _blobService = blobService;
             _appSettings = appSettings.Value;
+            _emailService = emailService;
         }
 
         public async Task<ApiResponse> CreateSop(SopDto model)
@@ -640,9 +642,23 @@ namespace Backend.Service.Implementation
         public async Task<ApiResponse> ApproveSop(int id)
         {
 
-            await UpdateLatestVersionStatus(id, SopStatus.Approved);
+            var updatedSop = await UpdateLatestVersionStatus(id, SopStatus.Approved);
 
             // TODO send email to author informing them
+            var authorId = updatedSop.SopVersions
+                .OrderByDescending(sv => sv.Version)
+                .FirstOrDefault().AuthorId;
+
+            if (!string.IsNullOrWhiteSpace(authorId))
+            {
+                var author = await _unitOfWork.ApplicationUsers.GetAsync(x => x.Id == authorId);
+                if (!string.IsNullOrWhiteSpace(author.Email))
+                {
+                    // Commented out during testing to prevent going over free postmark limit
+                    // _emailService.SendEmailAsync(author.Email, "Sop approved", "Sop " + updatedSop.SopVersions.FirstOrDefault().Title + " approved");
+                }
+            }
+
 
             return new ApiResponse()
             {
@@ -681,7 +697,7 @@ namespace Backend.Service.Implementation
             };
         }
 
-        public async Task UpdateLatestVersionStatus(int sopId, SopStatus status)
+        public async Task<Sop> UpdateLatestVersionStatus(int sopId, SopStatus status)
         {
             var sopEntity = await _unitOfWork.Sops.GetAsync(s => s.Id == sopId, includeProperties: "SopVersions", tracked: true);
             if (sopEntity == null)
@@ -699,8 +715,9 @@ namespace Backend.Service.Implementation
             }
 
             latestSopVersion.Status = status;
-
             await _unitOfWork.SaveAsync();
+
+            return sopEntity;
         }
 
 
