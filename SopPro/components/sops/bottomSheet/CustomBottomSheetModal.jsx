@@ -232,7 +232,11 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
   );
 
   const rejectApprovalCard = (
-    <BottomSheetCard icon="times" title="Reject" onPress={handleRejectPress} />
+    <BottomSheetCard
+      icon="thumbs-down"
+      title="Reject"
+      onPress={handleRejectPress}
+    />
   );
 
   const requestApprovalCard = (

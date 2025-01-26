@@ -29,10 +29,10 @@ const SopStatusChip = ({ status }) => {
         }; // Light blue for Draft
       case 2:
         return {
-          backgroundColor: "#f9f9a2",
-          borderColor: "#f1e02a",
-          textColor: "#f39c12",
-        }; // Soft pastel yellow for In Review
+          backgroundColor: "#FFE8D6",
+          borderColor: "#FFB385",
+          textColor: "#E67E22",
+        }; // Pastel orange for In Review
       case 3:
         return {
           backgroundColor: "#d3f8d3",
