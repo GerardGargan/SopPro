@@ -688,9 +688,38 @@ namespace Backend.Service.Implementation
         public async Task<ApiResponse> RejectSop(int id)
         {
 
-            await UpdateLatestVersionStatus(id, SopStatus.Rejected);
+            var updatedSop = await UpdateLatestVersionStatus(id, SopStatus.Rejected);
+            var latestVersion = updatedSop.SopVersions
+                .OrderByDescending(x => x.Version)
+                .FirstOrDefault();
 
-            // TODO send email to author informing them
+            // Send email notification
+            string authorId = latestVersion.AuthorId;
+            var rejectedByUserId = _tenancyResolver.GetUserId();
+
+            var rejectedByUser = await _unitOfWork.ApplicationUsers.GetAsync(x => x.Id == rejectedByUserId);
+
+            if (!string.IsNullOrWhiteSpace(authorId))
+            {
+                var author = await _unitOfWork.ApplicationUsers.GetAsync(x => x.Id == authorId);
+                if (!string.IsNullOrWhiteSpace(author.Email))
+                {
+                    var model = new
+                    {
+                        AuthorForename = author.Forename,
+                        RejectorForename = rejectedByUser.Forename,
+                        RejectorSurname = rejectedByUser.Surname,
+                        Title = latestVersion.Title,
+                        Date = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm") ?? "N/A",
+                        Reference = updatedSop.Reference
+                    };
+
+                    string emailBody = await _templateService.RenderTemplateAsync("SopRejected", model);
+
+                    // Commented out during testing to prevent going over free postmark limit temporarily
+                    _emailService.SendEmailAsync(author.Email, "Sop rejected", emailBody);
+                }
+            }
 
             return new ApiResponse()
             {
