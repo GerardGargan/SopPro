@@ -62,9 +62,6 @@ const SopCard = ({
         <View style={styles.chipContainer}>
           <SopStatusChip status={sop.status} />
         </View>
-        <View style={styles.iconContainer}>
-          <Ionicons name="chevron-forward" size={35} color="grey" />
-        </View>
       </TouchableOpacity>
     </View>
   );
@@ -96,10 +93,6 @@ const styles = StyleSheet.create({
   titleText: {
     fontSize: 16,
     fontWeight: "bold",
-  },
-  iconContainer: {
-    justifyContent: "center",
-    alignItems: "center",
   },
   chipContainer: {
     justifyContent: "center",
