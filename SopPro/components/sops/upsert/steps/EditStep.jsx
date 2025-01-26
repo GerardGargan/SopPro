@@ -130,7 +130,11 @@ const EditStep = ({
             onSelect={(image) => handleImageUpload(image, step.key)}
           />
 
-          <Button mode="text" onPress={handleClose}>
+          <Button
+            mode="text"
+            onPress={handleClose}
+            style={{ marginBottom: 50 }}
+          >
             Close
           </Button>
         </ScrollView>
@@ -153,6 +157,7 @@ const styles = StyleSheet.create({
   },
   scrollViewContainer: {
     padding: 20,
+    paddingBottom: 50,
   },
   textInput: {
     marginBottom: 10,
