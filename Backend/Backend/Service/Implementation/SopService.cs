@@ -665,7 +665,7 @@ namespace Backend.Service.Implementation
                         ApproverForename = approver.Forename,
                         ApproverSurname = approver.Surname,
                         Title = latestVersion.Title,
-                        ApprovalDate = latestVersion.ApprovalDate,
+                        ApprovalDate = latestVersion.ApprovalDate?.ToString("dd/MM/yyyy HH:mm") ?? "N/A",
                         Reference = updatedSop.Reference
                     };
 
