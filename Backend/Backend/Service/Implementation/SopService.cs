@@ -652,6 +652,21 @@ namespace Backend.Service.Implementation
             };
         }
 
+        public async Task<ApiResponse> RejectSop(int id)
+        {
+
+            await UpdateLatestVersionStatus(id, SopStatus.Rejected);
+
+            // TODO send email to author informing them
+
+            return new ApiResponse()
+            {
+                IsSuccess = true,
+                StatusCode = HttpStatusCode.OK,
+                SuccessMessage = "Sop rejected"
+            };
+        }
+
         public async Task<ApiResponse> RequestApproval(int id)
         {
             await UpdateLatestVersionStatus(id, SopStatus.InReview);

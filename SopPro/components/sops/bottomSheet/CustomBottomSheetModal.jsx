@@ -13,6 +13,7 @@ import {
   addSopToFavourites,
   approveSop,
   deleteSops,
+  rejectSop,
   removeSopFromFavourites,
   requestApproval,
 } from "../../../util/httpRequests";
@@ -118,6 +119,25 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     },
   });
 
+  const { mutate: mutateReject } = useMutation({
+    mutationFn: rejectSop,
+    onSuccess: () => {
+      Toast.show({
+        type: "success",
+        text1: "Sop rejected",
+        visibilityTime: 3000,
+      });
+      queryClient.invalidateQueries("sops");
+    },
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: error.message,
+        visibilityTime: 3000,
+      });
+    },
+  });
+
   const { mutate: mutateRequestApproval } = useMutation({
     mutationFn: requestApproval,
     onSuccess: () => {
@@ -172,6 +192,11 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     mutateRequestApproval(sop.id);
   }
 
+  function handleRejectPress() {
+    closeSheet();
+    mutateReject(sop.id);
+  }
+
   const editCard = (
     <BottomSheetCard icon="edit" title="Edit" onPress={handleEditPress} />
   );
@@ -207,7 +232,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
   );
 
   const rejectApprovalCard = (
-    <BottomSheetCard icon="times" title="Reject" onPress={() => {}} />
+    <BottomSheetCard icon="times" title="Reject" onPress={handleRejectPress} />
   );
 
   const requestApprovalCard = (
@@ -222,7 +247,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
   const userCardStack = (
     <>
       {editCard}
-      {sop?.status === 1 && requestApprovalCard}
+      {(sop?.status === 1 || sop?.status === 5) && requestApprovalCard}
       {favouritesCard}
       {deleteCard}
     </>
