@@ -14,6 +14,7 @@ import {
   approveSop,
   deleteSops,
   removeSopFromFavourites,
+  requestApproval,
 } from "../../../util/httpRequests";
 import Toast from "react-native-toast-message";
 import { useSelector } from "react-redux";
@@ -117,6 +118,25 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     },
   });
 
+  const { mutate: mutateRequestApproval } = useMutation({
+    mutationFn: requestApproval,
+    onSuccess: () => {
+      Toast.show({
+        type: "success",
+        text1: "Review request sent",
+        visibilityTime: 3000,
+      });
+      queryClient.invalidateQueries("sops");
+    },
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: error.message,
+        visibilityTime: 3000,
+      });
+    },
+  });
+
   function handleEditPress() {
     closeSheet();
     router.push({
@@ -147,6 +167,11 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     deleteSopsMutation([sop.id]);
   }
 
+  function handleRequestApproval() {
+    closeSheet();
+    mutateRequestApproval(sop.id);
+  }
+
   const editCard = (
     <BottomSheetCard icon="edit" title="Edit" onPress={handleEditPress} />
   );
@@ -175,7 +200,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
 
   const approvalCard = (
     <BottomSheetCard
-      icon="check-square"
+      icon="thumbs-up"
       title="Approve"
       onPress={handleApproval}
     />
@@ -189,7 +214,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     <BottomSheetCard
       icon="check-square"
       title="Request Approval"
-      onPress={() => {}}
+      onPress={handleRequestApproval}
     />
   );
 
@@ -204,7 +229,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
   );
   const adminCardStack = (
     <>
-      {sop?.status === 1 && approvalCard}
+      {sop?.status === 2 && approvalCard}
       {sop?.status === 2 && rejectApprovalCard}
     </>
   );

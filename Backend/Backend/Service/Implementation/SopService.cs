@@ -639,7 +639,36 @@ namespace Backend.Service.Implementation
 
         public async Task<ApiResponse> ApproveSop(int id)
         {
-            var sopEntity = await _unitOfWork.Sops.GetAsync(s => s.Id == id, includeProperties: "SopVersions", tracked: true);
+
+            await UpdateLatestVersionStatus(id, SopStatus.Approved);
+
+            // TODO send email to author informing them
+
+            return new ApiResponse()
+            {
+                IsSuccess = true,
+                StatusCode = HttpStatusCode.OK,
+                SuccessMessage = "Sop approved"
+            };
+        }
+
+        public async Task<ApiResponse> RequestApproval(int id)
+        {
+            await UpdateLatestVersionStatus(id, SopStatus.InReview);
+
+            // TODO Send email to admins
+
+            return new ApiResponse()
+            {
+                IsSuccess = true,
+                SuccessMessage = "Sop sent for review",
+                StatusCode = HttpStatusCode.OK
+            };
+        }
+
+        public async Task UpdateLatestVersionStatus(int sopId, SopStatus status)
+        {
+            var sopEntity = await _unitOfWork.Sops.GetAsync(s => s.Id == sopId, includeProperties: "SopVersions", tracked: true);
             if (sopEntity == null)
             {
                 throw new Exception("Sop not found");
@@ -654,18 +683,11 @@ namespace Backend.Service.Implementation
                 throw new Exception("No SopVersion found");
             }
 
-            latestSopVersion.Status = SopStatus.Approved;
+            latestSopVersion.Status = status;
 
             await _unitOfWork.SaveAsync();
-
-            return new ApiResponse()
-            {
-                IsSuccess = true,
-                StatusCode = HttpStatusCode.OK,
-                SuccessMessage = "Sop approved"
-            };
-
         }
+
 
         public async Task<ApiResponse> UploadImage(FileDto file)
         {

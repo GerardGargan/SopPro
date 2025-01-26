@@ -103,5 +103,14 @@ namespace Backend.Controllers
             var apiResponse = await _sopService.ApproveSop(id);
             return Ok(apiResponse);
         }
+
+        [HttpGet]
+        [Route("{id:int}/requestapproval")]
+        public async Task<IActionResult> RequestApproval(int id)
+        {
+            var apiResponse = await _sopService.RequestApproval(id);
+            return Ok(apiResponse);
+        }
+
     }
 }

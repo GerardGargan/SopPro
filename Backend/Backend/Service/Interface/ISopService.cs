@@ -15,5 +15,6 @@ namespace Backend.Service.Interface
         public Task<ApiResponse> AddToFavourites(int id);
         public Task<ApiResponse> RemoveFromFavourites(int id);
         public Task<ApiResponse> ApproveSop(int id);
+        public Task<ApiResponse> RequestApproval(int id);
     };
 }

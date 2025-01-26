@@ -178,3 +178,15 @@ export async function approveSop(id) {
     throw error;
   }
 }
+
+export async function requestApproval(id) {
+  try {
+    const response = await api.get(`/sop/${id}/requestapproval`);
+    return response.data;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error requesting approval"
+    );
+    throw error;
+  }
+}
