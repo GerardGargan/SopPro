@@ -4,6 +4,7 @@ using Backend.Models.Dto;
 using Backend.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Backend.Utility;
 
 namespace Backend.Controllers
 {
@@ -93,5 +94,32 @@ namespace Backend.Controllers
             var apiResponse = await _sopService.RemoveFromFavourites(id);
             return Ok(apiResponse);
         }
+
+        [Authorize(Roles = StaticDetails.Role_Admin)]
+        [HttpGet]
+        [Route("{id:int}/approve")]
+        public async Task<IActionResult> ApproveSop(int id)
+        {
+            var apiResponse = await _sopService.ApproveSop(id);
+            return Ok(apiResponse);
+        }
+
+        [Authorize(Roles = StaticDetails.Role_Admin)]
+        [HttpGet]
+        [Route("{id:int}/reject")]
+        public async Task<IActionResult> RejectSop(int id)
+        {
+            var apiResponse = await _sopService.RejectSop(id);
+            return Ok(apiResponse);
+        }
+
+        [HttpGet]
+        [Route("{id:int}/requestapproval")]
+        public async Task<IActionResult> RequestApproval(int id)
+        {
+            var apiResponse = await _sopService.RequestApproval(id);
+            return Ok(apiResponse);
+        }
+
     }
 }

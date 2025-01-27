@@ -57,6 +57,9 @@ namespace Backend.Service.Implementation
             LoginResponseDTO loginResponse = new()
             {
                 Email = userFromDb.Email,
+                Forename = userFromDb.Forename,
+                Surname = userFromDb.Surname,
+                Role = roles.FirstOrDefault(),
                 Token = token,
             };
 

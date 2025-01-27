@@ -46,21 +46,21 @@ const SopCard = ({
       >
         <View style={styles.textContainer}>
           <Text style={styles.refText} numberOfLines={1}>
-            Ref: {sop.reference} - V{sop.version}{" "}
-            {sop.isFavourite && (
-              <MaterialCommunityIcons name="star" size={13} color="gold" />
-            )}
+            Ref: {sop.reference} - V{sop.version}
           </Text>
           <Text style={styles.titleText} numberOfLines={1}>
             {sop.title}
           </Text>
           <Text numberOfLines={1}>{sop.description}</Text>
         </View>
+        {sop.isFavourite && (
+          <View style={styles.favouriteContainer}>
+            <MaterialCommunityIcons name="star" size={25} color="#FFC107" />
+          </View>
+        )}
+
         <View style={styles.chipContainer}>
           <SopStatusChip status={sop.status} />
-        </View>
-        <View style={styles.iconContainer}>
-          <Ionicons name="chevron-forward" size={35} color="grey" />
         </View>
       </TouchableOpacity>
     </View>
@@ -94,10 +94,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-  iconContainer: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
   chipContainer: {
     justifyContent: "center",
     alignItems: "center",
@@ -113,6 +109,10 @@ const styles = StyleSheet.create({
     fontStyle: "italic",
   },
   radioButton: {
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  favouriteContainer: {
     justifyContent: "center",
     alignItems: "center",
   },

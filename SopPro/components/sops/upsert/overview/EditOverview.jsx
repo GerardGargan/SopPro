@@ -14,6 +14,8 @@ function getStatus(identifier) {
       return "Approved";
     case 4:
       return "Archived";
+    case 5:
+      return "Rejected";
     default:
       return "Unknown";
   }

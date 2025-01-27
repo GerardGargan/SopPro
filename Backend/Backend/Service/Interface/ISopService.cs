@@ -14,5 +14,8 @@ namespace Backend.Service.Interface
         public Task<ApiResponse> UploadImage(FileDto file);
         public Task<ApiResponse> AddToFavourites(int id);
         public Task<ApiResponse> RemoveFromFavourites(int id);
+        public Task<ApiResponse> ApproveSop(int id);
+        public Task<ApiResponse> RejectSop(int id);
+        public Task<ApiResponse> RequestApproval(int id);
     };
 }

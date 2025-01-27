@@ -7,6 +7,8 @@ using Backend.Models.Settings;
 using Backend.Models.Tenancy;
 using Backend.Repository.Interface;
 using Backend.Service.Interface;
+using Backend.Utility;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -19,14 +21,20 @@ namespace Backend.Service.Implementation
         private readonly ApplicationDbContext _db;
         private readonly IBlobService _blobService;
         private readonly ApplicationSettings _appSettings;
+        private readonly IEmailService _emailService;
+        private readonly ITemplateService _templateService;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public SopService(IUnitOfWork unitOfWork, ITenancyResolver tenancyResolver, ApplicationDbContext db, IBlobService blobService, IOptions<ApplicationSettings> appSettings)
+        public SopService(IUnitOfWork unitOfWork, ITenancyResolver tenancyResolver, ApplicationDbContext db, IBlobService blobService, IOptions<ApplicationSettings> appSettings, IEmailService emailService, ITemplateService templateService, UserManager<ApplicationUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _tenancyResolver = tenancyResolver;
             _db = db;
             _blobService = blobService;
             _appSettings = appSettings.Value;
+            _emailService = emailService;
+            _templateService = templateService;
+            _userManager = userManager;
         }
 
         public async Task<ApiResponse> CreateSop(SopDto model)
@@ -636,6 +644,168 @@ namespace Backend.Service.Implementation
                 SuccessMessage = "Sop removed from favourites"
             };
         }
+
+        public async Task<ApiResponse> ApproveSop(int id)
+        {
+            var updatedSop = await UpdateLatestVersionStatus(id, SopStatus.Approved);
+
+            var latestVersion = updatedSop.SopVersions
+                .OrderByDescending(sv => sv.Version)
+                .FirstOrDefault();
+
+            var authorId = latestVersion.AuthorId;
+            var approverId = latestVersion.ApprovedById;
+
+            var approver = await _unitOfWork.ApplicationUsers.GetAsync(x => x.Id == approverId);
+
+            if (!string.IsNullOrWhiteSpace(authorId))
+            {
+                var author = await _unitOfWork.ApplicationUsers.GetAsync(x => x.Id == authorId);
+                if (!string.IsNullOrWhiteSpace(author.Email))
+                {
+                    var model = new
+                    {
+                        AuthorForename = author.Forename,
+                        ApproverForename = approver.Forename,
+                        ApproverSurname = approver.Surname,
+                        Title = latestVersion.Title,
+                        ApprovalDate = latestVersion.ApprovalDate?.ToString("dd/MM/yyyy HH:mm") ?? "N/A",
+                        Reference = updatedSop.Reference
+                    };
+
+                    string emailBody = await _templateService.RenderTemplateAsync("SopApproved", model);
+
+                    // Commented out during testing to prevent going over free postmark limit temporarily
+                    // _emailService.SendEmailAsync(author.Email, "Sop approved", emailBody);
+                }
+            }
+
+
+            return new ApiResponse()
+            {
+                IsSuccess = true,
+                StatusCode = HttpStatusCode.OK,
+                SuccessMessage = "Sop approved"
+            };
+        }
+
+        public async Task<ApiResponse> RejectSop(int id)
+        {
+
+            var updatedSop = await UpdateLatestVersionStatus(id, SopStatus.Rejected);
+            var latestVersion = updatedSop.SopVersions
+                .OrderByDescending(x => x.Version)
+                .FirstOrDefault();
+
+            // Send email notification
+            string authorId = latestVersion.AuthorId;
+            var rejectedByUserId = _tenancyResolver.GetUserId();
+
+            var rejectedByUser = await _unitOfWork.ApplicationUsers.GetAsync(x => x.Id == rejectedByUserId);
+
+            if (!string.IsNullOrWhiteSpace(authorId))
+            {
+                var author = await _unitOfWork.ApplicationUsers.GetAsync(x => x.Id == authorId);
+                if (!string.IsNullOrWhiteSpace(author.Email))
+                {
+                    var model = new
+                    {
+                        AuthorForename = author.Forename,
+                        RejectorForename = rejectedByUser.Forename,
+                        RejectorSurname = rejectedByUser.Surname,
+                        Title = latestVersion.Title,
+                        Date = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm") ?? "N/A",
+                        Reference = updatedSop.Reference
+                    };
+
+                    string emailBody = await _templateService.RenderTemplateAsync("SopRejected", model);
+
+                    // Commented out during testing to prevent going over free postmark limit temporarily
+                    // _emailService.SendEmailAsync(author.Email, "Sop rejected", emailBody);
+                }
+            }
+
+            return new ApiResponse()
+            {
+                IsSuccess = true,
+                StatusCode = HttpStatusCode.OK,
+                SuccessMessage = "Sop rejected"
+            };
+        }
+
+        public async Task<ApiResponse> RequestApproval(int id)
+        {
+            var updatedSop = await UpdateLatestVersionStatus(id, SopStatus.InReview);
+            var latestVersion = updatedSop.SopVersions
+                .OrderByDescending(x => x.Version)
+                .FirstOrDefault();
+
+            // Send email notification to administrators
+            var adminUsers = await _userManager.GetUsersInRoleAsync(StaticDetails.Role_Admin);
+            var adminEmails = adminUsers.Where(x => !string.IsNullOrWhiteSpace(x.Email)).Select(x => x.Email).ToList();
+
+            var authorId = latestVersion.AuthorId;
+            var requestorUserId = _tenancyResolver.GetUserId();
+
+            if (adminUsers != null && adminUsers.Count > 0)
+            {
+                var author = await _unitOfWork.ApplicationUsers.GetAsync(x => x.Id == authorId);
+                var requestor = await _unitOfWork.ApplicationUsers.GetAsync(x => x.Id == requestorUserId);
+
+                var model = new
+                {
+                    Requestor = $"{requestor.Forename} {requestor.Surname}",
+                    Author = $"{author.Forename} {author.Surname}",
+                    Title = latestVersion.Title,
+                    Date = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm") ?? "N/A",
+                    Reference = updatedSop.Reference
+                };
+
+                string emailBody = await _templateService.RenderTemplateAsync("SopApprovalRequest", model);
+
+                // Commented out during testing to prevent going over free postmark limit temporarily
+                // _emailService.SendEmailAsync(adminEmails, null, "Sop approval request", emailBody);
+
+            }
+
+            return new ApiResponse()
+            {
+                IsSuccess = true,
+                SuccessMessage = "Sop sent for review",
+                StatusCode = HttpStatusCode.OK
+            };
+        }
+
+        public async Task<Sop> UpdateLatestVersionStatus(int sopId, SopStatus status)
+        {
+            var sopEntity = await _unitOfWork.Sops.GetAsync(s => s.Id == sopId, includeProperties: "SopVersions", tracked: true);
+            if (sopEntity == null)
+            {
+                throw new Exception("Sop not found");
+            }
+
+            var latestSopVersion = sopEntity.SopVersions
+                .OrderByDescending(sv => sv.Version)
+                .FirstOrDefault();
+
+            if (latestSopVersion == null)
+            {
+                throw new Exception("No SopVersion found");
+            }
+
+            latestSopVersion.Status = status;
+
+            if (status == SopStatus.Approved)
+            {
+                latestSopVersion.ApprovalDate = DateTime.UtcNow;
+                latestSopVersion.ApprovedById = _tenancyResolver.GetUserId();
+            }
+
+            await _unitOfWork.SaveAsync();
+
+            return sopEntity;
+        }
+
 
         public async Task<ApiResponse> UploadImage(FileDto file)
         {
