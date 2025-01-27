@@ -1,4 +1,4 @@
-import { StyleSheet, Text } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import React, { forwardRef, useCallback, useMemo } from "react";
 import {
   BottomSheetBackdrop,
@@ -6,7 +6,7 @@ import {
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
 import BottomSheetCard from "./BottomSheetCard";
-import { Divider } from "react-native-paper";
+import { Divider, useTheme } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -19,11 +19,15 @@ import {
 } from "../../../util/httpRequests";
 import Toast from "react-native-toast-message";
 import { useSelector } from "react-redux";
+import CustomChip from "../../UI/CustomChip";
+import { getStatus } from "../../../util/statusHelper";
+import { FontAwesome5 } from "@expo/vector-icons";
 
 const CustomBottomSheetModal = forwardRef((props, ref) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const snapPoints = useMemo(() => ["60%"], []);
+  const theme = useTheme();
   const sop = props.sop;
   const userRole = useSelector((state) => state.auth.role);
   const isAdmin = userRole === "admin";
@@ -273,9 +277,25 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     >
       <BottomSheetView style={styles.contentContainer}>
         <Text style={styles.headerText}>{sop?.title}</Text>
+        <View style={styles.rowContainer}>
+          <CustomChip style={styles.customChip}>
+            <Text>Version {sop?.version}</Text>
+          </CustomChip>
+          <CustomChip style={styles.customChip}>
+            <Text>{getStatus(sop?.status)}</Text>
+          </CustomChip>
+          {sop?.isFavourite && (
+            <CustomChip style={styles.customChip}>
+              <View style={styles.rowContainer}>
+                <FontAwesome5 name="star" size={16} color="#888" />
+                <Text> Favourite</Text>
+              </View>
+            </CustomChip>
+          )}
+        </View>
         <Divider style={styles.divider} />
-        {userCardStack}
         {isAdmin && adminCardStack}
+        {userCardStack}
       </BottomSheetView>
     </BottomSheetModal>
   );
@@ -296,9 +316,16 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 24,
     fontWeight: "bold",
+    marginBottom: 4,
   },
   divider: {
     width: "100%",
-    marginVertical: 20,
+    marginVertical: 15,
+  },
+  rowContainer: {
+    flexDirection: "row",
+  },
+  customChip: {
+    marginHorizontal: 3,
   },
 });

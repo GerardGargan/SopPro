@@ -1,24 +1,9 @@
 import { StyleSheet, Text, View } from "react-native";
 import React from "react";
+import CustomChip from "../UI/CustomChip";
+import { getStatus } from "../../util/statusHelper";
 
 const SopStatusChip = ({ status }) => {
-  function getStatus(identifier) {
-    switch (identifier) {
-      case 1:
-        return "Draft";
-      case 2:
-        return "In Review";
-      case 3:
-        return "Approved";
-      case 4:
-        return "Archived";
-      case 5:
-        return "Rejected";
-      default:
-        return "Unknown";
-    }
-  }
-
   function getChipStyle(identifier) {
     switch (identifier) {
       case 1:
@@ -63,32 +48,17 @@ const SopStatusChip = ({ status }) => {
   const chipStyle = getChipStyle(status);
 
   return (
-    <View
-      style={[
-        styles.chip,
-        {
-          backgroundColor: chipStyle.backgroundColor,
-          borderColor: chipStyle.borderColor,
-        },
-      ]}
-    >
+    <CustomChip style={chipStyle}>
       <Text style={[styles.text, { color: chipStyle.textColor }]}>
         {getStatus(status)}
       </Text>
-    </View>
+    </CustomChip>
   );
 };
 
 export default SopStatusChip;
 
 const styles = StyleSheet.create({
-  chip: {
-    borderWidth: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    alignSelf: "flex-start",
-  },
   text: {
     fontSize: 13,
     fontWeight: "400",
