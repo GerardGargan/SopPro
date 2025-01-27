@@ -7,6 +7,8 @@ using Backend.Models.Settings;
 using Backend.Models.Tenancy;
 using Backend.Repository.Interface;
 using Backend.Service.Interface;
+using Backend.Utility;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
@@ -21,8 +23,9 @@ namespace Backend.Service.Implementation
         private readonly ApplicationSettings _appSettings;
         private readonly IEmailService _emailService;
         private readonly ITemplateService _templateService;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public SopService(IUnitOfWork unitOfWork, ITenancyResolver tenancyResolver, ApplicationDbContext db, IBlobService blobService, IOptions<ApplicationSettings> appSettings, IEmailService emailService, ITemplateService templateService)
+        public SopService(IUnitOfWork unitOfWork, ITenancyResolver tenancyResolver, ApplicationDbContext db, IBlobService blobService, IOptions<ApplicationSettings> appSettings, IEmailService emailService, ITemplateService templateService, UserManager<ApplicationUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _tenancyResolver = tenancyResolver;
@@ -31,6 +34,7 @@ namespace Backend.Service.Implementation
             _appSettings = appSettings.Value;
             _emailService = emailService;
             _templateService = templateService;
+            _userManager = userManager;
         }
 
         public async Task<ApiResponse> CreateSop(SopDto model)
@@ -717,7 +721,7 @@ namespace Backend.Service.Implementation
                     string emailBody = await _templateService.RenderTemplateAsync("SopRejected", model);
 
                     // Commented out during testing to prevent going over free postmark limit temporarily
-                    _emailService.SendEmailAsync(author.Email, "Sop rejected", emailBody);
+                    // _emailService.SendEmailAsync(author.Email, "Sop rejected", emailBody);
                 }
             }
 
@@ -731,9 +735,38 @@ namespace Backend.Service.Implementation
 
         public async Task<ApiResponse> RequestApproval(int id)
         {
-            await UpdateLatestVersionStatus(id, SopStatus.InReview);
+            var updatedSop = await UpdateLatestVersionStatus(id, SopStatus.InReview);
+            var latestVersion = updatedSop.SopVersions
+                .OrderByDescending(x => x.Version)
+                .FirstOrDefault();
 
-            // TODO Send email to admins
+            // Send email notification to administrators
+            var adminUsers = await _userManager.GetUsersInRoleAsync(StaticDetails.Role_Admin);
+            var adminEmails = adminUsers.Where(x => !string.IsNullOrWhiteSpace(x.Email)).Select(x => x.Email).ToList();
+
+            var authorId = latestVersion.AuthorId;
+            var requestorUserId = _tenancyResolver.GetUserId();
+
+            if (adminUsers != null && adminUsers.Count > 0)
+            {
+                var author = await _unitOfWork.ApplicationUsers.GetAsync(x => x.Id == authorId);
+                var requestor = await _unitOfWork.ApplicationUsers.GetAsync(x => x.Id == requestorUserId);
+
+                var model = new
+                {
+                    Requestor = $"{requestor.Forename} {requestor.Surname}",
+                    Author = $"{author.Forename} {author.Surname}",
+                    Title = latestVersion.Title,
+                    Date = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm") ?? "N/A",
+                    Reference = updatedSop.Reference
+                };
+
+                string emailBody = await _templateService.RenderTemplateAsync("SopApprovalRequest", model);
+
+                // Commented out during testing to prevent going over free postmark limit temporarily
+                // _emailService.SendEmailAsync(adminEmails, null, "Sop approval request", emailBody);
+
+            }
 
             return new ApiResponse()
             {
