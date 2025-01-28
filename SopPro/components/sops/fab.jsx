@@ -16,7 +16,7 @@ const Fab = () => {
         open={open}
         visible
         icon={open ? "file-document" : "plus"}
-        style={{ position: "absolute", bottom: 50 }}
+        style={{ position: "absolute", bottom: 70 }}
         actions={[
           {
             icon: "plus",
