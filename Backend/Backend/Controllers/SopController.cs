@@ -5,6 +5,7 @@ using Backend.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Backend.Utility;
+using Backend.Models.DatabaseModels;
 
 namespace Backend.Controllers
 {
@@ -14,11 +15,13 @@ namespace Backend.Controllers
     public class SopController : BaseApiController
     {
         private readonly ISopService _sopService;
+        private readonly IPdfService _pdfService;
 
-        public SopController(ISopService sopService)
+        public SopController(ISopService sopService, IPdfService pdfService)
         {
 
             _sopService = sopService;
+            _pdfService = pdfService;
         }
 
         [HttpPost]
@@ -119,6 +122,17 @@ namespace Backend.Controllers
         {
             var apiResponse = await _sopService.RequestApproval(id);
             return Ok(apiResponse);
+        }
+
+        [HttpGet]
+        [Route("{id:int}/pdf")]
+        public async Task<IActionResult> GeneratePdf(int id)
+        {
+            SopDto sop = new SopDto() { };
+            var pdf = _pdfService.GeneratePdf("template1", sop);
+
+            return File(pdf, "application/pdf", "test.pdf");
+
         }
 
     }
