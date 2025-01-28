@@ -20,8 +20,8 @@ const _layout = () => {
           tabBarStyle: {
             backgroundColor: theme.colors.surface,
             borderTopColor: theme.colors.outline,
-            height: 70,
-            paddingTop: 8,
+            height: 60,
+            paddingTop: 4,
           },
           tabBarActiveTintColor: theme.colors.primary,
           tabBarInactiveTintColor: theme.colors.onSurfaceVariant,
