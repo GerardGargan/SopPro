@@ -21,7 +21,14 @@ import Toast from "react-native-toast-message";
 import { useSelector } from "react-redux";
 import CustomChip from "../../UI/CustomChip";
 import { getStatus } from "../../../util/statusHelper";
-import { FontAwesome5 } from "@expo/vector-icons";
+import {
+  Star,
+  ThumbsUp,
+  ThumbsDown,
+  Pencil,
+  Trash2,
+  FileCheck2,
+} from "lucide-react-native";
 
 const CustomBottomSheetModal = forwardRef((props, ref) => {
   const router = useRouter();
@@ -202,42 +209,34 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
   }
 
   const editCard = (
-    <BottomSheetCard icon="edit" title="Edit" onPress={handleEditPress} />
+    <BottomSheetCard Icon={Pencil} title="Edit" onPress={handleEditPress} />
   );
 
   const deleteCard = (
-    <BottomSheetCard
-      icon="trash-alt"
-      title="Delete"
-      onPress={handleDeletePress}
-    />
+    <BottomSheetCard Icon={Trash2} title="Delete" onPress={handleDeletePress} />
   );
 
   const favouritesCard = sop?.isFavourite ? (
     <BottomSheetCard
-      icon="star"
+      Icon={Star}
       title="Remove from favourites"
       onPress={handleRemoveFromFavouritesPress}
     />
   ) : (
     <BottomSheetCard
-      icon="star"
+      Icon={Star}
       title="Add to favourites"
       onPress={handleAddToFavouritesPress}
     />
   );
 
   const approvalCard = (
-    <BottomSheetCard
-      icon="thumbs-up"
-      title="Approve"
-      onPress={handleApproval}
-    />
+    <BottomSheetCard Icon={ThumbsUp} title="Approve" onPress={handleApproval} />
   );
 
   const rejectApprovalCard = (
     <BottomSheetCard
-      icon="thumbs-down"
+      Icon={ThumbsDown}
       title="Reject"
       onPress={handleRejectPress}
     />
@@ -245,7 +244,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
 
   const requestApprovalCard = (
     <BottomSheetCard
-      icon="check-square"
+      Icon={FileCheck2}
       title="Request Approval"
       onPress={handleRequestApproval}
     />
@@ -287,7 +286,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
           {sop?.isFavourite && (
             <CustomChip style={styles.customChip}>
               <View style={styles.rowContainer}>
-                <FontAwesome5 name="star" size={16} color="#888" />
+                <Star color="#888" size={17} />
                 <Text> Favourite</Text>
               </View>
             </CustomChip>
@@ -324,6 +323,7 @@ const styles = StyleSheet.create({
   },
   rowContainer: {
     flexDirection: "row",
+    alignItems: "center",
   },
   customChip: {
     marginHorizontal: 3,

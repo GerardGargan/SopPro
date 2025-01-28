@@ -16,7 +16,7 @@ const Fab = () => {
         open={open}
         visible
         icon={open ? "file-document" : "plus"}
-        style={{ position: "absolute", bottom: 50 }}
+        style={{ position: "absolute", bottom: 60 }}
         actions={[
           {
             icon: "plus",
@@ -31,7 +31,7 @@ const Fab = () => {
           },
           {
             icon: "lightbulb",
-            label: "AI Generated",
+            label: "AI Generator",
             onPress: () => console.log("Pressed AI"),
           },
           {

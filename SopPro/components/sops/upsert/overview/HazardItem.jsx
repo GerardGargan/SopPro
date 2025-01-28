@@ -1,6 +1,7 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
 import { IconButton } from "react-native-paper";
+import { Pencil } from "lucide-react-native";
 
 const HazardItem = ({ hazard, onEdit }) => {
   return (
@@ -13,9 +14,12 @@ const HazardItem = ({ hazard, onEdit }) => {
           {hazard.controlMeasure ? hazard.controlMeasure : "Control measure"}
         </Text>
       </View>
-      <View>
-        <IconButton icon="pencil" onPress={() => onEdit(hazard.id)} />
-      </View>
+      <TouchableOpacity
+        onPress={() => onEdit(hazard.id)}
+        style={styles.iconButton}
+      >
+        <Pencil color="black" />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -43,5 +47,8 @@ const styles = StyleSheet.create({
   hazardControl: {
     fontSize: 14,
     color: "gray",
+  },
+  iconButton: {
+    padding: 15,
   },
 });

@@ -12,6 +12,7 @@ import { Stack, Redirect } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { Text } from "react-native";
+import { ActivityIndicator } from "react-native-paper";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -57,7 +58,11 @@ export default function RootLayout() {
   }, [dispatch]);
 
   if (!authChecked) {
-    return <Text>Loading</Text>;
+    return (
+      <View style={styles.centered}>
+        <ActivityIndicator animating={true} />
+      </View>
+    );
   }
 
   if (!isLoggedIn) {
