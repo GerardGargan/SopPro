@@ -70,6 +70,7 @@ builder.Services.AddScoped<IPpeService, PpeService>();
 builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddScoped<ITenancyResolver, TenancyResolver>();
 builder.Services.AddSingleton<IBlobService, BlobService>();
+builder.Services.AddScoped<IPdfService, PdfService>();
 
 
 var templateFolder = Path.Combine(Directory.GetCurrentDirectory(), "Templates");
