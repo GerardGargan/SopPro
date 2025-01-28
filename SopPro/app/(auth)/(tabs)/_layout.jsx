@@ -1,11 +1,11 @@
 import { Tabs } from "expo-router";
 import React from "react";
-import { FontAwesome5 } from "@expo/vector-icons";
 import SafeAreaHeader from "../../../components/UI/SareAreaHeader";
-import { Button, useTheme } from "react-native-paper";
+import { useTheme } from "react-native-paper";
+import { House, FileText, Grid2X2 } from "lucide-react-native";
 
-function TabBarIcon({ ...props }) {
-  return <FontAwesome5 size={28} style={{ marginBottom: -3 }} {...props} />;
+function TabBarIcon({ Icon, ...props }) {
+  return <Icon size={28} style={{ marginBottom: -3 }} {...props} />;
 }
 
 const _layout = () => {
@@ -29,7 +29,9 @@ const _layout = () => {
           name="index"
           options={{
             title: "Home",
-            tabBarIcon: ({ color }) => <TabBarIcon name="home" color={color} />,
+            tabBarIcon: ({ color }) => (
+              <TabBarIcon Icon={House} color={color} />
+            ),
           }}
         />
         <Tabs.Screen
@@ -37,7 +39,7 @@ const _layout = () => {
           options={{
             title: "Sops",
             tabBarIcon: ({ color }) => (
-              <TabBarIcon name="clipboard-list" color={color} />
+              <TabBarIcon Icon={FileText} color={color} />
             ),
           }}
         />
@@ -46,7 +48,7 @@ const _layout = () => {
           options={{
             title: "More",
             tabBarIcon: ({ color }) => (
-              <TabBarIcon name="th-large" color={color} />
+              <TabBarIcon Icon={Grid2X2} color={color} />
             ),
           }}
         />

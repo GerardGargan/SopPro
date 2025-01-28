@@ -31,7 +31,7 @@ const Fab = () => {
           },
           {
             icon: "lightbulb",
-            label: "AI Generated",
+            label: "AI Generator",
             onPress: () => console.log("Pressed AI"),
           },
           {

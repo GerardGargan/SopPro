@@ -21,13 +21,7 @@ const EditStep = ({
 }) => {
   const [showDeleteWarning, setShowDeleteWarning] = useState(false);
 
-  const {
-    mutate: uploadMutate,
-    data: imageData,
-    isError,
-    error,
-    isPending,
-  } = useMutation({
+  const { mutate: uploadMutate, data: imageData } = useMutation({
     mutationFn: ({ formData, key }) => {
       return uploadImage(formData).then((data) => ({ ...data, key }));
     },

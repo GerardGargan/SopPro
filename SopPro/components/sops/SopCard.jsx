@@ -1,8 +1,8 @@
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
-import { Icon, RadioButton } from "react-native-paper";
-import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { RadioButton } from "react-native-paper";
 import SopStatusChip from "./SopStatusChip";
+import { Star, Camera } from "lucide-react-native";
 
 const SopCard = ({
   sop,
@@ -19,7 +19,7 @@ const SopCard = ({
     openBottomSheet(sop);
   }
 
-  let image = <Icon source="camera" size={25} />;
+  let image = <Camera color="black" size={30} />;
 
   if (sop.imageUrl) {
     image = (
@@ -55,7 +55,7 @@ const SopCard = ({
         </View>
         {sop.isFavourite && (
           <View style={styles.favouriteContainer}>
-            <MaterialCommunityIcons name="star" size={25} color="#FFC107" />
+            <Star fill="#FFC107" size={25} />
           </View>
         )}
 

@@ -46,6 +46,7 @@ export default function RootLayout() {
     const checkAuth = async () => {
       const token = await AsyncStorage.getItem("authToken");
       const userInfo = await AsyncStorage.getItem("userInfo");
+      console.log(userInfo);
       const payload = {
         token,
         userInfo: JSON.parse(userInfo),
