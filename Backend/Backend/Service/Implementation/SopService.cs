@@ -160,7 +160,7 @@ namespace Backend.Service.Implementation
                         Title = sopStep.Title,
                         ImageUrl = sopStep.ImageUrl,
                     }).ToList()
-                }).ToList()
+                }).OrderByDescending(x => x.Version).ToList()
             }).ToListAsync();
 
             // add latest version to each sop
