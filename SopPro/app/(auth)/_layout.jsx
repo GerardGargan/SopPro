@@ -11,7 +11,7 @@ import { authActions } from "../../store/authSlice";
 import { Stack, Redirect } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { FontAwesome5 } from "@expo/vector-icons";
-import { Text } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { ActivityIndicator } from "react-native-paper";
 
 export {
@@ -80,3 +80,11 @@ export default function RootLayout() {
     </Stack>
   );
 }
+
+const styles = StyleSheet.create({
+  centered: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+});
