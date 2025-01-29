@@ -268,7 +268,7 @@ namespace Backend.Service.Implementation
 
         public async Task<SopVersionDto> GetSopVersion(int sopVersionId)
         {
-            var sopVersion = await _unitOfWork.SopVersions.GetAsync(x => x.Id == sopVersionId, includeProperties: "Author,ApprovedBy,SopSteps,SopHazards");
+            var sopVersion = await _unitOfWork.SopVersions.GetAsync(x => x.Id == sopVersionId, includeProperties: "Author,ApprovedBy,SopSteps,SopSteps.SopStepPpe,SopHazards");
 
             if (sopVersion == null)
             {

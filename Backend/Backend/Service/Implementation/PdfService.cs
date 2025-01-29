@@ -1,6 +1,10 @@
+using System.Threading.Tasks;
 using Backend.Models.DatabaseModels;
 using Backend.Models.Dto;
+using Backend.Repository.Implementation;
+using Backend.Repository.Interface;
 using Backend.Service.Interface;
+using Microsoft.EntityFrameworkCore;
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
@@ -9,6 +13,12 @@ namespace Backend.Service.Implementation
 {
     public class PdfService : IPdfService
     {
+        private readonly IUnitOfWork _unitOfWork;
+        public PdfService(IUnitOfWork unitOfWork)
+        {
+            _unitOfWork = unitOfWork;
+        }
+
         public byte[] GeneratePdf(string templateName, SopVersionDto model)
         {
             QuestPDF.Settings.License = LicenseType.Community;
@@ -35,7 +45,7 @@ namespace Backend.Service.Implementation
                     page.Header().Element(container => ComposeHeader(container, model));
 
                     // Content
-                    page.Content().Element(container => ComposeContent(container, model));
+                    page.Content().Element(container => ComposeContent(container, model).GetAwaiter().GetResult());
 
                     // Footer
                     page.Footer().Element(ComposeFooter);
@@ -72,8 +82,10 @@ namespace Backend.Service.Implementation
             return container.Padding(5).BorderBottom(0);
         }
 
-        private void ComposeContent(IContainer container, SopVersionDto model)
+        private async Task ComposeContent(IContainer container, SopVersionDto model)
         {
+            Dictionary<int, string> PpeDict = await _unitOfWork.Ppe.GetAll().ToDictionaryAsync(x => x.Id, x => x.Name);
+
             container.Column(column =>
             {
                 // Metadata section
@@ -192,20 +204,20 @@ namespace Backend.Service.Implementation
                                             content.Item().Text(step.Text);
 
                                             // PPE section 
-                                            if (step.Ppes?.Any() == true)
+                                            if (step.PpeIds?.Any() == true)
                                             {
                                                 content.Item().PaddingTop(5).Column(ppe =>
                                                 {
                                                     ppe.Item().Text("Required PPE:").Bold();
                                                     ppe.Item().PaddingTop(2).Row(ppeRow =>
                                                     {
-                                                        foreach (var ppeItem in step.Ppes)
+                                                        foreach (var ppeId in step.PpeIds)
                                                         {
                                                             ppeRow.AutoItem().Background(Colors.Yellow.Lighten5)
                                                                 .Border(1)
                                                                 .BorderColor(Colors.Yellow.Medium)
                                                                 .Padding(5)
-                                                                .Text($"{ppeItem}")
+                                                                .Text($"{PpeDict[ppeId]}")
                                                                 .FontSize(10);
                                                         }
                                                     });

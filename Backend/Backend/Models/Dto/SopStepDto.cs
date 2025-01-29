@@ -23,7 +23,6 @@ namespace Backend.Models.Dto
                 Title = sopStep.Title,
                 ImageUrl = sopStep.ImageUrl,
                 PpeIds = sopStep.SopStepPpe?.Select(x => x.PpeId).ToList(),
-                Ppes = sopStep.SopStepPpe?.Select(x => new PpeDto() { Name = x.Ppe.Name, Icon = x.Ppe.Icon }).ToList(),
             };
 
             return sopStepDto;
