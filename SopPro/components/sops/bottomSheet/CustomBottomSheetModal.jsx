@@ -28,6 +28,7 @@ import {
   Pencil,
   Trash2,
   FileCheck2,
+  FileDown,
 } from "lucide-react-native";
 import ExportModal from "../exportModal/ExportModal";
 
@@ -259,9 +260,9 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     />
   );
 
-  const exportCart = (
+  const exportCard = (
     <BottomSheetCard
-      Icon={FileCheck2}
+      Icon={FileDown}
       title="Export"
       onPress={handleExportPress}
     />
@@ -274,7 +275,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
       {(sop?.status === 1 || sop?.status === 5) && requestApprovalCard}
       {favouritesCard}
       {deleteCard}
-      {exportCart}
+      {exportCard}
     </>
   );
   const adminCardStack = (
