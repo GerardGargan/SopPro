@@ -10,6 +10,7 @@ namespace Backend.Models.Dto
         public string Text { get; set; }
         public string ImageUrl { get; set; }
         public List<int> PpeIds { get; set; }
+        public List<PpeDto> Ppes { get; set; }
 
         public static SopStepDto FromSopStep(SopStep sopStep)
         {
@@ -21,7 +22,8 @@ namespace Backend.Models.Dto
                 Text = sopStep.Text,
                 Title = sopStep.Title,
                 ImageUrl = sopStep.ImageUrl,
-                PpeIds = sopStep.SopStepPpe?.Select(x => x.PpeId).ToList()
+                PpeIds = sopStep.SopStepPpe?.Select(x => x.PpeId).ToList(),
+                Ppes = sopStep.SopStepPpe?.Select(x => new PpeDto() { Name = x.Ppe.Name, Icon = x.Ppe.Icon }).ToList(),
             };
 
             return sopStepDto;

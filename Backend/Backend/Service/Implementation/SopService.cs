@@ -266,6 +266,20 @@ namespace Backend.Service.Implementation
             };
         }
 
+        public async Task<SopVersionDto> GetSopVersion(int sopVersionId)
+        {
+            var sopVersion = await _unitOfWork.SopVersions.GetAsync(x => x.Id == sopVersionId, includeProperties: "Author,ApprovedBy,SopSteps,SopHazards");
+
+            if (sopVersion == null)
+            {
+                throw new Exception("Sop version not found");
+            }
+
+            SopVersionDto sopVersionDto = SopVersionDto.FromSopVersion(sopVersion);
+            // emsure steps are in the correct order
+            return sopVersionDto;
+        }
+
         /// <summary>
         /// Updates a sop. Creates a new version if the existing version is approved, otherwise updates the existing version.
         /// </summary>

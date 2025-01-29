@@ -5,7 +5,6 @@ using Backend.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Backend.Utility;
-using Backend.Models.DatabaseModels;
 
 namespace Backend.Controllers
 {
@@ -125,11 +124,12 @@ namespace Backend.Controllers
         }
 
         [HttpGet]
-        [Route("{id:int}/pdf")]
-        public async Task<IActionResult> GeneratePdf(int id)
+        [Route("{sopVersionId:int}/pdf")]
+        public async Task<IActionResult> GeneratePdf(int sopVersionId)
         {
-            SopDto sop = new SopDto() { };
-            var pdf = _pdfService.GeneratePdf("template1", sop);
+            var sopServiceResponse = await _sopService.GetSopVersion(12026);
+            SopVersionDto sopVersion = sopServiceResponse;
+            var pdf = _pdfService.GeneratePdf("template1", sopVersion);
 
             return File(pdf, "application/pdf", "test.pdf");
 
