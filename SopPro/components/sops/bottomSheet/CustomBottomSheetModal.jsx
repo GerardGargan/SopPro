@@ -274,8 +274,8 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
       {editCard}
       {(sop?.status === 1 || sop?.status === 5) && requestApprovalCard}
       {favouritesCard}
-      {deleteCard}
       {exportCard}
+      {deleteCard}
     </>
   );
   const adminCardStack = (

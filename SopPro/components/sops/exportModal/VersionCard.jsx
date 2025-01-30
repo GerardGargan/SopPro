@@ -15,6 +15,7 @@ const VersionCard = ({
   createDate,
   handleVersionSelect,
 }) => {
+  const dateFormatted = new Date(createDate).toLocaleDateString("en-GB");
   return (
     <TouchableOpacity
       style={styles.versionCard}
@@ -23,7 +24,7 @@ const VersionCard = ({
       <View style={styles.versionInfo}>
         <Text style={styles.versionTitle}>Version {versionNumber}</Text>
         <Text style={styles.versionStatus}>{getStatus(status)}</Text>
-        <Text style={styles.versionDate}>Created: {createDate}</Text>
+        <Text style={styles.versionDate}>Created: {dateFormatted}</Text>
       </View>
       <View
         style={[
