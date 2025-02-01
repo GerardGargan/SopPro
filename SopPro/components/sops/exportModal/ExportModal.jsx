@@ -1,9 +1,29 @@
 import { ScrollView, StyleSheet, Text, View } from "react-native";
-import React from "react";
-import { Modal, Portal } from "react-native-paper";
+import React, { useState } from "react";
+import { ActivityIndicator, Button, Modal, Portal } from "react-native-paper";
 import VersionCard from "./VersionCard";
+import { downloadSopVersion } from "../../../util/downloadHelper";
+import Toast from "react-native-toast-message";
+import ErrorBlock from "../../UI/ErrorBlock";
 
 const ExportModal = ({ sopVersions, visible, setVisibility }) => {
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [isSuccessful, setIsSuccessful] = useState(false);
+  const [isError, setIsError] = useState(false);
+
+  async function handleDownload(versionId, reference, title) {
+    setIsDownloading(true);
+    setIsSuccessful(false);
+    setIsError(false);
+    try {
+      await downloadSopVersion(versionId, reference, title);
+      setIsSuccessful(true);
+    } catch (e) {
+      setIsError(true);
+    }
+    setIsDownloading(false);
+  }
+
   return (
     <Portal>
       <Modal
@@ -12,6 +32,13 @@ const ExportModal = ({ sopVersions, visible, setVisibility }) => {
         onDismiss={() => setVisibility(false)}
       >
         <View style={styles.exportContainer}>
+          {isDownloading && <ActivityIndicator />}
+          {isError && (
+            <ErrorBlock>
+              <Text>An error occured, download failed.</Text>
+            </ErrorBlock>
+          )}
+          {isSuccessful && <Text>Download successful!</Text>}
           <Text style={styles.exportTitle}>Export Modal</Text>
           <Text style={styles.exportSubtitle}>Select a version to export</Text>
           <ScrollView style={styles.versionsContainer}>
@@ -23,7 +50,8 @@ const ExportModal = ({ sopVersions, visible, setVisibility }) => {
                   versionNumber={version.version}
                   createDate={version.createDate}
                   status={version.status}
-                  handleVersionSelect={() => {}}
+                  title={version.title}
+                  handleVersionSelect={handleDownload}
                 />
               );
             })}

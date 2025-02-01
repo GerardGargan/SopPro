@@ -13,13 +13,14 @@ const VersionCard = ({
   versionNumber,
   status,
   createDate,
+  title,
   handleVersionSelect,
 }) => {
   const dateFormatted = new Date(createDate).toLocaleDateString("en-GB");
   return (
     <TouchableOpacity
       style={styles.versionCard}
-      onPress={() => handleVersionSelect(id)}
+      onPress={() => handleVersionSelect(id, versionNumber, title)}
     >
       <View style={styles.versionInfo}>
         <Text style={styles.versionTitle}>Version {versionNumber}</Text>
