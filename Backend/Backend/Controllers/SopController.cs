@@ -129,7 +129,7 @@ namespace Backend.Controllers
         {
             var sopServiceResponse = await _sopService.GetSopVersion(12026);
             SopVersionDto sopVersion = sopServiceResponse;
-            var pdf = _pdfService.GeneratePdf("template1", sopVersion);
+            var pdf = await _pdfService.GeneratePdf("template1", sopVersion);
 
             return File(pdf, "application/pdf", "test.pdf");
 

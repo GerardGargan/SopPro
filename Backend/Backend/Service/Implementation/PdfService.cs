@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
 using Backend.Models.DatabaseModels;
 using Backend.Models.Dto;
+using Backend.Models.Tenancy;
 using Backend.Repository.Implementation;
 using Backend.Repository.Interface;
 using Backend.Service.Interface;
@@ -14,22 +15,52 @@ namespace Backend.Service.Implementation
     public class PdfService : IPdfService
     {
         private readonly IUnitOfWork _unitOfWork;
-        public PdfService(IUnitOfWork unitOfWork)
+        private readonly IEmailService _emailService;
+        private readonly ITenancyResolver _tenancyResolver;
+        private readonly ITemplateService _templateService;
+        public PdfService(IUnitOfWork unitOfWork, IEmailService emailService, ITenancyResolver tenancyResolver, ITemplateService templateService)
         {
             _unitOfWork = unitOfWork;
+            _emailService = emailService;
+            _tenancyResolver = tenancyResolver;
+            _templateService = templateService;
         }
 
-        public byte[] GeneratePdf(string templateName, SopVersionDto model)
+        public async Task<byte[]> GeneratePdf(string templateName, SopVersionDto model)
         {
             QuestPDF.Settings.License = LicenseType.Community;
+
+            byte[] template = null;
 
             switch (templateName.ToLower())
             {
                 case "template1":
-                    return Template1(model);
+                    template = Template1(model);
+                    break;
                 default:
                     throw new Exception("Invalid template name");
             }
+
+            // send email attachment
+            var userId = _tenancyResolver.GetUserId();
+            var user = await _unitOfWork.ApplicationUsers.GetAsync(x => x.Id == userId);
+            List<string> recipients = new List<string>(1);
+            recipients.Add(user.Email);
+
+            var emailTemplateModel = new
+            {
+                Username = user.Forename,
+                Title = model.Title,
+                Description = model.Description,
+                Version = model.Version,
+                Status = model.Status.ToString(),
+                DateGenerated = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm") ?? "N/A",
+            };
+
+            string emailBody = await _templateService.RenderTemplateAsync("PdfExport", emailTemplateModel);
+            _emailService.SendEmailWithPdfAttachmentAsync(recipients, null, "Exported sop is ready", emailBody, template);
+
+            return template;
         }
 
         private byte[] Template1(SopVersionDto model)
