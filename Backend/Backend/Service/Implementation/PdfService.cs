@@ -47,10 +47,13 @@ namespace Backend.Service.Implementation
             List<string> recipients = new List<string>(1);
             recipients.Add(user.Email);
 
+            var sop = await _unitOfWork.Sops.GetAsync(x => x.Id == model.SopId);
+
             var emailTemplateModel = new
             {
                 Username = user.Forename,
                 Title = model.Title,
+                Reference = sop.Reference,
                 Description = model.Description,
                 Version = model.Version,
                 Status = model.Status.ToString(),
@@ -58,7 +61,8 @@ namespace Backend.Service.Implementation
             };
 
             string emailBody = await _templateService.RenderTemplateAsync("PdfExport", emailTemplateModel);
-            _emailService.SendEmailWithPdfAttachmentAsync(recipients, null, "Exported sop is ready", emailBody, template);
+            string pdfName = "SOP" + "-" + sop.Reference + "-V" + model.Version + "-" + DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm");
+            _emailService.SendEmailWithPdfAttachmentAsync(recipients, null, "Exported sop is ready", emailBody, template, pdfName);
 
             return template;
         }

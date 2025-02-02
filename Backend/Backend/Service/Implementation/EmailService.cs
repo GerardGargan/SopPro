@@ -91,7 +91,7 @@ namespace Backend.Service.Implementation
 
         }
 
-        public async Task<bool> SendEmailWithPdfAttachmentAsync(List<string> recipients, List<string> bccRecipients, string subject, string body, byte[] pdfData)
+        public async Task<bool> SendEmailWithPdfAttachmentAsync(List<string> recipients, List<string> bccRecipients, string subject, string body, byte[] pdfData, string pdfName)
         {
             // return false if there are no recipients
             if ((recipients == null || recipients.Count == 0) && (bccRecipients == null || bccRecipients.Count == 0))
@@ -119,7 +119,7 @@ namespace Backend.Service.Implementation
             {
                 new PostmarkMessageAttachment
                 {
-                    Name = "SOP.pdf",
+                    Name = pdfName,
                     Content = Convert.ToBase64String(pdfData),
                     ContentType = "application/pdf"
                 }
