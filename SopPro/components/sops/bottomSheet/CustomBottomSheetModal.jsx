@@ -5,7 +5,7 @@ import {
   BottomSheetModal,
   BottomSheetView,
 } from "@gorhom/bottom-sheet";
-import BottomSheetCard from "./BottomSheetCard";
+import MenuCard from "../../UI/MenuCard";
 import { Divider, useTheme } from "react-native-paper";
 import { useRouter } from "expo-router";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -219,21 +219,21 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
   }
 
   const editCard = (
-    <BottomSheetCard Icon={Pencil} title="Edit" onPress={handleEditPress} />
+    <MenuCard Icon={Pencil} title="Edit" onPress={handleEditPress} />
   );
 
   const deleteCard = (
-    <BottomSheetCard Icon={Trash2} title="Delete" onPress={handleDeletePress} />
+    <MenuCard Icon={Trash2} title="Delete" onPress={handleDeletePress} />
   );
 
   const favouritesCard = sop?.isFavourite ? (
-    <BottomSheetCard
+    <MenuCard
       Icon={Star}
       title="Remove from favourites"
       onPress={handleRemoveFromFavouritesPress}
     />
   ) : (
-    <BottomSheetCard
+    <MenuCard
       Icon={Star}
       title="Add to favourites"
       onPress={handleAddToFavouritesPress}
@@ -241,19 +241,15 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
   );
 
   const approvalCard = (
-    <BottomSheetCard Icon={ThumbsUp} title="Approve" onPress={handleApproval} />
+    <MenuCard Icon={ThumbsUp} title="Approve" onPress={handleApproval} />
   );
 
   const rejectApprovalCard = (
-    <BottomSheetCard
-      Icon={ThumbsDown}
-      title="Reject"
-      onPress={handleRejectPress}
-    />
+    <MenuCard Icon={ThumbsDown} title="Reject" onPress={handleRejectPress} />
   );
 
   const requestApprovalCard = (
-    <BottomSheetCard
+    <MenuCard
       Icon={FileCheck2}
       title="Request Approval"
       onPress={handleRequestApproval}
@@ -261,11 +257,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
   );
 
   const exportCard = (
-    <BottomSheetCard
-      Icon={FileDown}
-      title="Export"
-      onPress={handleExportPress}
-    />
+    <MenuCard Icon={FileDown} title="Export" onPress={handleExportPress} />
   );
 
   // Group cards based on user role

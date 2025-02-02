@@ -1,8 +1,7 @@
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
 import React from "react";
-import { FontAwesome5 } from "@expo/vector-icons";
 
-const BottomSheetCard = ({ Icon, title, onPress }) => {
+const MenuCard = ({ Icon, title, onPress }) => {
   return (
     <TouchableOpacity style={styles.rootContainer} onPress={onPress}>
       <Icon size={28} color="#888" style={styles.icon} />
@@ -13,7 +12,7 @@ const BottomSheetCard = ({ Icon, title, onPress }) => {
   );
 };
 
-export default BottomSheetCard;
+export default MenuCard;
 
 const styles = StyleSheet.create({
   rootContainer: {
