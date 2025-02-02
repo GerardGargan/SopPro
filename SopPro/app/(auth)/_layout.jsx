@@ -77,6 +77,10 @@ export default function RootLayout() {
     <Stack>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       <Stack.Screen name="upsert/[id]" options={{ title: "Create SOP" }} />
+      <Stack.Screen
+        name="user/changePassword"
+        options={{ title: "Change Password" }}
+      />
     </Stack>
   );
 }
