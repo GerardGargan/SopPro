@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import { ActivityIndicator, Button, Modal, Portal } from "react-native-paper";
 import VersionCard from "./VersionCard";
 import { downloadSopVersion } from "../../../util/downloadHelper";
-import Toast from "react-native-toast-message";
 import ErrorBlock from "../../UI/ErrorBlock";
 
 const ExportModal = ({ sopVersions, visible, setVisibility }) => {
@@ -24,6 +23,16 @@ const ExportModal = ({ sopVersions, visible, setVisibility }) => {
     setIsDownloading(false);
   }
 
+  const successMessage = (
+    <Text style={styles.successText}>Download successful! ✅</Text>
+  );
+
+  const errorMessage = (
+    <ErrorBlock>
+      <Text>An error occured, download failed.</Text>
+    </ErrorBlock>
+  );
+
   return (
     <Portal>
       <Modal
@@ -33,14 +42,11 @@ const ExportModal = ({ sopVersions, visible, setVisibility }) => {
       >
         <View style={styles.exportContainer}>
           {isDownloading && <ActivityIndicator />}
-          {isError && (
-            <ErrorBlock>
-              <Text>An error occured, download failed.</Text>
-            </ErrorBlock>
-          )}
-          {isSuccessful && <Text>Download successful!</Text>}
-          <Text style={styles.exportTitle}>Export Modal</Text>
+          {isError && errorMessage}
+          {isSuccessful && successMessage}
+          <Text style={styles.exportTitle}>Export to PDF</Text>
           <Text style={styles.exportSubtitle}>Select a version to export</Text>
+
           <ScrollView style={styles.versionsContainer}>
             {sopVersions?.map((version) => {
               return (
@@ -86,5 +92,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#666",
     marginBottom: 16,
+  },
+  successText: {
+    fontSize: 20,
+    marginBottom: 8,
   },
 });
