@@ -10,18 +10,18 @@ const More = () => {
   const menuOptions = [
     {
       key: 1,
-      icon: LogOut,
-      title: "Log out",
-      onPress: () => {
-        router.replace("/logout");
-      },
-    },
-    {
-      key: 2,
       icon: KeyRound,
       title: "Change password",
       onPress: () => {
         router.push("(auth)/user/changePassword");
+      },
+    },
+    {
+      key: 2,
+      icon: LogOut,
+      title: "Log out",
+      onPress: () => {
+        router.replace("/logout");
       },
     },
   ];
