@@ -160,7 +160,7 @@ namespace Backend.Service.Implementation
                         Title = sopStep.Title,
                         ImageUrl = sopStep.ImageUrl,
                     }).ToList()
-                }).ToList()
+                }).OrderByDescending(x => x.Version).ToList()
             }).ToListAsync();
 
             // add latest version to each sop
@@ -264,6 +264,20 @@ namespace Backend.Service.Implementation
                 StatusCode = HttpStatusCode.OK,
                 Result = sopDto
             };
+        }
+
+        public async Task<SopVersionDto> GetSopVersion(int sopVersionId)
+        {
+            var sopVersion = await _unitOfWork.SopVersions.GetAsync(x => x.Id == sopVersionId, includeProperties: "Author,ApprovedBy,SopSteps,SopSteps.SopStepPpe,SopHazards");
+
+            if (sopVersion == null)
+            {
+                throw new Exception("Sop version not found");
+            }
+
+            SopVersionDto sopVersionDto = SopVersionDto.FromSopVersion(sopVersion);
+            // emsure steps are in the correct order
+            return sopVersionDto;
         }
 
         /// <summary>

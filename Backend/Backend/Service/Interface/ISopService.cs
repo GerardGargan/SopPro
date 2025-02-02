@@ -17,5 +17,7 @@ namespace Backend.Service.Interface
         public Task<ApiResponse> ApproveSop(int id);
         public Task<ApiResponse> RejectSop(int id);
         public Task<ApiResponse> RequestApproval(int id);
+        public Task<SopVersionDto> GetSopVersion(int sopVersionId);
+
     };
 }

@@ -6,8 +6,10 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using PostmarkDotNet;
 
-namespace Backend.Service.Implementation {
-    public class EmailService : IEmailService {
+namespace Backend.Service.Implementation
+{
+    public class EmailService : IEmailService
+    {
         private readonly ApplicationSettings _appSettings;
         private readonly IUnitOfWork _unitOfWork;
 
@@ -24,7 +26,8 @@ namespace Backend.Service.Implementation {
         /// <param name="subject"></param>
         /// <param name="body"></param>
         /// <returns></returns>
-        public async Task<bool> SendEmailAsync(string toEmail, string subject, string body) {
+        public async Task<bool> SendEmailAsync(string toEmail, string subject, string body)
+        {
             var client = new PostmarkClient(_appSettings.PostmarkApiToken);
 
             var message = new PostmarkMessage
@@ -48,11 +51,11 @@ namespace Backend.Service.Implementation {
         /// <param name="subject">The email subject</param>
         /// <param name="body">The email body</param>
         /// <returns></returns>
-        public async Task<bool> SendEmailAsync(List<string> recipients, List<string> bccRecipients, string subject, string body) 
+        public async Task<bool> SendEmailAsync(List<string> recipients, List<string> bccRecipients, string subject, string body)
         {
 
             // return false if there are no recipients
-            if((recipients == null || recipients.Count == 0) && (bccRecipients == null || bccRecipients.Count == 0)) 
+            if ((recipients == null || recipients.Count == 0) && (bccRecipients == null || bccRecipients.Count == 0))
             {
                 return false;
             }
@@ -66,7 +69,7 @@ namespace Backend.Service.Implementation {
 
             var client = new PostmarkClient(_appSettings.PostmarkApiToken);
 
-            var message = new PostmarkMessage 
+            var message = new PostmarkMessage
             {
                 From = _appSettings.PostmarkFromEmail,
                 To = toEmails,
@@ -75,7 +78,55 @@ namespace Backend.Service.Implementation {
                 HtmlBody = body
             };
 
-            try 
+            try
+            {
+                var response = await client.SendMessageAsync(message);
+
+                return response.Status == PostmarkStatus.Success;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+
+        }
+
+        public async Task<bool> SendEmailWithPdfAttachmentAsync(List<string> recipients, List<string> bccRecipients, string subject, string body, byte[] pdfData, string pdfName)
+        {
+            // return false if there are no recipients
+            if ((recipients == null || recipients.Count == 0) && (bccRecipients == null || bccRecipients.Count == 0))
+            {
+                return false;
+            }
+
+            // handle nulls by creating empty lists
+            recipients = recipients ?? new List<string>(0);
+            bccRecipients = bccRecipients ?? new List<string>(0);
+
+            string toEmails = string.Join(",", recipients);
+            string bccEmails = string.Join(",", bccRecipients);
+
+            var client = new PostmarkClient(_appSettings.PostmarkApiToken);
+
+            var message = new PostmarkMessage
+            {
+                From = _appSettings.PostmarkFromEmail,
+                To = toEmails,
+                Bcc = bccEmails,
+                Subject = subject,
+                HtmlBody = body,
+                Attachments = new List<PostmarkMessageAttachment>
+            {
+                new PostmarkMessageAttachment
+                {
+                    Name = pdfName,
+                    Content = Convert.ToBase64String(pdfData),
+                    ContentType = "application/pdf"
+                }
+            }
+            };
+
+            try
             {
                 var response = await client.SendMessageAsync(message);
 

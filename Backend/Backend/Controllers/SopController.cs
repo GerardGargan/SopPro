@@ -14,11 +14,13 @@ namespace Backend.Controllers
     public class SopController : BaseApiController
     {
         private readonly ISopService _sopService;
+        private readonly IPdfService _pdfService;
 
-        public SopController(ISopService sopService)
+        public SopController(ISopService sopService, IPdfService pdfService)
         {
 
             _sopService = sopService;
+            _pdfService = pdfService;
         }
 
         [HttpPost]
@@ -119,6 +121,18 @@ namespace Backend.Controllers
         {
             var apiResponse = await _sopService.RequestApproval(id);
             return Ok(apiResponse);
+        }
+
+        [HttpGet]
+        [Route("{sopVersionId:int}/pdf")]
+        public async Task<IActionResult> GeneratePdf(int sopVersionId)
+        {
+            var sopServiceResponse = await _sopService.GetSopVersion(12026);
+            SopVersionDto sopVersion = sopServiceResponse;
+            var pdf = await _pdfService.GeneratePdf("template1", sopVersion);
+
+            return File(pdf, "application/pdf", "test.pdf");
+
         }
 
     }

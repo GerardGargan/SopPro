@@ -11,6 +11,8 @@ namespace Backend.Models.Dto
         public SopStatus Status { get; set; }
         public string AuthorId { get; set; }
         public string ApprovedById { get; set; }
+        public string ApprovedBy { get; set; }
+        public string Author { get; set; }
         public DateTime? CreateDate { get; set; }
         public DateTime? ApprovalDate { get; set; }
         public DateTime? RequestApprovalDate { get; set; }
@@ -28,11 +30,13 @@ namespace Backend.Models.Dto
                 Description = sopVersion.Description,
                 Status = sopVersion.Status,
                 AuthorId = sopVersion.AuthorId,
+                Author = sopVersion.Author?.Forename + " " + sopVersion.Author?.Surname,
                 ApprovedById = sopVersion.ApprovedById,
+                ApprovedBy = sopVersion.ApprovedBy?.Forename + " " + sopVersion.ApprovedBy?.Surname,
                 CreateDate = sopVersion.CreateDate,
                 ApprovalDate = sopVersion.ApprovalDate,
                 RequestApprovalDate = sopVersion.RequestApprovalDate,
-                SopSteps = sopVersion.SopSteps?.Select(x => SopStepDto.FromSopStep(x)).ToList(),
+                SopSteps = sopVersion.SopSteps?.Select(x => SopStepDto.FromSopStep(x)).OrderBy(x => x.Position).ToList(),
                 SopHazards = sopVersion.SopHazards?.Select(x => SopHazardDto.FromSopHazard(x)).ToList()
             };
 

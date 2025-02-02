@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOP Approved!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9;
+            margin: 0;
+            padding: 0;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: #4CAF50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        p {
+            margin: 10px 0;
+        }
+
+        .highlight {
+            font-weight: bold;
+            color: #4CAF50;
+        }
+
+        .details {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f1f1f1;
+            border-left: 4px solid #4CAF50;
+            border-radius: 4px;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="email-container">
+        <h1>Your exported PDF is attached! 🎉</h1>
+        <p>
+            <b>Hi {{Username}},</b>
+        </p>
+        <p>
+            Your PDF export is ready! Please find it attached to this email.
+        </p>
+        <div class="details">
+            <p><span class="highlight">SOP Title:</span> {{Title}}</p>
+            <p><span class="highlight">Reference:</span> {{Reference}}</p>
+            <p><span class="highlight">Description:</span> {{Description}}</p>
+            <p><span class="highlight">Version:</span> {{Version}}</p>
+            <p><span class="highlight">Status:</span> {{Status}}</p>
+            <p><span class="highlight">Generated on:</span> {{DateGenerated}} (UTC)</p>
+        </div>
+        <p>
+            Thank you for your hard work and dedication to maintaining high standards.
+        </p>
+        <div class="footer">
+            <p>This is an automated email. Please do not reply.</p>
+            <p>&copy; {{CurrentYear}} SopPro</p>
+        </div>
+    </div>
+</body>
+
+</html>

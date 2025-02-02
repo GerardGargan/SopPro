@@ -1,8 +1,5 @@
 import React, { useState } from "react";
-import {
-  StyleSheet,
-  View,
-} from "react-native";
+import { StyleSheet, View } from "react-native";
 import { TextInput, Button } from "react-native-paper";
 import InputErrorMessage from "../UI/InputErrorMessage";
 import {
@@ -98,9 +95,9 @@ const RegisterForm = ({ onSubmit, isPendingRegistration, isPendingLogin }) => {
     });
   }
 
-  let buttonText = "Create account and company";
-  if(isPendingRegistration || isPendingLogin) {
-    buttonText = "Registering and logging you in..."
+  let buttonText = "Create account";
+  if (isPendingRegistration || isPendingLogin) {
+    buttonText = "Registering and logging you in...";
   }
 
   return (

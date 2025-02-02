@@ -1,5 +1,5 @@
 import { StyleSheet, Text, View } from "react-native";
-import React, { forwardRef, useCallback, useMemo } from "react";
+import React, { forwardRef, useCallback, useMemo, useState } from "react";
 import {
   BottomSheetBackdrop,
   BottomSheetModal,
@@ -28,7 +28,9 @@ import {
   Pencil,
   Trash2,
   FileCheck2,
+  FileDown,
 } from "lucide-react-native";
+import ExportModal from "../exportModal/ExportModal";
 
 const CustomBottomSheetModal = forwardRef((props, ref) => {
   const router = useRouter();
@@ -36,8 +38,11 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
   const snapPoints = useMemo(() => ["60%"], []);
   const theme = useTheme();
   const sop = props.sop;
+  const sopVersions = sop?.sopVersions;
   const userRole = useSelector((state) => state.auth.role);
   const isAdmin = userRole === "admin";
+
+  const [exportModalVisibile, setExportModalVisible] = useState(false);
 
   function closeSheet() {
     ref.current?.close();
@@ -208,6 +213,11 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     mutateReject(sop.id);
   }
 
+  function handleExportPress() {
+    closeSheet();
+    setExportModalVisible(true);
+  }
+
   const editCard = (
     <BottomSheetCard Icon={Pencil} title="Edit" onPress={handleEditPress} />
   );
@@ -250,12 +260,21 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     />
   );
 
+  const exportCard = (
+    <BottomSheetCard
+      Icon={FileDown}
+      title="Export"
+      onPress={handleExportPress}
+    />
+  );
+
   // Group cards based on user role
   const userCardStack = (
     <>
       {editCard}
       {(sop?.status === 1 || sop?.status === 5) && requestApprovalCard}
       {favouritesCard}
+      {exportCard}
       {deleteCard}
     </>
   );
@@ -267,36 +286,46 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
   );
 
   return (
-    <BottomSheetModal
-      ref={ref}
-      index={0}
-      snapPoints={snapPoints}
-      enablePanDownToClose={true}
-      backdropComponent={renderBackdrop}
-    >
-      <BottomSheetView style={styles.contentContainer}>
-        <Text style={styles.headerText}>{sop?.title}</Text>
-        <View style={styles.rowContainer}>
-          <CustomChip style={styles.customChip}>
-            <Text>Version {sop?.version}</Text>
-          </CustomChip>
-          <CustomChip style={styles.customChip}>
-            <Text>{getStatus(sop?.status)}</Text>
-          </CustomChip>
-          {sop?.isFavourite && (
+    <>
+      <BottomSheetModal
+        ref={ref}
+        index={0}
+        snapPoints={snapPoints}
+        enablePanDownToClose={true}
+        backdropComponent={renderBackdrop}
+      >
+        <BottomSheetView style={styles.contentContainer}>
+          <Text style={styles.headerText}>{sop?.title}</Text>
+          <View style={styles.rowContainer}>
             <CustomChip style={styles.customChip}>
-              <View style={styles.rowContainer}>
-                <Star color="#888" size={17} />
-                <Text> Favourite</Text>
-              </View>
+              <Text>Version {sop?.version}</Text>
             </CustomChip>
-          )}
-        </View>
-        <Divider style={styles.divider} />
-        {isAdmin && adminCardStack}
-        {userCardStack}
-      </BottomSheetView>
-    </BottomSheetModal>
+            <CustomChip style={styles.customChip}>
+              <Text>{getStatus(sop?.status)}</Text>
+            </CustomChip>
+            {sop?.isFavourite && (
+              <CustomChip style={styles.customChip}>
+                <View style={styles.rowContainer}>
+                  <Star color="#888" size={17} />
+                  <Text> Favourite</Text>
+                </View>
+              </CustomChip>
+            )}
+          </View>
+          <Divider style={styles.divider} />
+          {isAdmin && adminCardStack}
+          {userCardStack}
+        </BottomSheetView>
+      </BottomSheetModal>
+
+      {exportModalVisibile && (
+        <ExportModal
+          sopVersions={sopVersions}
+          visible={exportModalVisibile}
+          setVisibility={setExportModalVisible}
+        />
+      )}
+    </>
   );
 });
 
