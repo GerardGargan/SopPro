@@ -4,6 +4,6 @@ namespace Backend.Service.Interface
 {
     public interface IPdfService
     {
-        public byte[] GeneratePdf(string templateName, SopVersionDto model);
+        public Task<byte[]> GeneratePdf(string templateName, SopVersionDto model);
     }
 }
