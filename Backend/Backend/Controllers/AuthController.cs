@@ -1,6 +1,9 @@
-﻿using Backend.Models;
+﻿using System.Net;
+using Backend.Models;
 using Backend.Models.Dto;
 using Backend.Service.Interface;
+using Backend.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers
@@ -52,10 +55,11 @@ namespace Backend.Controllers
         {
             var apiResponse = await _authService.RegisterInvitedUser(model, ModelState);
 
-            if(apiResponse.IsSuccess)
+            if (apiResponse.IsSuccess)
             {
                 return Ok(apiResponse);
-            } else
+            }
+            else
             {
                 return StatusCode((int)apiResponse.StatusCode, apiResponse);
             }
@@ -68,7 +72,7 @@ namespace Backend.Controllers
         /// <returns>A success status</returns>
 
         [HttpPost("inviteuser")]
-        //[Authorize(Roles = StaticDetails.Role_Admin)]
+        [Authorize(Roles = StaticDetails.Role_Admin)]
         [ProducesResponseType(200, Type = typeof(ApiResponse))]
         public async Task<IActionResult> InviteUser([FromBody] InviteRequestDTO model)
         {
@@ -86,5 +90,13 @@ namespace Backend.Controllers
 
         }
 
+        [Authorize]
+        [HttpPost("password")]
+        [ProducesResponseType(200, Type = typeof(ApiResponse))]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDto model)
+        {
+            var apiResponse = await _authService.ChangePassword(model);
+            return StatusCode((int)apiResponse.StatusCode, apiResponse);
+        }
     }
 }

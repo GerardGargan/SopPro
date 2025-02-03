@@ -3,6 +3,7 @@ using Backend.Models;
 using Backend.Models.DatabaseModels;
 using Backend.Models.Dto;
 using Backend.Models.Settings;
+using Backend.Models.Tenancy;
 using Backend.Repository.Interface;
 using Backend.Service.Interface;
 using Backend.Utility;
@@ -25,8 +26,9 @@ namespace Backend.Service.Implementation
         private readonly IdentityOptions _identityOptions;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ApplicationSettings _appSettings;
+        private readonly ITenancyResolver _tenancyResolver;
 
-        public AuthService(ApplicationDbContext db, IConfiguration configuration, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IJwtService jwtService, IOptions<IdentityOptions> identityOptions, IUnitOfWork unitOfWork, IOptions<ApplicationSettings> appSettings)
+        public AuthService(ApplicationDbContext db, IConfiguration configuration, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IJwtService jwtService, IOptions<IdentityOptions> identityOptions, IUnitOfWork unitOfWork, IOptions<ApplicationSettings> appSettings, ITenancyResolver tenancyResolver)
         {
             _db = db;
             _userManager = userManager;
@@ -35,6 +37,7 @@ namespace Backend.Service.Implementation
             _identityOptions = identityOptions.Value;
             _unitOfWork = unitOfWork;
             _appSettings = appSettings.Value;
+            _tenancyResolver = tenancyResolver;
         }
 
         public async Task<ApiResponse<LoginResponseDTO>> Login(LoginRequestDTO model, ModelStateDictionary modelState)
@@ -287,6 +290,42 @@ namespace Backend.Service.Implementation
                 StatusCode = HttpStatusCode.OK,
                 IsSuccess = true,
                 SuccessMessage = "Organisation and user created successfully"
+            };
+        }
+
+        public async Task<ApiResponse> ChangePassword(ChangePasswordDto model)
+        {
+            if (!ValidatePassword(model.NewPassword))
+            {
+                throw new Exception("Password does not meet the minimum criteria");
+            }
+
+            if (model.NewPassword != model.ConfirmNewPassword)
+            {
+                throw new Exception("New password and confirm password do not match");
+            }
+
+            var userId = _tenancyResolver.GetUserId();
+            var user = await _userManager.FindByIdAsync(userId);
+
+            // check old password matches
+            var isPasswordCorrect = await _userManager.CheckPasswordAsync(user, model.OldPassword);
+            if (!isPasswordCorrect)
+            {
+                throw new Exception("Old Passowrd is incorrect");
+            }
+
+            var changePassword = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+            if (!changePassword.Succeeded)
+            {
+                throw new Exception("Oops something went wrong!");
+            }
+
+            return new ApiResponse()
+            {
+                IsSuccess = true,
+                StatusCode = HttpStatusCode.OK,
+                SuccessMessage = "Password changed successfully"
             };
         }
 
