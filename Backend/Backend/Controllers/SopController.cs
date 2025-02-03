@@ -127,7 +127,7 @@ namespace Backend.Controllers
         [Route("{sopVersionId:int}/pdf")]
         public async Task<IActionResult> GeneratePdf(int sopVersionId)
         {
-            var sopServiceResponse = await _sopService.GetSopVersion(12026);
+            var sopServiceResponse = await _sopService.GetSopVersion(sopVersionId);
             SopVersionDto sopVersion = sopServiceResponse;
             var pdf = await _pdfService.GeneratePdf("template1", sopVersion);
 
