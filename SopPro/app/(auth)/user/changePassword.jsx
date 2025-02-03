@@ -2,11 +2,13 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import React, { useState } from "react";
 import { Button, TextInput } from "react-native-paper";
 import Toast from "react-native-toast-message";
+import { validatePassword } from "../../../util/validationHelpers";
+import { useMutation } from "@tanstack/react-query";
+import { changePasswordRequest } from "../../../util/httpRequests";
 
-const changePassword = () => {
-  const [currentPassword, setCurrentPassword] = useState("");
-  const [isCurrentPasswordVisible, setIsCurrentPasswordVisible] =
-    useState(false);
+const ChangePassword = () => {
+  const [oldPassword, setCurrentPassword] = useState("");
+  const [isOldPasswordVisible, setIsOldPasswordVisible] = useState(false);
 
   const [newPassword, setNewPassword] = useState("");
   const [isNewPasswordVisible, setIsNewPasswordVisible] = useState(false);
@@ -15,12 +17,31 @@ const changePassword = () => {
   const [isConfirmNewPasswordVisible, setIsConfirmNewPasswordVisible] =
     useState(false);
 
+  const { mutate } = useMutation({
+    mutationFn: changePasswordRequest,
+    onSuccess: () => {
+      Toast.show({
+        type: "success",
+        text1: "Password updated",
+        visibilityTime: 3000,
+      });
+    },
+    onError: (error) => {
+      console.log(error);
+      Toast.show({
+        type: "error",
+        text1: error.message,
+        visibilityTime: 3000,
+      });
+    },
+  });
+
   function handlePasswordChange() {
     const errors = [];
 
     if (
-      !currentPassword ||
-      currentPassword.trim() == "" ||
+      !oldPassword ||
+      oldPassword.trim() == "" ||
       !newPassword ||
       newPassword.trim() == "" ||
       !confirmNewPassword ||
@@ -33,6 +54,11 @@ const changePassword = () => {
       errors.push(`New passwords don't match!`);
     }
 
+    const passwordValidator = validatePassword(newPassword);
+    if (!passwordValidator.isFieldValid) {
+      errors.push(passwordValidator.message);
+    }
+
     if (errors.length > 0) {
       Toast.show({
         type: "error",
@@ -42,24 +68,22 @@ const changePassword = () => {
       return;
     }
 
-    console.log("valid.. proceed to send request");
+    mutate({ oldPassword, newPassword, confirmNewPassword });
   }
 
   return (
     <ScrollView style={styles.rootContainer}>
-      <Text>Change your password</Text>
+      <Text style={styles.title}>Change your password</Text>
       <TextInput
         style={styles.input}
         label="Current password"
-        value={currentPassword}
+        value={oldPassword}
         onChangeText={(value) => setCurrentPassword(value)}
-        secureTextEntry={!isCurrentPasswordVisible}
+        secureTextEntry={!isOldPasswordVisible}
         right={
           <TextInput.Icon
-            icon={isCurrentPasswordVisible ? "eye-off" : "eye"}
-            onPress={() =>
-              setIsCurrentPasswordVisible(!isCurrentPasswordVisible)
-            }
+            icon={isOldPasswordVisible ? "eye-off" : "eye"}
+            onPress={() => setIsOldPasswordVisible(!isOldPasswordVisible)}
           />
         }
       />
@@ -78,7 +102,7 @@ const changePassword = () => {
       />
       <TextInput
         style={styles.input}
-        label="Confirm new password"
+        label="Confirm new password "
         value={confirmNewPassword}
         onChangeText={(value) => setConfirmNewPassword(value)}
         secureTextEntry={!isConfirmNewPasswordVisible}
@@ -105,7 +129,7 @@ const changePassword = () => {
   );
 };
 
-export default changePassword;
+export default ChangePassword;
 
 const styles = StyleSheet.create({
   rootContainer: {
@@ -113,6 +137,10 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   input: {
-    marginVertical: 4,
+    marginVertical: 8,
+  },
+  title: {
+    fontSize: 20,
+    marginBottom: 4,
   },
 });

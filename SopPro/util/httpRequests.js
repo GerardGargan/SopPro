@@ -202,3 +202,20 @@ export async function requestApproval(id) {
     throw error;
   }
 }
+
+export async function changePasswordRequest({
+  oldPassword,
+  newPassword,
+  confirmNewPassword,
+}) {
+  const data = { oldPassword, newPassword, confirmNewPassword };
+  try {
+    const response = await api.post(`/auth/password`, data);
+    return response.data;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error changing password"
+    );
+    throw error;
+  }
+}
