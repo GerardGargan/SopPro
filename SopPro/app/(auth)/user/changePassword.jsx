@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text } from "react-native";
 import React, { useState } from "react";
 import { Button, TextInput } from "react-native-paper";
 import Toast from "react-native-toast-message";

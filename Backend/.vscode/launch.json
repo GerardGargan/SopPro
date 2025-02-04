@@ -16,7 +16,7 @@
                 "args": "${auto-detect-url}"
             },
             "env": {
-                "ASPNETCORE_URLS": "http://192.168.1.47:5000",
+                "ASPNETCORE_URLS": "http://192.168.22.39:5000",
             },
             "justMyCode": true
         }
