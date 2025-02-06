@@ -7,13 +7,16 @@ using Backend.Models.Tenancy;
 using Backend.Repository.Interface;
 using Backend.Service.Interface;
 using Backend.Utility;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
+using System.Web;
 
 namespace Backend.Service.Implementation
 {
@@ -27,8 +30,9 @@ namespace Backend.Service.Implementation
         private readonly IUnitOfWork _unitOfWork;
         private readonly ApplicationSettings _appSettings;
         private readonly ITenancyResolver _tenancyResolver;
+        private readonly IEmailService _emailService;
 
-        public AuthService(ApplicationDbContext db, IConfiguration configuration, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IJwtService jwtService, IOptions<IdentityOptions> identityOptions, IUnitOfWork unitOfWork, IOptions<ApplicationSettings> appSettings, ITenancyResolver tenancyResolver)
+        public AuthService(ApplicationDbContext db, IConfiguration configuration, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IJwtService jwtService, IOptions<IdentityOptions> identityOptions, IUnitOfWork unitOfWork, IOptions<ApplicationSettings> appSettings, ITenancyResolver tenancyResolver, IEmailService emailService)
         {
             _db = db;
             _userManager = userManager;
@@ -38,6 +42,7 @@ namespace Backend.Service.Implementation
             _unitOfWork = unitOfWork;
             _appSettings = appSettings.Value;
             _tenancyResolver = tenancyResolver;
+            _emailService = emailService;
         }
 
         public async Task<ApiResponse<LoginResponseDTO>> Login(LoginRequestDTO model, ModelStateDictionary modelState)
@@ -327,6 +332,18 @@ namespace Backend.Service.Implementation
                 StatusCode = HttpStatusCode.OK,
                 SuccessMessage = "Password changed successfully"
             };
+        }
+
+        public async Task ForgotPassword(ForgotPasswordRequest model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            if (user != null)
+            {
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var resetUrl = $"soppro://reset?email={model.Email}&token={HttpUtility.UrlEncode(token)}";
+                await _emailService.SendEmailAsync(model.Email, "test", $@"<a href=""http://192.168.1.47:5000/api/auth/redirect?redirect={resetUrl}"">Click here to reset your password</a>");
+            }
         }
 
         public bool ValidatePassword(string password)

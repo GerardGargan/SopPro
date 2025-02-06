@@ -4,6 +4,7 @@ using Backend.Models.Dto;
 using Backend.Service.Interface;
 using Backend.Utility;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers
@@ -97,6 +98,32 @@ namespace Backend.Controllers
         {
             var apiResponse = await _authService.ChangePassword(model);
             return StatusCode((int)apiResponse.StatusCode, apiResponse);
+        }
+
+        [AllowAnonymous]
+        [HttpPost("forgot")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest model)
+        {
+            await _authService.ForgotPassword(model);
+
+            return Ok("Email sent with a reset link");
+        }
+
+        [AllowAnonymous]
+        [HttpGet("redirect")]
+        public async Task<IActionResult> RedirectToCustomScheme([FromQuery] string redirect)
+        {
+            if (string.IsNullOrWhiteSpace(redirect))
+            {
+                return BadRequest("Invalid redirect URL.");
+            }
+
+            if (!redirect.Contains("soppro://"))
+            {
+                return BadRequest("Invalid redirect scheme.");
+            }
+
+            return Redirect(redirect);
         }
     }
 }
