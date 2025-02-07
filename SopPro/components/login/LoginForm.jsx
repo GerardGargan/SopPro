@@ -61,7 +61,11 @@ const LoginForm = ({ onSubmit, isPending }) => {
           {isPending ? "Loggin in..." : "Log in"}
         </Button>
       </View>
-      <Button mode="text" onPress={handleForgotPasswordPress}>
+      <Button
+        style={{ marginVertical: 8 }}
+        mode="text"
+        onPress={handleForgotPasswordPress}
+      >
         Forgot Password
       </Button>
     </>
