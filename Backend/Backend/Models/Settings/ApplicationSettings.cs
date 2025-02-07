@@ -2,6 +2,7 @@
 {
     public class ApplicationSettings
     {
+        public string BaseUrl { get; set; }
         public string JwtSecret { get; set; }
         public string JwtIssuer { get; set; }
         public string JwtAudience { get; set; }

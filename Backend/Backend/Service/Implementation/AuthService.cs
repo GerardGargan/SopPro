@@ -7,16 +7,12 @@ using Backend.Models.Tenancy;
 using Backend.Repository.Interface;
 using Backend.Service.Interface;
 using Backend.Utility;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
-using System.Web;
 
 namespace Backend.Service.Implementation
 {
@@ -344,7 +340,7 @@ namespace Backend.Service.Implementation
                 var encodedToken = Uri.EscapeDataString(token);
 
                 var resetUrl = $"soppro://reset?email={model.Email}&token={encodedToken}";
-                var redirectUrl = $"http://192.168.1.47:5000/api/auth/redirect?redirect={Uri.EscapeDataString(resetUrl)}";
+                var redirectUrl = $"{_appSettings.BaseUrl}/api/auth/redirect?redirect={Uri.EscapeDataString(resetUrl)}";
 
                 await _emailService.SendEmailAsync(model.Email, "Password Reset", $@"<a href=""{redirectUrl}"">Click here to reset your password</a>");
             }
