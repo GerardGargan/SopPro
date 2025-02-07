@@ -346,6 +346,33 @@ namespace Backend.Service.Implementation
             }
         }
 
+        public async Task<ApiResponse> ResetPassword(ResetPasswordRequest model)
+        {
+            if (!ValidatePassword(model.NewPassword))
+            {
+                throw new Exception("Password does not meet requirements");
+            }
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                throw new Exception("User could not be found");
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, model.ResetCode, model.NewPassword);
+            if (!result.Succeeded)
+            {
+                throw new Exception("Error reseting password");
+            }
+
+            return new ApiResponse()
+            {
+                IsSuccess = true,
+                SuccessMessage = "Password reset successfully",
+                StatusCode = HttpStatusCode.OK
+            };
+        }
+
         public bool ValidatePassword(string password)
         {
             // Check if the password length is sufficient

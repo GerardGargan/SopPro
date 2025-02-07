@@ -13,5 +13,6 @@ namespace Backend.Service.Interface
         Task<ApiResponse<LoginResponseDTO>> Login(LoginRequestDTO model, ModelStateDictionary modelState);
         Task<ApiResponse> ChangePassword(ChangePasswordDto model);
         Task ForgotPassword(ForgotPasswordRequest model);
+        Task<ApiResponse> ResetPassword(ResetPasswordRequest model);
     }
 }

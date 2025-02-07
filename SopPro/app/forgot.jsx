@@ -1,0 +1,87 @@
+import { StyleSheet, Text, View } from "react-native";
+import React, { useState } from "react";
+import { ScrollView } from "react-native-gesture-handler";
+import Header from "../components/UI/Header";
+import { Button, TextInput } from "react-native-paper";
+import { validateEmail } from "../util/validationHelpers";
+import InputErrorMessage from "../components/UI/InputErrorMessage";
+import { forgotPassword } from "../util/httpRequests";
+import { useMutation } from "@tanstack/react-query";
+import Toast from "react-native-toast-message";
+
+const forgot = () => {
+  const [email, setEmail] = useState("");
+  const [emailError, setEmailError] = useState(false);
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: forgotPassword,
+    onSuccess: () => {
+      Toast.show({
+        type: "success",
+        text1: "Reset Email link sent",
+        visibilityTime: 3000,
+      });
+    },
+    onError: (error) => {
+      console.log(error);
+    },
+  });
+
+  function handlePress() {
+    setEmailError(false);
+
+    const emailValidator = validateEmail(email);
+    if (!emailValidator.isFieldValid) {
+      setEmailError(emailValidator.message);
+      return;
+    }
+
+    mutate(email);
+  }
+  return (
+    <ScrollView style={styles.rootContainer}>
+      <View style={styles.formContainer}>
+        <Header text="Reset password" textStyle={{ color: "black" }} />
+        <TextInput
+          style={styles.textInput}
+          error={emailError !== false}
+          label="Email"
+          keyboardType="email-address"
+          value={email}
+          onChangeText={(value) => setEmail(value)}
+        />
+        {emailError !== false && (
+          <InputErrorMessage>{emailError}</InputErrorMessage>
+        )}
+        <Button
+          mode="contained"
+          loading={isPending}
+          contentStyle={{ height: 50 }}
+          labelStyle={{ fontSize: 20 }}
+          style={styles.buttonContainer}
+          onPress={handlePress}
+        >
+          Reset Password
+        </Button>
+      </View>
+    </ScrollView>
+  );
+};
+
+export default forgot;
+
+const styles = StyleSheet.create({
+  rootContainer: {
+    flex: 1,
+    margin: 30,
+    paddingTop: 50,
+  },
+  formContainer: {},
+  textInput: {
+    marginVertical: 2,
+  },
+  buttonContainer: {
+    borderRadius: 0,
+    marginVertical: 14,
+  },
+});

@@ -110,6 +110,16 @@ namespace Backend.Controllers
         }
 
         [AllowAnonymous]
+        [ProducesResponseType(200, Type = typeof(ApiResponse))]
+        [HttpPost("reset")]
+        public async Task<IActionResult> ForgotPassword([FromBody] ResetPasswordRequest model)
+        {
+            var apiResponse = await _authService.ResetPassword(model);
+
+            return Ok(apiResponse);
+        }
+
+        [AllowAnonymous]
         [HttpGet("redirect")]
         public async Task<IActionResult> RedirectToCustomScheme([FromQuery] string redirect)
         {

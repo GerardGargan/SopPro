@@ -25,7 +25,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 }, ServiceLifetime.Scoped);
 builder.Services.AddSingleton(u => new BlobServiceClient(builder.Configuration.GetConnectionString("AzureBlobStorage")));
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>();
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>().AddEntityFrameworkStores<ApplicationDbContext>().AddDefaultTokenProviders();
 builder.Services.Configure<IdentityOptions>(options =>
 {
     // Default Password settings.

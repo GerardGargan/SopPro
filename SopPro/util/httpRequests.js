@@ -219,3 +219,18 @@ export async function changePasswordRequest({
     throw error;
   }
 }
+
+export async function forgotPassword(email) {
+  try {
+    const response = await api.post("/auth/forgot", {
+      email,
+    });
+
+    return response.data;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error requesting reset"
+    );
+    throw error;
+  }
+}
