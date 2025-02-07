@@ -23,7 +23,11 @@ const forgot = () => {
       });
     },
     onError: (error) => {
-      console.log(error);
+      Toast.show({
+        type: "error",
+        text1: error.message,
+        visibilityTime: 3000,
+      });
     },
   });
 

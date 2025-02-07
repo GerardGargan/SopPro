@@ -234,3 +234,17 @@ export async function forgotPassword(email) {
     throw error;
   }
 }
+
+export async function resetPassword({ email, formattedToken, password }) {
+  const data = { email, resetCode: formattedToken, newPassword: password };
+
+  try {
+    const response = await api.post("/auth/reset", data);
+    return response.data;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error reseting password"
+    );
+    throw error;
+  }
+}
