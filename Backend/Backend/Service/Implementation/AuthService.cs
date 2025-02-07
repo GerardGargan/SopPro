@@ -341,8 +341,12 @@ namespace Backend.Service.Implementation
             if (user != null)
             {
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-                var resetUrl = $"soppro://reset?email={model.Email}&token={HttpUtility.UrlEncode(token)}";
-                await _emailService.SendEmailAsync(model.Email, "test", $@"<a href=""http://192.168.1.47:5000/api/auth/redirect?redirect={resetUrl}"">Click here to reset your password</a>");
+                var encodedToken = Uri.EscapeDataString(token);
+
+                var resetUrl = $"soppro://reset?email={model.Email}&token={encodedToken}";
+                var redirectUrl = $"http://192.168.1.47:5000/api/auth/redirect?redirect={Uri.EscapeDataString(resetUrl)}";
+
+                await _emailService.SendEmailAsync(model.Email, "Password Reset", $@"<a href=""{redirectUrl}"">Click here to reset your password</a>");
             }
         }
 
