@@ -219,3 +219,32 @@ export async function changePasswordRequest({
     throw error;
   }
 }
+
+export async function forgotPassword(email) {
+  try {
+    const response = await api.post("/auth/forgot", {
+      email,
+    });
+
+    return response.data;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error requesting reset"
+    );
+    throw error;
+  }
+}
+
+export async function resetPassword({ email, formattedToken, password }) {
+  const data = { email, resetCode: formattedToken, newPassword: password };
+
+  try {
+    const response = await api.post("/auth/reset", data);
+    return response.data;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error reseting password"
+    );
+    throw error;
+  }
+}

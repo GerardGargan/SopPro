@@ -8,10 +8,9 @@ using Backend.Repository.Interface;
 using Backend.Service.Interface;
 using Backend.Utility;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.Options;
-using Microsoft.IdentityModel.Tokens;
-using System.IdentityModel.Tokens.Jwt;
 using System.Net;
 using System.Security.Claims;
 
@@ -27,8 +26,9 @@ namespace Backend.Service.Implementation
         private readonly IUnitOfWork _unitOfWork;
         private readonly ApplicationSettings _appSettings;
         private readonly ITenancyResolver _tenancyResolver;
+        private readonly IEmailService _emailService;
 
-        public AuthService(ApplicationDbContext db, IConfiguration configuration, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IJwtService jwtService, IOptions<IdentityOptions> identityOptions, IUnitOfWork unitOfWork, IOptions<ApplicationSettings> appSettings, ITenancyResolver tenancyResolver)
+        public AuthService(ApplicationDbContext db, IConfiguration configuration, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IJwtService jwtService, IOptions<IdentityOptions> identityOptions, IUnitOfWork unitOfWork, IOptions<ApplicationSettings> appSettings, ITenancyResolver tenancyResolver, IEmailService emailService)
         {
             _db = db;
             _userManager = userManager;
@@ -38,6 +38,7 @@ namespace Backend.Service.Implementation
             _unitOfWork = unitOfWork;
             _appSettings = appSettings.Value;
             _tenancyResolver = tenancyResolver;
+            _emailService = emailService;
         }
 
         public async Task<ApiResponse<LoginResponseDTO>> Login(LoginRequestDTO model, ModelStateDictionary modelState)
@@ -326,6 +327,49 @@ namespace Backend.Service.Implementation
                 IsSuccess = true,
                 StatusCode = HttpStatusCode.OK,
                 SuccessMessage = "Password changed successfully"
+            };
+        }
+
+        public async Task ForgotPassword(ForgotPasswordRequest model)
+        {
+            var user = await _userManager.FindByEmailAsync(model.Email);
+
+            if (user != null)
+            {
+                var token = await _userManager.GeneratePasswordResetTokenAsync(user);
+                var encodedToken = Uri.EscapeDataString(token);
+
+                var resetUrl = $"soppro://reset?email={model.Email}&token={encodedToken}";
+                var redirectUrl = $"{_appSettings.BaseUrl}/api/auth/redirect?redirect={Uri.EscapeDataString(resetUrl)}";
+
+                await _emailService.SendEmailAsync(model.Email, "Password Reset", $@"<a href=""{redirectUrl}"">Click here to reset your password</a>");
+            }
+        }
+
+        public async Task<ApiResponse> ResetPassword(ResetPasswordRequest model)
+        {
+            if (!ValidatePassword(model.NewPassword))
+            {
+                throw new Exception("Password does not meet requirements");
+            }
+
+            var user = await _userManager.FindByEmailAsync(model.Email);
+            if (user == null)
+            {
+                throw new Exception("User could not be found");
+            }
+
+            var result = await _userManager.ResetPasswordAsync(user, model.ResetCode, model.NewPassword);
+            if (!result.Succeeded)
+            {
+                throw new Exception("Error reseting password");
+            }
+
+            return new ApiResponse()
+            {
+                IsSuccess = true,
+                SuccessMessage = "Password reset successfully",
+                StatusCode = HttpStatusCode.OK
             };
         }
 

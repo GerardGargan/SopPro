@@ -10,8 +10,7 @@ import { authActions } from "../../store/authSlice";
 
 import { Stack, Redirect } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { FontAwesome5 } from "@expo/vector-icons";
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { ActivityIndicator } from "react-native-paper";
 
 export {

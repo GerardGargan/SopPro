@@ -2,14 +2,21 @@ import React, { useState } from "react";
 import { StyleSheet, View } from "react-native";
 import { TextInput, Button } from "react-native-paper";
 import Header from "../UI/Header";
+import { useRouter } from "expo-router";
 
 const LoginForm = ({ onSubmit, isPending }) => {
+  const router = useRouter();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
   function handlePress() {
     onSubmit({ email, password });
+  }
+
+  function handleForgotPasswordPress() {
+    router.navigate("forgot");
   }
 
   return (
@@ -54,6 +61,13 @@ const LoginForm = ({ onSubmit, isPending }) => {
           {isPending ? "Loggin in..." : "Log in"}
         </Button>
       </View>
+      <Button
+        style={{ marginVertical: 8 }}
+        mode="text"
+        onPress={handleForgotPasswordPress}
+      >
+        Forgot Password
+      </Button>
     </>
   );
 };
