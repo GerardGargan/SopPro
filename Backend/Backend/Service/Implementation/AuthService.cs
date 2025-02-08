@@ -158,6 +158,7 @@ namespace Backend.Service.Implementation
 
                 // Update invitation to accepted
                 invitationFromDb.Status = Status.Accepted;
+                await _unitOfWork.SaveAsync();
 
             });
 
@@ -218,7 +219,13 @@ namespace Backend.Service.Implementation
 
             await _unitOfWork.SaveAsync();
 
-            // TODO: Send the user an email with the token embedded in the link
+            // Send the user an email with the token embedded in the link
+            var encodedToken = Uri.EscapeDataString(token);
+
+            var deepLinkUrl = $"soppro://registerinvite?token={encodedToken}";
+            var redirectUrl = $"{_appSettings.BaseUrl}/api/auth/redirect?redirect={Uri.EscapeDataString(deepLinkUrl)}";
+
+            _emailService.SendEmailAsync(model.Email, "Invite link for SopPro", $@"<a href=""{redirectUrl}"">Click here to complete registration</a>");
 
             // return an api response with a success
             return new ApiResponse()
@@ -348,7 +355,7 @@ namespace Backend.Service.Implementation
                 var resetUrl = $"soppro://reset?email={model.Email}&token={encodedToken}";
                 var redirectUrl = $"{_appSettings.BaseUrl}/api/auth/redirect?redirect={Uri.EscapeDataString(resetUrl)}";
 
-                await _emailService.SendEmailAsync(model.Email, "Password Reset", $@"<a href=""{redirectUrl}"">Click here to reset your password</a>");
+                _emailService.SendEmailAsync(model.Email, "Password Reset", $@"<a href=""{redirectUrl}"">Click here to reset your password</a>");
             }
         }
 

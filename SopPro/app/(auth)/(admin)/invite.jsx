@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import React, { useState } from "react";
 import { Button, TextInput } from "react-native-paper";
 import Header from "../../../components/UI/Header";
@@ -61,7 +61,7 @@ const invite = () => {
         <Header text="Invite user" textStyle={{ color: "black" }} />
         <TextInput
           style={styles.textInput}
-          label="Email"
+          label="Email address"
           keyboardType="email-address"
           value={email}
           onChangeText={(value) => setEmail(value)}

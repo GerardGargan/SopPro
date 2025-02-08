@@ -253,9 +253,29 @@ export async function inviteUser({ email, role }) {
   const data = { email, role };
   try {
     const response = await api.post("/auth/inviteuser", data);
+    return response.data;
   } catch (e) {
     const error = new Error(
-      e.resoonse?.data?.errorMessage || "Error sending invite"
+      e.response?.data?.errorMessage || "Error sending invite"
     );
+    throw error;
+  }
+}
+
+export async function completeRegistration({
+  forename,
+  surname,
+  password,
+  token,
+}) {
+  const data = { forename, surname, password, token };
+  try {
+    const response = await api.post("/auth/registerinvite", data);
+    return response.data;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error sending invite"
+    );
+    throw error;
   }
 }
