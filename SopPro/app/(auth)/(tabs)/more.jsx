@@ -14,7 +14,7 @@ const More = () => {
       key: 1,
       icon: UserPlus,
       title: "Invite user",
-      onPress: () => router.push("(auth)/more"),
+      onPress: () => router.push("(auth)/(admin)/invite"),
     },
   ];
 
