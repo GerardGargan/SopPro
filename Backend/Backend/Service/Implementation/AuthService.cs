@@ -27,8 +27,9 @@ namespace Backend.Service.Implementation
         private readonly ApplicationSettings _appSettings;
         private readonly ITenancyResolver _tenancyResolver;
         private readonly IEmailService _emailService;
+        private readonly ITemplateService _templateService;
 
-        public AuthService(ApplicationDbContext db, IConfiguration configuration, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IJwtService jwtService, IOptions<IdentityOptions> identityOptions, IUnitOfWork unitOfWork, IOptions<ApplicationSettings> appSettings, ITenancyResolver tenancyResolver, IEmailService emailService)
+        public AuthService(ApplicationDbContext db, IConfiguration configuration, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IJwtService jwtService, IOptions<IdentityOptions> identityOptions, IUnitOfWork unitOfWork, IOptions<ApplicationSettings> appSettings, ITenancyResolver tenancyResolver, IEmailService emailService, ITemplateService templateService)
         {
             _db = db;
             _userManager = userManager;
@@ -39,6 +40,7 @@ namespace Backend.Service.Implementation
             _appSettings = appSettings.Value;
             _tenancyResolver = tenancyResolver;
             _emailService = emailService;
+            _templateService = templateService;
         }
 
         public async Task<ApiResponse<LoginResponseDTO>> Login(LoginRequestDTO model, ModelStateDictionary modelState)
@@ -225,7 +227,19 @@ namespace Backend.Service.Implementation
             var deepLinkUrl = $"soppro://registerinvite?token={encodedToken}";
             var redirectUrl = $"{_appSettings.BaseUrl}/api/auth/redirect?redirect={Uri.EscapeDataString(deepLinkUrl)}";
 
-            _emailService.SendEmailAsync(model.Email, "Invite link for SopPro", $@"<a href=""{redirectUrl}"">Click here to complete registration</a>");
+            var invitedByUser = await _unitOfWork.ApplicationUsers.GetAsync(x => x.Id == _tenancyResolver.GetUserId());
+
+            var emailModel = new
+            {
+                OrganisatonName = orgFromDb.Name,
+                InvitedBy = invitedByUser.Forename,
+                DeepLink = redirectUrl
+            };
+
+            string emailSubject = $"{emailModel.InvitedBy} has invited you to join {orgFromDb.Name} on SopPro";
+            string emailBody = await _templateService.RenderTemplateAsync("UserInvitation", emailModel);
+
+            _emailService.SendEmailAsync(model.Email, emailSubject, emailBody);
 
             // return an api response with a success
             return new ApiResponse()
