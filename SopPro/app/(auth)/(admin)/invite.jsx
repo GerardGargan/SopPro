@@ -1,26 +1,29 @@
-import { StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
 import React, { useState } from "react";
-import { ScrollView } from "react-native-gesture-handler";
-import Header from "../components/UI/Header";
 import { Button, TextInput } from "react-native-paper";
-import { validateEmail } from "../util/validationHelpers";
-import InputErrorMessage from "../components/UI/InputErrorMessage";
-import { forgotPassword } from "../util/httpRequests";
+import Header from "../../../components/UI/Header";
+import SelectPicker from "../../../components/UI/SelectPicker";
+import { Picker } from "@react-native-picker/picker";
+import { validateEmail } from "../../../util/validationHelpers";
+import InputErrorMessage from "../../../components/UI/InputErrorMessage";
+import { inviteUser } from "../../../util/httpRequests";
 import { useMutation } from "@tanstack/react-query";
 import Toast from "react-native-toast-message";
 
-const forgot = () => {
+const invite = () => {
   const [email, setEmail] = useState("");
-  const [emailError, setEmailError] = useState(false);
+  const [role, setRole] = useState("user");
+  const [emailValidationError, setEmailValidationError] = useState(false);
 
   const { mutate, isPending } = useMutation({
-    mutationFn: forgotPassword,
+    mutationFn: inviteUser,
     onSuccess: () => {
       Toast.show({
         type: "success",
-        text1: "Reset Email link sent",
+        text1: "Invitation sent",
         visibilityTime: 3000,
       });
+      resetForm();
     },
     onError: (error) => {
       Toast.show({
@@ -32,31 +35,47 @@ const forgot = () => {
   });
 
   function handlePress() {
-    setEmailError(false);
+    setEmailValidationError(false);
 
     const emailValidator = validateEmail(email);
     if (!emailValidator.isFieldValid) {
-      setEmailError(emailValidator.message);
+      setEmailValidationError(emailValidator.message);
       return;
     }
 
-    mutate(email);
+    mutate({ email, role });
   }
+
+  function handleUpdateRole(value) {
+    setRole(value);
+  }
+
+  function resetForm() {
+    setEmail("");
+    setRole("user");
+  }
+
   return (
     <ScrollView style={styles.rootContainer}>
       <View style={styles.formContainer}>
-        <Header text="Reset password" textStyle={{ color: "black" }} />
+        <Header text="Invite user" textStyle={{ color: "black" }} />
         <TextInput
           style={styles.textInput}
-          error={emailError !== false}
-          label="Email"
+          label="Email address"
           keyboardType="email-address"
           value={email}
           onChangeText={(value) => setEmail(value)}
         />
-        {emailError !== false && (
-          <InputErrorMessage>{emailError}</InputErrorMessage>
+        {emailValidationError && (
+          <InputErrorMessage>{emailValidationError}</InputErrorMessage>
         )}
+        <SelectPicker
+          selectedValue={role}
+          onValueChange={(value) => handleUpdateRole(value)}
+        >
+          <Picker.Item label="Basic user" value={"user"} />
+          <Picker.Item label="Administrator" value={"admin"} />
+        </SelectPicker>
         <Button
           mode="contained"
           loading={isPending}
@@ -65,14 +84,14 @@ const forgot = () => {
           style={styles.buttonContainer}
           onPress={handlePress}
         >
-          Reset Password
+          Invite user
         </Button>
       </View>
     </ScrollView>
   );
 };
 
-export default forgot;
+export default invite;
 
 const styles = StyleSheet.create({
   rootContainer: {
@@ -81,7 +100,7 @@ const styles = StyleSheet.create({
     paddingTop: 50,
   },
   textInput: {
-    marginVertical: 2,
+    marginVertical: 8,
   },
   buttonContainer: {
     borderRadius: 0,

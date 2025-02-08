@@ -27,8 +27,9 @@ namespace Backend.Service.Implementation
         private readonly ApplicationSettings _appSettings;
         private readonly ITenancyResolver _tenancyResolver;
         private readonly IEmailService _emailService;
+        private readonly ITemplateService _templateService;
 
-        public AuthService(ApplicationDbContext db, IConfiguration configuration, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IJwtService jwtService, IOptions<IdentityOptions> identityOptions, IUnitOfWork unitOfWork, IOptions<ApplicationSettings> appSettings, ITenancyResolver tenancyResolver, IEmailService emailService)
+        public AuthService(ApplicationDbContext db, IConfiguration configuration, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IJwtService jwtService, IOptions<IdentityOptions> identityOptions, IUnitOfWork unitOfWork, IOptions<ApplicationSettings> appSettings, ITenancyResolver tenancyResolver, IEmailService emailService, ITemplateService templateService)
         {
             _db = db;
             _userManager = userManager;
@@ -39,6 +40,7 @@ namespace Backend.Service.Implementation
             _appSettings = appSettings.Value;
             _tenancyResolver = tenancyResolver;
             _emailService = emailService;
+            _templateService = templateService;
         }
 
         public async Task<ApiResponse<LoginResponseDTO>> Login(LoginRequestDTO model, ModelStateDictionary modelState)
@@ -158,6 +160,7 @@ namespace Backend.Service.Implementation
 
                 // Update invitation to accepted
                 invitationFromDb.Status = Status.Accepted;
+                await _unitOfWork.SaveAsync();
 
             });
 
@@ -177,7 +180,8 @@ namespace Backend.Service.Implementation
 
             // Perform validation and error handling
             ApplicationUser userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(u => u.UserName.ToLower() == model.Email);
-            Organisation orgFromDb = await _unitOfWork.Organisations.GetAsync(o => o.Id == model.OrganisationId);
+            var orgId = _tenancyResolver.GetOrganisationid();
+            Organisation orgFromDb = await _unitOfWork.Organisations.GetAsync(o => o.Id == orgId);
 
             if (userFromDb != null)
             {
@@ -189,6 +193,11 @@ namespace Backend.Service.Implementation
                 throw new Exception("Organisation does not exist");
             }
 
+            if (model.Role != StaticDetails.Role_Admin && model.Role != StaticDetails.Role_User)
+            {
+                throw new Exception("Invalid role selected");
+            }
+
             if (!modelState.IsValid)
             {
                 var errors = modelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
@@ -196,14 +205,14 @@ namespace Backend.Service.Implementation
             }
 
             // Data is validated at this point, proceed to generate a token and store it in the database, send the user an invitation email
-            string token = _jwtService.GenerateInviteToken(model.Email, model.Role, model.OrganisationId, _appSettings.JwtIssuer, _appSettings.JwtAudience, _appSettings.JwtInviteExpireHours, _appSettings.JwtSecret);
+            string token = _jwtService.GenerateInviteToken(model.Email, model.Role, orgFromDb.Id, _appSettings.JwtIssuer, _appSettings.JwtAudience, _appSettings.JwtInviteExpireHours, _appSettings.JwtSecret);
 
             // Store the token and relevant info in the database
             await _unitOfWork.Invitations.AddAsync(new Invitation
             {
                 Email = model.Email,
                 Role = model.Role,
-                OrganisationId = model.OrganisationId,
+                OrganisationId = orgFromDb.Id,
                 Token = token,
                 Status = Status.Pending,
                 ExpiryDate = DateTime.UtcNow.AddHours(_appSettings.JwtInviteExpireHours),
@@ -212,7 +221,25 @@ namespace Backend.Service.Implementation
 
             await _unitOfWork.SaveAsync();
 
-            // TODO: Send the user an email with the token embedded in the link
+            // Send the user an email with the token embedded in the link
+            var encodedToken = Uri.EscapeDataString(token);
+
+            var deepLinkUrl = $"soppro://registerinvite?token={encodedToken}";
+            var redirectUrl = $"{_appSettings.BaseUrl}/api/auth/redirect?redirect={Uri.EscapeDataString(deepLinkUrl)}";
+
+            var invitedByUser = await _unitOfWork.ApplicationUsers.GetAsync(x => x.Id == _tenancyResolver.GetUserId());
+
+            var emailModel = new
+            {
+                OrganisatonName = orgFromDb.Name,
+                InvitedBy = invitedByUser.Forename,
+                DeepLink = redirectUrl
+            };
+
+            string emailSubject = $"{emailModel.InvitedBy} has invited you to join {orgFromDb.Name} on SopPro";
+            string emailBody = await _templateService.RenderTemplateAsync("UserInvitation", emailModel);
+
+            _emailService.SendEmailAsync(model.Email, emailSubject, emailBody);
 
             // return an api response with a success
             return new ApiResponse()
@@ -342,7 +369,7 @@ namespace Backend.Service.Implementation
                 var resetUrl = $"soppro://reset?email={model.Email}&token={encodedToken}";
                 var redirectUrl = $"{_appSettings.BaseUrl}/api/auth/redirect?redirect={Uri.EscapeDataString(resetUrl)}";
 
-                await _emailService.SendEmailAsync(model.Email, "Password Reset", $@"<a href=""{redirectUrl}"">Click here to reset your password</a>");
+                _emailService.SendEmailAsync(model.Email, "Password Reset", $@"<a href=""{redirectUrl}"">Click here to reset your password</a>");
             }
         }
 

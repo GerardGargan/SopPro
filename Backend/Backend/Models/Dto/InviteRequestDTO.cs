@@ -9,7 +9,5 @@ namespace Backend.Models.Dto
         public string Email { get; set; }
         [Required]
         public string Role { get; set; }
-        [Required]
-        public int OrganisationId { get; set; }
     }
 }

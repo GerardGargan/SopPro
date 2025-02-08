@@ -58,7 +58,7 @@ const LoginForm = ({ onSubmit, isPending }) => {
           style={{ borderRadius: 0 }}
           onPress={handlePress}
         >
-          {isPending ? "Loggin in..." : "Log in"}
+          {isPending ? "Logging in..." : "Log in"}
         </Button>
       </View>
       <Button
