@@ -8,6 +8,7 @@ import { validateEmail } from "../../../util/validationHelpers";
 import InputErrorMessage from "../../../components/UI/InputErrorMessage";
 import { inviteUser } from "../../../util/httpRequests";
 import { useMutation } from "@tanstack/react-query";
+import Toast from "react-native-toast-message";
 
 const invite = () => {
   const [email, setEmail] = useState("");
@@ -17,10 +18,19 @@ const invite = () => {
   const { mutate, isPending } = useMutation({
     mutationFn: inviteUser,
     onSuccess: () => {
-      console.log("success");
+      Toast.show({
+        type: "success",
+        text1: "Invitation sent",
+        visibilityTime: 3000,
+      });
+      resetForm();
     },
     onError: (error) => {
-      console.log(error);
+      Toast.show({
+        type: "error",
+        text1: error.message,
+        visibilityTime: 3000,
+      });
     },
   });
 
@@ -38,6 +48,11 @@ const invite = () => {
 
   function handleUpdateRole(value) {
     setRole(value);
+  }
+
+  function resetForm() {
+    setEmail("");
+    setRole("user");
   }
 
   return (
