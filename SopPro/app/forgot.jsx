@@ -80,7 +80,6 @@ const styles = StyleSheet.create({
     margin: 30,
     paddingTop: 50,
   },
-  formContainer: {},
   textInput: {
     marginVertical: 2,
   },

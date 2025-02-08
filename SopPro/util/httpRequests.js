@@ -248,3 +248,14 @@ export async function resetPassword({ email, formattedToken, password }) {
     throw error;
   }
 }
+
+export async function inviteUser({ email, role }) {
+  const data = { email, role };
+  try {
+    const response = await api.post("/auth/inviteuser", data);
+  } catch (e) {
+    const error = new Error(
+      e.resoonse?.data?.errorMessage || "Error sending invite"
+    );
+  }
+}

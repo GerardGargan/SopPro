@@ -177,7 +177,8 @@ namespace Backend.Service.Implementation
 
             // Perform validation and error handling
             ApplicationUser userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(u => u.UserName.ToLower() == model.Email);
-            Organisation orgFromDb = await _unitOfWork.Organisations.GetAsync(o => o.Id == model.OrganisationId);
+            var orgId = _tenancyResolver.GetOrganisationid();
+            Organisation orgFromDb = await _unitOfWork.Organisations.GetAsync(o => o.Id == orgId);
 
             if (userFromDb != null)
             {
@@ -189,6 +190,11 @@ namespace Backend.Service.Implementation
                 throw new Exception("Organisation does not exist");
             }
 
+            if (model.Role != StaticDetails.Role_Admin && model.Role != StaticDetails.Role_User)
+            {
+                throw new Exception("Invalid role selected");
+            }
+
             if (!modelState.IsValid)
             {
                 var errors = modelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
@@ -196,14 +202,14 @@ namespace Backend.Service.Implementation
             }
 
             // Data is validated at this point, proceed to generate a token and store it in the database, send the user an invitation email
-            string token = _jwtService.GenerateInviteToken(model.Email, model.Role, model.OrganisationId, _appSettings.JwtIssuer, _appSettings.JwtAudience, _appSettings.JwtInviteExpireHours, _appSettings.JwtSecret);
+            string token = _jwtService.GenerateInviteToken(model.Email, model.Role, orgFromDb.Id, _appSettings.JwtIssuer, _appSettings.JwtAudience, _appSettings.JwtInviteExpireHours, _appSettings.JwtSecret);
 
             // Store the token and relevant info in the database
             await _unitOfWork.Invitations.AddAsync(new Invitation
             {
                 Email = model.Email,
                 Role = model.Role,
-                OrganisationId = model.OrganisationId,
+                OrganisationId = orgFromDb.Id,
                 Token = token,
                 Status = Status.Pending,
                 ExpiryDate = DateTime.UtcNow.AddHours(_appSettings.JwtInviteExpireHours),
