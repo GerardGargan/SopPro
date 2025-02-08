@@ -1,51 +1,65 @@
-import { ScrollView, StyleSheet, Text, View } from "react-native";
 import React from "react";
-import { Link, useRouter } from "expo-router";
-import MenuCard from "../../../components/UI/MenuCard";
-import { KeyRound, LogOut } from "lucide-react-native";
+import { ScrollView, StyleSheet, View } from "react-native";
+import { useRouter } from "expo-router";
+import { useSelector } from "react-redux";
+import { KeyRound, LogOut, UserPlus } from "lucide-react-native";
+import MenuSection from "../../../components/UI/MenuSection";
 
 const More = () => {
   const router = useRouter();
+  const role = useSelector((state) => state.auth.role);
 
-  const menuOptions = [
+  const adminMenuOptions = [
+    {
+      key: 1,
+      icon: UserPlus,
+      title: "Invite user",
+      onPress: () => router.push("(auth)/more"),
+    },
+  ];
+
+  const userMenuOptions = [
     {
       key: 1,
       icon: KeyRound,
       title: "Change password",
-      onPress: () => {
-        router.push("(auth)/user/changePassword");
-      },
+      onPress: () => router.push("(auth)/user/changePassword"),
     },
     {
       key: 2,
       icon: LogOut,
       title: "Log out",
-      onPress: () => {
-        router.replace("/logout");
-      },
+      onPress: () => router.replace("/logout"),
     },
   ];
 
   return (
     <ScrollView style={styles.container}>
-      {menuOptions.map((option) => {
-        return (
-          <MenuCard
-            key={option.key}
-            title={option.title}
-            Icon={option.icon}
-            onPress={option.onPress}
+      <View style={styles.content}>
+        {role === "admin" && (
+          <MenuSection
+            title="Administrator Options"
+            options={adminMenuOptions}
           />
-        );
-      })}
+        )}
+        <MenuSection title="User Options" options={userMenuOptions} />
+      </View>
     </ScrollView>
   );
 };
 
-export default More;
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
+  content: {
+    padding: 16,
+    gap: 24,
+  },
+  section: {
+    gap: 12,
   },
 });
+
+export default More;
