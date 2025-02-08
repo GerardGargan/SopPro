@@ -1,14 +1,18 @@
 import React from "react";
-import { Stack } from "expo-router";
-import { useTheme } from "react-native-paper";
+import { Redirect, Stack } from "expo-router";
+import { useSelector } from "react-redux";
 
 const _layout = () => {
-  const theme = useTheme();
+  const role = useSelector((state) => state.auth.role);
+
+  if (role !== "admin") {
+    return <Redirect href="(auth)" />;
+  }
 
   return (
     <>
       <Stack>
-        <Stack.Screen name="invite" options={{ headerShown: true }} />
+        <Stack.Screen name="invite" options={{ title: "Invite user" }} />
       </Stack>
     </>
   );
