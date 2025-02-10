@@ -7,6 +7,7 @@ import { capitiliseFirstLetter } from "../../../util/validationHelpers";
 import { fetchSops } from "../../../util/httpRequests";
 import { useQuery } from "@tanstack/react-query";
 import SopCardLarge from "../../../components/sops/SopCardLarge";
+import SopCardLargeSkeleton from "../../../components/skeletons/SopCardLargeSkeleton";
 
 const index = () => {
   const isFocused = useIsFocused();
@@ -26,6 +27,14 @@ const index = () => {
         textStyle={{ color: "black" }}
         text={"Welcome " + capitiliseFirstLetter(name)}
       />
+      {isFetching && (
+        <ScrollView horizontal style={styles.skeletonContainer}>
+          {[...Array(4)].map((_, index) => (
+            <SopCardLargeSkeleton key={index} />
+          ))}
+        </ScrollView>
+      )}
+
       {isFetched && (
         <FlatList
           style={styles.listContainer}
@@ -47,6 +56,9 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   listContainer: {
+    paddingVertical: 16,
+  },
+  skeletonContainer: {
     paddingVertical: 16,
   },
 });
