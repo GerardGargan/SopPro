@@ -13,9 +13,6 @@ const index = () => {
   const isFocused = useIsFocused();
   const name = useSelector((state) => state.auth.forename);
 
-  const userRole = useSelector((state) => state.auth.role);
-  const userForename = useSelector((state) => state.auth.forename);
-
   const { data, isFetching, isFetched, isError, error } = useQuery({
     queryKey: ["sops", "favourites"],
     queryFn: () => fetchSops({ isFavourite: true }),
@@ -27,8 +24,17 @@ const index = () => {
         textStyle={{ color: "black" }}
         text={"Welcome " + capitiliseFirstLetter(name)}
       />
+      <Text style={styles.subtitleText}>Favourites</Text>
       {isFetching && (
-        <ScrollView horizontal style={styles.skeletonContainer}>
+        <ScrollView
+          showsHorizontalScrollIndicator={false}
+          horizontal
+          style={styles.skeletonContainer}
+          contentContainerStyle={{
+            paddingRight: 20,
+          }}
+        >
+          <View style={{ width: 8 }} />
           {[...Array(4)].map((_, index) => (
             <SopCardLargeSkeleton key={index} />
           ))}
@@ -37,11 +43,15 @@ const index = () => {
 
       {isFetched && (
         <FlatList
-          style={styles.listContainer}
           horizontal
           data={data}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => <SopCardLarge sop={item} />}
+          contentContainerStyle={{
+            paddingRight: 20,
+          }}
+          ListHeaderComponent={<View style={{ width: 8 }} />}
+          showsHorizontalScrollIndicator={false}
         />
       )}
       {isFocused && <Fab />}
@@ -60,5 +70,13 @@ const styles = StyleSheet.create({
   },
   skeletonContainer: {
     paddingVertical: 16,
+  },
+  subtitleText: {
+    fontSize: 22,
+    fontWeight: "700",
+    marginLeft: 16,
+    marginBottom: 8,
+    color: "#333",
+    letterSpacing: 0.5,
   },
 });
