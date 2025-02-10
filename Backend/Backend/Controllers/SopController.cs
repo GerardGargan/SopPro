@@ -31,9 +31,9 @@ namespace Backend.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] string search, [FromQuery] string status, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+        public async Task<IActionResult> GetAll([FromQuery] string search, [FromQuery] string status, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] bool isFavourite = false)
         {
-            var apiResponse = await _sopService.GetAllSops(search, status, page, pageSize);
+            var apiResponse = await _sopService.GetAllSops(search, status, page, pageSize, isFavourite);
             return Ok(apiResponse);
         }
 

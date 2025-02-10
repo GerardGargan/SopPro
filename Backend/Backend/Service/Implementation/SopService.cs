@@ -109,7 +109,7 @@ namespace Backend.Service.Implementation
             };
         }
 
-        public async Task<ApiResponse<List<SopDto>>> GetAllSops(string search, string status, int page, int pageSize)
+        public async Task<ApiResponse<List<SopDto>>> GetAllSops(string search, string status, int page, int pageSize, bool isFavourite = false)
         {
 
             var query = _unitOfWork.Sops.GetAll();
@@ -123,6 +123,10 @@ namespace Backend.Service.Implementation
             var userId = _tenancyResolver.GetUserId();
             var favouriteSopIds = await _unitOfWork.SopUserFavourites.GetAll(f => f.ApplicationUserId == userId).Select(f => f.SopId).ToListAsync();
 
+            if (isFavourite)
+            {
+                query = query.Where(sop => favouriteSopIds.Contains(sop.Id));
+            }
             var sops = await query
             .OrderByDescending(sop => sop.Id)
             .Skip((page - 1) * pageSize)

@@ -2,13 +2,14 @@ import React from "react";
 import { StyleSheet } from "react-native";
 import { Searchbar } from "react-native-paper";
 
-const SearchInput = ({ value, onChangeText }) => {
+const SearchInput = ({ value, onChangeText, ...props }) => {
   return (
     <Searchbar
       style={styles.searchBar}
       placeholder="Search"
       onChangeText={onChangeText}
       value={value}
+      {...props}
     />
   );
 };
