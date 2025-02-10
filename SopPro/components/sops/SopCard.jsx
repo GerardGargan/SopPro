@@ -99,7 +99,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   chipContainer: {
-    justifyContent: "center",
+    justifyContent: "start",
     alignItems: "center",
     marginHorizontal: 10,
   },
@@ -117,7 +117,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   favouriteContainer: {
-    justifyContent: "center",
+    justifyContent: "start",
     alignItems: "center",
   },
 });
