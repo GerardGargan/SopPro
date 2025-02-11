@@ -31,6 +31,7 @@ import {
   FileDown,
 } from "lucide-react-native";
 import ExportModal from "../exportModal/ExportModal";
+import { useBottomSheetBackHandler } from "../../../hooks/useBottomSheetBackHandler";
 
 const CustomBottomSheetModal = forwardRef((props, ref) => {
   const router = useRouter();
@@ -42,6 +43,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
   const userRole = useSelector((state) => state.auth.role);
   const isAdmin = userRole === "admin";
 
+  const { handleSheetPositionChange } = useBottomSheetBackHandler(ref);
   const [exportModalVisibile, setExportModalVisible] = useState(false);
 
   function closeSheet() {
@@ -285,6 +287,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
         snapPoints={snapPoints}
         enablePanDownToClose={true}
         backdropComponent={renderBackdrop}
+        onChange={handleSheetPositionChange}
       >
         <BottomSheetView style={styles.contentContainer}>
           <Text style={styles.headerText}>{sop?.title}</Text>
