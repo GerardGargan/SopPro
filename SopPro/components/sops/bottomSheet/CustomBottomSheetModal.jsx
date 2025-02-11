@@ -292,7 +292,11 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
       >
         <BottomSheetView style={styles.contentContainer}>
           <Text style={styles.headerText}>{sop?.title}</Text>
-          <View style={styles.rowContainer}>
+          <ScrollView
+            style={{ flexGrow: 0 }}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+          >
             <CustomChip style={styles.customChip}>
               <Text>Version {sop?.version}</Text>
             </CustomChip>
@@ -307,7 +311,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
                 </View>
               </CustomChip>
             )}
-          </View>
+          </ScrollView>
           <Divider style={styles.divider} />
           <ScrollView style={{ width: "100%" }}>
             {isAdmin && adminCardStack}
