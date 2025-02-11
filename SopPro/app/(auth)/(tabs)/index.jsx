@@ -71,7 +71,8 @@ const index = () => {
             showsHorizontalScrollIndicator={false}
           />
         )}
-        <EmptyFavoritesCard />
+
+        {isFetched && data.length == 0 && <EmptyFavoritesCard />}
         {isFocused && <Fab />}
       </ScrollView>
 
