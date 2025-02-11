@@ -10,6 +10,7 @@ import SopCardLarge from "../../../components/sops/SopCardLarge";
 import SopCardLargeSkeleton from "../../../components/skeletons/SopCardLargeSkeleton";
 import CustomBottomSheetModal from "../../../components/sops/bottomSheet/CustomBottomSheetModal";
 import { useCallback, useRef, useState } from "react";
+import EmptyFavoritesCard from "../../../components/favourites/EmptyFavouritesCard";
 
 const index = () => {
   const isFocused = useIsFocused();
@@ -52,7 +53,7 @@ const index = () => {
           </ScrollView>
         )}
 
-        {isFetched && (
+        {isFetched && data.length > 0 && (
           <FlatList
             horizontal
             data={data}
@@ -70,6 +71,7 @@ const index = () => {
             showsHorizontalScrollIndicator={false}
           />
         )}
+        <EmptyFavoritesCard />
         {isFocused && <Fab />}
       </ScrollView>
 
