@@ -1,31 +1,40 @@
-import { StyleSheet, Text, View, Dimensions, Image } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Dimensions,
+  Image,
+  TouchableOpacity,
+} from "react-native";
 import React from "react";
 import { Camera } from "lucide-react-native";
 
-const SopCardLarge = ({ sop, toggleSelect, openBottomSheet }) => {
+const SopCardLarge = ({ sop, handleOpenBottomSheet }) => {
   return (
     <View style={styles.card}>
-      <View style={styles.imageContainer}>
-        {sop.imageUrl ? (
-          <Image
-            source={{ uri: sop.imageUrl }}
-            style={styles.image}
-            resizeMode="cover"
-          />
-        ) : (
-          <View style={styles.placeholderImage}>
-            <Camera color="black" size={30} />
-          </View>
-        )}
-      </View>
-      <View style={styles.contentContainer}>
-        <Text style={styles.title} numberOfLines={1}>
-          {sop.title || "SOP Title"}
-        </Text>
-        <Text style={styles.description} numberOfLines={1}>
-          {sop.description || "Description"}
-        </Text>
-      </View>
+      <TouchableOpacity onPress={() => handleOpenBottomSheet(sop)}>
+        <View style={styles.imageContainer}>
+          {sop.imageUrl ? (
+            <Image
+              source={{ uri: sop.imageUrl }}
+              style={styles.image}
+              resizeMode="cover"
+            />
+          ) : (
+            <View style={styles.placeholderImage}>
+              <Camera color="black" size={30} />
+            </View>
+          )}
+        </View>
+        <View style={styles.contentContainer}>
+          <Text style={styles.title} numberOfLines={1}>
+            {sop.title || "SOP Title"}
+          </Text>
+          <Text style={styles.description} numberOfLines={1}>
+            {sop.description || "Description"}
+          </Text>
+        </View>
+      </TouchableOpacity>
     </View>
   );
 };
