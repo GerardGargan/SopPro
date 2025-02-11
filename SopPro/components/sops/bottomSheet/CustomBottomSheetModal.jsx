@@ -32,6 +32,7 @@ import {
 } from "lucide-react-native";
 import ExportModal from "../exportModal/ExportModal";
 import { useBottomSheetBackHandler } from "../../../hooks/useBottomSheetBackHandler";
+import { ScrollView } from "react-native-gesture-handler";
 
 const CustomBottomSheetModal = forwardRef((props, ref) => {
   const router = useRouter();
@@ -308,8 +309,10 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
             )}
           </View>
           <Divider style={styles.divider} />
-          {isAdmin && adminCardStack}
-          {userCardStack}
+          <ScrollView style={{ width: "100%" }}>
+            {isAdmin && adminCardStack}
+            {userCardStack}
+          </ScrollView>
         </BottomSheetView>
       </BottomSheetModal>
 
