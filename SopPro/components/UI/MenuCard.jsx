@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
     marginRight: 16,
   },
   optionText: {
-    fontSize: 20,
+    fontSize: 18,
     color: "#333",
   },
 });
