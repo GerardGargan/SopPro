@@ -67,6 +67,7 @@ namespace Backend.Service.Implementation
                     Version = 1,
                     AuthorId = _tenancyResolver.GetUserId(),
                     CreateDate = DateTime.UtcNow,
+                    LastUpdated = DateTime.UtcNow,
                     Title = model.Title,
                     Description = model.Description,
                     Status = SopStatus.Draft,
@@ -109,7 +110,7 @@ namespace Backend.Service.Implementation
             };
         }
 
-        public async Task<ApiResponse<List<SopDto>>> GetAllSops(string search, string status, int page, int pageSize, bool isFavourite = false)
+        public async Task<ApiResponse<List<SopDto>>> GetAllSops(string search, string status, int page, int pageSize, bool isFavourite = false, string soryBy = "recent", string sortOrder = "desc")
         {
 
             var query = _unitOfWork.Sops.GetAll();
@@ -127,8 +128,16 @@ namespace Backend.Service.Implementation
             {
                 query = query.Where(sop => favouriteSopIds.Contains(sop.Id));
             }
+
+            // apply sorting
+            if (soryBy.ToLower() == "recent")
+            {
+                query = sortOrder.ToLower() == "asc"
+           ? query.OrderBy(sop => sop.SopVersions.OrderBy(x => x.LastUpdated).FirstOrDefault().LastUpdated)
+           : query.OrderByDescending(sop => sop.SopVersions.OrderByDescending(x => x.LastUpdated).FirstOrDefault().LastUpdated);
+            }
+
             var sops = await query
-            .OrderByDescending(sop => sop.Id)
             .Skip((page - 1) * pageSize)
             .Take(pageSize).Select(sop => new SopDto
             {
@@ -331,7 +340,8 @@ namespace Backend.Service.Implementation
                         Title = model.Title,
                         Description = model.Description,
                         Status = SopStatus.Draft,
-                        CreateDate = DateTime.UtcNow
+                        CreateDate = DateTime.UtcNow,
+                        LastUpdated = DateTime.UtcNow
                     };
 
                     await _unitOfWork.SopVersions.AddAsync(newVersion);
@@ -358,6 +368,7 @@ namespace Backend.Service.Implementation
                     // update existing version
                     latestVersion.Title = model.Title;
                     latestVersion.Description = model.Description;
+                    latestVersion.LastUpdated = DateTime.UtcNow;
 
                     // update sop hazards
                     var existingHazardIds = latestVersion.SopHazards.Select(h => h.Id).ToList();
