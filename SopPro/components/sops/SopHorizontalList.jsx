@@ -7,6 +7,7 @@ const SopHorizontalList = ({
   isFetched,
   data,
   isFetching,
+  isError,
   handlePresentModalPress,
   title,
   EmptyCard,
@@ -16,7 +17,7 @@ const SopHorizontalList = ({
   emptyText,
   EmptyIcon,
 }) => {
-  if (isFetched && data.length == 0) {
+  if (isFetched && !isError && data.length == 0) {
     return (
       <EmptyCard
         title={emptyTitle}
@@ -31,7 +32,7 @@ const SopHorizontalList = ({
   return (
     <View style={styles.listContainer}>
       <Text style={styles.subtitleText}>{title}</Text>
-      {isFetching && (
+      {(isFetching || isError) && (
         <ScrollView
           showsHorizontalScrollIndicator={false}
           horizontal
@@ -47,7 +48,7 @@ const SopHorizontalList = ({
         </ScrollView>
       )}
 
-      {isFetched && data.length > 0 && (
+      {isFetched && !isError && data.length > 0 && (
         <FlatList
           horizontal
           data={data}

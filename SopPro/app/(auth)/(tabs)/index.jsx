@@ -64,6 +64,7 @@ const index = () => {
           data={favouritesData}
           isFetched={isFetchedFavourites}
           isFetching={isFetchingFavourites}
+          isError={isErrorFavourites}
           title="Favourites"
           handlePresentModalPress={handlePresentModalPress}
           EmptyCard={LargeNoDataCard}
@@ -78,6 +79,7 @@ const index = () => {
           data={recentData}
           isFetched={isFetchedRecent}
           isFetching={isFetchingRecent}
+          isError={isErrorRecent}
           title="Recently updated"
           handlePresentModalPress={handlePresentModalPress}
           EmptyCard={LargeNoDataCard}
