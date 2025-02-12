@@ -21,7 +21,13 @@ const index = () => {
 
   const [bottomSheetSelectedSop, setBottomSheetSelectedSop] = useState(null);
 
-  const { data, isFetching, isFetched, isError, error } = useQuery({
+  const {
+    data: favouritesData,
+    isFetching: isFetchingFavourites,
+    isFetched: isFetchedFavourites,
+    isError: isErrorFavourites,
+    error: erroFavourites,
+  } = useQuery({
     queryKey: ["favourites", "sops"],
     queryFn: () => fetchSops({ isFavourite: true }),
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -55,9 +61,9 @@ const index = () => {
         />
 
         <SopHorizontalList
-          data={data}
-          isFetched={isFetched}
-          isFetching={isFetching}
+          data={favouritesData}
+          isFetched={isFetchedFavourites}
+          isFetching={isFetchingFavourites}
           title="Favourites"
           handlePresentModalPress={handlePresentModalPress}
           EmptyCard={LargeNoDataCard}
