@@ -10,7 +10,7 @@ import SopCardLarge from "../../../components/sops/SopCardLarge";
 import SopCardLargeSkeleton from "../../../components/skeletons/SopCardLargeSkeleton";
 import CustomBottomSheetModal from "../../../components/sops/bottomSheet/CustomBottomSheetModal";
 import { useCallback, useRef, useState } from "react";
-import EmptyFavoritesCard from "../../../components/favourites/EmptyFavouritesCard";
+import LargeNoDataCard from "../../../components/favourites/LargeNoDataCard";
 import SopHorizontalList from "../../../components/sops/SopHorizontalList";
 
 const index = () => {
@@ -44,9 +44,13 @@ const index = () => {
           isFetching={isFetching}
           title="Favourites"
           handlePresentModalPress={handlePresentModalPress}
+          EmptyCard={LargeNoDataCard}
+          emptyDataName="favourites"
+          buttonText="Browse SOPs"
+          callbackRoute="sops"
+          text="Add your most-used SOPs to Favourites for quick access. They'll appear right here on your home screen."
         />
 
-        {isFetched && data.length == 0 && <EmptyFavoritesCard />}
         {isFocused && <Fab />}
       </ScrollView>
 

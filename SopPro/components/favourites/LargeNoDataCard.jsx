@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Bookmark } from "lucide-react-native";
 import { useRouter } from "expo-router";
 
-const EmptyFavoritesCard = () => {
+const LargeNoDataCard = ({ dataName, text, callbackRoute, buttonText }) => {
   const router = useRouter();
 
   return (
@@ -13,18 +13,15 @@ const EmptyFavoritesCard = () => {
           <Bookmark size={24} color="#2563EB" />
         </View>
 
-        <Text style={styles.title}>No favourites yet</Text>
+        <Text style={styles.title}>No {dataName} yet</Text>
 
-        <Text style={styles.description}>
-          Add your most-used SOPs to Favourites for quick access. They'll appear
-          right here on your home screen.
-        </Text>
+        <Text style={styles.description}>{text}</Text>
 
         <TouchableOpacity
           style={styles.button}
-          onPress={() => router.navigate("sops")}
+          onPress={() => router.navigate(callbackRoute)}
         >
-          <Text style={styles.buttonText}>Browse SOPs</Text>
+          <Text style={styles.buttonText}>{buttonText}</Text>
         </TouchableOpacity>
       </View>
     </View>
@@ -74,4 +71,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default EmptyFavoritesCard;
+export default LargeNoDataCard;

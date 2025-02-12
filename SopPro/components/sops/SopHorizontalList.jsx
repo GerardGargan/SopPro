@@ -9,7 +9,23 @@ const SopHorizontalList = ({
   isFetching,
   handlePresentModalPress,
   title,
+  EmptyCard,
+  emptyDataName,
+  callbackRoute,
+  buttonText,
+  text,
 }) => {
+  if (isFetched && data.length == 0) {
+    return (
+      <EmptyCard
+        dataName={emptyDataName}
+        buttonText={buttonText}
+        callbackRoute={callbackRoute}
+        text={text}
+      />
+    );
+  }
+
   return (
     <View style={styles.listContainer}>
       <Text style={styles.subtitleText}>{title}</Text>
