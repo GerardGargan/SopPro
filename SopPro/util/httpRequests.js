@@ -64,6 +64,7 @@ export async function fetchSops({
   status,
   page = 1,
   pageSize = 20,
+  isFavourite = false,
 }) {
   try {
     const params = {};
@@ -71,6 +72,7 @@ export async function fetchSops({
     if (status !== null) params.status = status;
     params.page = page;
     params.pageSize = pageSize;
+    params.isFavourite = isFavourite;
 
     const response = await api.get("/sop", {
       params,

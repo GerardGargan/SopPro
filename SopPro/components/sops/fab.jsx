@@ -34,11 +34,6 @@ const Fab = () => {
             label: "AI Generator",
             onPress: () => console.log("Pressed AI"),
           },
-          {
-            icon: "image-multiple",
-            label: "Start with pictures",
-            onPress: () => console.log("Pressed pictures"),
-          },
         ]}
         onStateChange={onStateChange}
       />

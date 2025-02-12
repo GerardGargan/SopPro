@@ -31,6 +31,8 @@ import {
   FileDown,
 } from "lucide-react-native";
 import ExportModal from "../exportModal/ExportModal";
+import { useBottomSheetBackHandler } from "../../../hooks/useBottomSheetBackHandler";
+import { ScrollView } from "react-native-gesture-handler";
 
 const CustomBottomSheetModal = forwardRef((props, ref) => {
   const router = useRouter();
@@ -42,6 +44,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
   const userRole = useSelector((state) => state.auth.role);
   const isAdmin = userRole === "admin";
 
+  const { handleSheetPositionChange } = useBottomSheetBackHandler(ref);
   const [exportModalVisibile, setExportModalVisible] = useState(false);
 
   function closeSheet() {
@@ -285,10 +288,15 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
         snapPoints={snapPoints}
         enablePanDownToClose={true}
         backdropComponent={renderBackdrop}
+        onChange={handleSheetPositionChange}
       >
         <BottomSheetView style={styles.contentContainer}>
           <Text style={styles.headerText}>{sop?.title}</Text>
-          <View style={styles.rowContainer}>
+          <ScrollView
+            style={{ flexGrow: 0 }}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+          >
             <CustomChip style={styles.customChip}>
               <Text>Version {sop?.version}</Text>
             </CustomChip>
@@ -303,10 +311,12 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
                 </View>
               </CustomChip>
             )}
-          </View>
+          </ScrollView>
           <Divider style={styles.divider} />
-          {isAdmin && adminCardStack}
-          {userCardStack}
+          <ScrollView style={{ width: "100%" }}>
+            {isAdmin && adminCardStack}
+            {userCardStack}
+          </ScrollView>
         </BottomSheetView>
       </BottomSheetModal>
 

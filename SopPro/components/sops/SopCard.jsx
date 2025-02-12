@@ -72,17 +72,21 @@ export default SopCard;
 const styles = StyleSheet.create({
   cardContainer: {
     flexDirection: "row",
+    alignItems: "center",
     justifyContent: "space-between",
-    borderTopColor: "lightgrey",
-    borderTopWidth: 1,
     backgroundColor: "white",
+    marginBottom: 8,
+    paddingVertical: 12,
   },
   pictureContainer: {
-    width: 75,
-    height: 75,
+    width: 64,
+    height: 64,
     backgroundColor: "lightgrey",
     justifyContent: "center",
     alignItems: "center",
+    borderRadius: 10,
+    overflow: "hidden",
+    marginLeft: 12,
   },
   textContainer: {
     padding: 10,
@@ -95,7 +99,7 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   chipContainer: {
-    justifyContent: "center",
+    justifyContent: "start",
     alignItems: "center",
     marginHorizontal: 10,
   },
@@ -113,7 +117,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   favouriteContainer: {
-    justifyContent: "center",
+    justifyContent: "start",
     alignItems: "center",
   },
 });
