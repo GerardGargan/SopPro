@@ -22,8 +22,21 @@ const index = () => {
   const [bottomSheetSelectedSop, setBottomSheetSelectedSop] = useState(null);
 
   const { data, isFetching, isFetched, isError, error } = useQuery({
-    queryKey: ["sops", "favourites"],
+    queryKey: ["favourites", "sops"],
     queryFn: () => fetchSops({ isFavourite: true }),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 10 * 60 * 1000, // 10 minutes
+  });
+
+  const {
+    data: recentData,
+    isFetching: isFetchingRecent,
+    isFetched: isFetchedRecent,
+    isError: isErrorRecent,
+    error: errorRecent,
+  } = useQuery({
+    queryKey: ["recent", "sops"],
+    queryFn: () => fetchSops({ pageSize: 10 }),
     staleTime: 5 * 60 * 1000, // 5 minutes
     cacheTime: 10 * 60 * 1000, // 10 minutes
   });
@@ -56,10 +69,10 @@ const index = () => {
         />
 
         <SopHorizontalList
-          data={data}
-          isFetched={isFetched}
-          isFetching={isFetching}
-          title="Most recent"
+          data={recentData}
+          isFetched={isFetchedRecent}
+          isFetching={isFetchingRecent}
+          title="Recently updated"
           handlePresentModalPress={handlePresentModalPress}
           EmptyCard={LargeNoDataCard}
           emptyTitle="Nothing to show yet!"
