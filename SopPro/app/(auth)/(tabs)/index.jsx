@@ -12,6 +12,7 @@ import CustomBottomSheetModal from "../../../components/sops/bottomSheet/CustomB
 import { useCallback, useRef, useState } from "react";
 import LargeNoDataCard from "../../../components/favourites/LargeNoDataCard";
 import SopHorizontalList from "../../../components/sops/SopHorizontalList";
+import { Bookmark, Clock } from "lucide-react-native";
 
 const index = () => {
   const isFocused = useIsFocused();
@@ -23,6 +24,8 @@ const index = () => {
   const { data, isFetching, isFetched, isError, error } = useQuery({
     queryKey: ["sops", "favourites"],
     queryFn: () => fetchSops({ isFavourite: true }),
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 10 * 60 * 1000, // 10 minutes
   });
 
   const handlePresentModalPress = useCallback((sop) => {
@@ -45,10 +48,25 @@ const index = () => {
           title="Favourites"
           handlePresentModalPress={handlePresentModalPress}
           EmptyCard={LargeNoDataCard}
-          emptyDataName="favourites"
+          emptyTitle="No favourites yet"
           buttonText="Browse SOPs"
           callbackRoute="sops"
-          text="Add your most-used SOPs to Favourites for quick access. They'll appear right here on your home screen."
+          emptyText="Add your most-used SOPs to Favourites for quick access. They'll appear right here on your home screen."
+          EmptyIcon={Bookmark}
+        />
+
+        <SopHorizontalList
+          data={data}
+          isFetched={isFetched}
+          isFetching={isFetching}
+          title="Most recent"
+          handlePresentModalPress={handlePresentModalPress}
+          EmptyCard={LargeNoDataCard}
+          emptyTitle="Nothing to show yet!"
+          buttonText="Create a SOP"
+          callbackRoute="/upsert/-1"
+          emptyText="Start creating and editing SOPs, the most recent edited SOPs in your organisation will appear here!"
+          EmptyIcon={Clock}
         />
 
         {isFocused && <Fab />}

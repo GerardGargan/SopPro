@@ -3,17 +3,25 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Bookmark } from "lucide-react-native";
 import { useRouter } from "expo-router";
 
-const LargeNoDataCard = ({ dataName, text, callbackRoute, buttonText }) => {
+const LargeNoDataCard = ({
+  title,
+  text,
+  callbackRoute,
+  buttonText,
+  EmptyIcon,
+}) => {
   const router = useRouter();
 
   return (
     <View style={styles.container}>
       <View style={styles.card}>
-        <View style={styles.iconContainer}>
-          <Bookmark size={24} color="#2563EB" />
-        </View>
+        {EmptyIcon && (
+          <View style={styles.iconContainer}>
+            <EmptyIcon size={24} color="#2563EB" />
+          </View>
+        )}
 
-        <Text style={styles.title}>No {dataName} yet</Text>
+        <Text style={styles.title}>{title}</Text>
 
         <Text style={styles.description}>{text}</Text>
 

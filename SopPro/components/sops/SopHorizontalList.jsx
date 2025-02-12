@@ -10,18 +10,20 @@ const SopHorizontalList = ({
   handlePresentModalPress,
   title,
   EmptyCard,
-  emptyDataName,
   callbackRoute,
   buttonText,
-  text,
+  emptyTitle,
+  emptyText,
+  EmptyIcon,
 }) => {
   if (isFetched && data.length == 0) {
     return (
       <EmptyCard
-        dataName={emptyDataName}
+        title={emptyTitle}
         buttonText={buttonText}
         callbackRoute={callbackRoute}
-        text={text}
+        text={emptyText}
+        EmptyIcon={EmptyIcon}
       />
     );
   }
