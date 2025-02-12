@@ -22,7 +22,7 @@ const useLogin = () => {
         dispatch(authActions.setToken(token));
         dispatch(authActions.setUserInfo(userInfo));
 
-        router.navigate("/(auth)");
+        router.replace("/(auth)");
       }
     },
   });
