@@ -10,6 +10,7 @@ namespace Backend.Models.DatabaseModels
         public int Version { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
+        public DateTime? LastUpdated { get; set; }
         public SopStatus Status { get; set; }
         public string AuthorId { get; set; }
         [ForeignKey("AuthorId")]
