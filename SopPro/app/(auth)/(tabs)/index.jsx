@@ -11,6 +11,7 @@ import SopCardLargeSkeleton from "../../../components/skeletons/SopCardLargeSkel
 import CustomBottomSheetModal from "../../../components/sops/bottomSheet/CustomBottomSheetModal";
 import { useCallback, useRef, useState } from "react";
 import EmptyFavoritesCard from "../../../components/favourites/EmptyFavouritesCard";
+import SopHorizontalList from "../../../components/sops/SopHorizontalList";
 
 const index = () => {
   const isFocused = useIsFocused();
@@ -36,41 +37,14 @@ const index = () => {
           textStyle={{ color: "black" }}
           text={"Welcome " + capitiliseFirstLetter(name)}
         />
-        <Text style={styles.subtitleText}>Favourites</Text>
-        {isFetching && (
-          <ScrollView
-            showsHorizontalScrollIndicator={false}
-            horizontal
-            style={styles.skeletonContainer}
-            contentContainerStyle={{
-              paddingRight: 20,
-            }}
-          >
-            <View style={{ width: 8 }} />
-            {[...Array(4)].map((_, index) => (
-              <SopCardLargeSkeleton key={index} />
-            ))}
-          </ScrollView>
-        )}
 
-        {isFetched && data.length > 0 && (
-          <FlatList
-            horizontal
-            data={data}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <SopCardLarge
-                sop={item}
-                handleOpenBottomSheet={handlePresentModalPress}
-              />
-            )}
-            contentContainerStyle={{
-              paddingRight: 20,
-            }}
-            ListHeaderComponent={<View style={{ width: 8 }} />}
-            showsHorizontalScrollIndicator={false}
-          />
-        )}
+        <SopHorizontalList
+          data={data}
+          isFetched={isFetched}
+          isFetching={isFetching}
+          title="Favourites"
+          handlePresentModalPress={handlePresentModalPress}
+        />
 
         {isFetched && data.length == 0 && <EmptyFavoritesCard />}
         {isFocused && <Fab />}
@@ -89,19 +63,5 @@ export default index;
 const styles = StyleSheet.create({
   rootContainer: {
     flex: 1,
-  },
-  listContainer: {
-    paddingVertical: 16,
-  },
-  skeletonContainer: {
-    paddingVertical: 16,
-  },
-  subtitleText: {
-    fontSize: 22,
-    fontWeight: "700",
-    marginLeft: 16,
-    marginBottom: 8,
-    color: "#333",
-    letterSpacing: 0.5,
   },
 });
