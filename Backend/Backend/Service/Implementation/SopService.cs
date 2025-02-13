@@ -519,7 +519,7 @@ namespace Backend.Service.Implementation
 
         }
 
-        public async Task<SopDto> GenerateAiSop(string description)
+        public async Task<SopDto> GenerateAiSop(AiRequestDto model)
         {
             // Create JSON Schema with desired response type from string.
             ChatResponseFormat chatResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(
@@ -583,7 +583,7 @@ namespace Backend.Service.Implementation
                              "Each SOP should contain SopVersion (with Title and Description), SopSteps (array with Position, Title, and Text), and SopHazards " +
                              "(array with Name, ControlMeasure, and RiskLevel [Low, Medium, High]). Use the following mapping for 'riskLevel' in each hazard: 1 = Low, 2 = Medium, 3 = High - Always return the integer, not the text. Return a valid JSON object.  Please generate a sop in this format for the following task or job: ";
 
-            string fullPrompt = $"{systemInstructions}\n\n{description}";
+            string fullPrompt = $"{systemInstructions}\n\n{model.description}";
 
             var result = await _chatService.GetChatMessageContentAsync(fullPrompt, executionSettings);
 

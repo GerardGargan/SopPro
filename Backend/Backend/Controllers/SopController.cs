@@ -138,11 +138,11 @@ namespace Backend.Controllers
 
         }
 
-        [HttpGet]
+        [HttpPost]
         [Route("test")]
-        public async Task<IActionResult> GenerateAiSop()
+        public async Task<IActionResult> GenerateAiSop([FromBody] AiRequestDto model)
         {
-            var result = await _sopService.GenerateAiSop("Generate a sop for Setting up a heidelberg printnig press");
+            var result = await _sopService.GenerateAiSop(model);
             return Ok(result);
         }
 
