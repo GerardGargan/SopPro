@@ -138,7 +138,6 @@ namespace Backend.Controllers
 
         }
 
-        [AllowAnonymous]
         [HttpGet]
         [Route("test")]
         public async Task<IActionResult> GenerateAiSop()

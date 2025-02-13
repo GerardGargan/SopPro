@@ -15,8 +15,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using OpenAI.Chat;
-using Newtonsoft.Json.Schema;
-using Newtonsoft.Json.Schema.Generation;
 using Newtonsoft.Json;
 
 namespace Backend.Service.Implementation
@@ -521,74 +519,155 @@ namespace Backend.Service.Implementation
 
         }
 
-        public async Task<string> GenerateAiSop(string description)
+        public async Task<SopDto> GenerateAiSop(string description)
         {
             // Create JSON Schema with desired response type from string.
             ChatResponseFormat chatResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(
-    "sop_structure",
-    jsonSchema: BinaryData.FromString("""
-    {
-        "type": "object",
-        "properties": {
-            "SopVersion": {
+            "sop_structure",
+            jsonSchema: BinaryData.FromString("""
+            {
                 "type": "object",
                 "properties": {
-                    "Title": { "type": "string" },
-                    "Description": { "type": "string" },
-                    "SopSteps": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "Position": { "type": ["integer", "null"] },
-                                "Title": { "type": "string" },
-                                "Text": { "type": "string" }
-                            },
-                            "required": ["Position", "Title", "Text"],
-                            "additionalProperties": false
-                        }
-                    },
-                    "SopHazards": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "properties": {
-                                "Name": { "type": "string" },
-                                "ControlMeasure": { "type": "string" },
-                                "RiskLevel": {
-                                    "type": ["string", "null"],
-                                    "enum": ["Low", "Medium", "High"]
+                    "SopVersion": {
+                        "type": "object",
+                        "properties": {
+                            "Title": { "type": "string" },
+                            "Description": { "type": "string" },
+                            "SopSteps": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "Position": { "type": ["integer", "null"] },
+                                        "Title": { "type": "string" },
+                                        "Text": { "type": "string" }
+                                    },
+                                    "required": ["Position", "Title", "Text"],
+                                    "additionalProperties": false
                                 }
                             },
-                            "required": ["Name", "ControlMeasure", "RiskLevel"],
-                            "additionalProperties": false
-                        }
+                            "SopHazards": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "Name": { "type": "string" },
+                                        "ControlMeasure": { "type": "string" },
+                                        "RiskLevel": {
+                                            "type": ["string", "null"],
+                                            "enum": ["Low", "Medium", "High"]
+                                        }
+                                    },
+                                    "required": ["Name", "ControlMeasure", "RiskLevel"],
+                                    "additionalProperties": false
+                                }
+                            }
+                        },
+                        "required": ["Title", "Description", "SopSteps", "SopHazards"],
+                        "additionalProperties": false
                     }
                 },
-                "required": ["Title", "Description", "SopSteps", "SopHazards"],
+                "required": ["SopVersion"],
                 "additionalProperties": false
             }
-        },
-        "required": ["SopVersion"],
-        "additionalProperties": false
-    }
-    """), null, true);
+            """), null, true);
 
-
-
-
-
-#pragma warning disable SKEXP0010 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+#pragma warning disable SKEXP0010 
             var executionSettings = new OpenAIPromptExecutionSettings
             {
                 ResponseFormat = chatResponseFormat
             };
-#pragma warning restore SKEXP0010 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+#pragma warning restore SKEXP0010 
 
-            // Replace the prompt with the actual request for your Sop generation
-            var result = await _chatService.GetChatMessageContentAsync(description, executionSettings);
+            var systemInstructions = "You are an assistant that generates SOPs (Standard operating procedures) as JSON data. The response must conform to the provided schema. " +
+                             "Each SOP should contain SopVersion (with Title and Description), SopSteps (array with Position, Title, and Text), and SopHazards " +
+                             "(array with Name, ControlMeasure, and RiskLevel [Low, Medium, High]). Return a valid JSON object. Please generate a sop in this format for the following task or job: ";
 
-            return result.ToString();
+            string fullPrompt = $"{systemInstructions}\n\n{description}";
+
+            var result = await _chatService.GetChatMessageContentAsync(fullPrompt, executionSettings);
+
+            string jsonResult = result.ToString();
+
+            AiSop sopAiDto = System.Text.Json.JsonSerializer.Deserialize<AiSop>(jsonResult, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                AllowTrailingCommas = true
+            });
+
+            SopDto sopDto = new SopDto();
+
+            await _unitOfWork.ExecuteInTransactionAsync(async () =>
+            {
+                Sop sop = new Sop()
+                {
+                    Reference = new Random().Next(10000000).ToString(),
+                    DepartmentId = null,
+                    isAiGenerated = true,
+                    OrganisationId = _tenancyResolver.GetOrganisationid().Value,
+                };
+
+                await _unitOfWork.Sops.AddAsync(sop);
+                await _unitOfWork.SaveAsync();
+
+                SopVersion sopVersion = new SopVersion()
+                {
+                    SopId = sop.Id,
+                    Version = 1,
+                    Status = SopStatus.Draft,
+                    AuthorId = _tenancyResolver.GetUserId(),
+                    CreateDate = DateTime.UtcNow,
+                    LastUpdated = DateTime.UtcNow,
+                    Title = sopAiDto.SopVersion.Title,
+                    Description = sopAiDto.SopVersion.Description,
+                    OrganisationId = _tenancyResolver.GetOrganisationid().Value
+                };
+
+                await _unitOfWork.SopVersions.AddAsync(sopVersion);
+                await _unitOfWork.SaveAsync();
+
+                List<SopStep> sopSteps = new List<SopStep>(sopAiDto.SopVersion.SopSteps.Count);
+
+                int position = 1;
+                foreach (var step in sopAiDto.SopVersion.SopSteps)
+                {
+                    var sopStep = new SopStep()
+                    {
+                        SopVersionId = sopVersion.Id,
+                        Position = position,
+                        Title = step.Title,
+                        Text = step.Text,
+                        OrganisationId = _tenancyResolver.GetOrganisationid().Value
+                    };
+                    sopSteps.Add(sopStep);
+                    position += 1;
+                }
+                await _unitOfWork.SopSteps.AddRangeAsync(sopSteps);
+
+                List<SopHazard> sopHazards = new List<SopHazard>(sopAiDto.SopVersion.SopHazards.Count);
+
+                foreach (var hazard in sopAiDto.SopVersion.SopHazards)
+                {
+                    var sopHazard = new SopHazard()
+                    {
+                        SopVersionId = sopVersion.Id,
+                        Name = hazard.Name,
+                        ControlMeasure = hazard.ControlMeasure,
+                        // RiskLevel = hazard.RiskLevel,
+                        OrganisationId = _tenancyResolver.GetOrganisationid().Value
+                    };
+
+                    sopHazards.Add(sopHazard);
+                }
+                await _unitOfWork.SopHazards.AddRangeAsync(sopHazards);
+
+
+                await _unitOfWork.SaveAsync();
+
+                sopDto = SopDto.FromSop(sop);
+            });
+
+            return sopDto;
         }
 
 
