@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="Azure.Storage.Blobs" Version="12.23.0" />
     <PackageReference Include="Handlebars.Net" Version="2.1.6" />
+    <PackageReference Include="JsonSchema.Net" Version="6.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="9.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="9.0.0" />
@@ -19,6 +20,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.SemanticKernel" Version="1.37.0" />
+    <PackageReference Include="Newtonsoft.Json.Schema" Version="4.0.1" />
     <PackageReference Include="Postmark" Version="5.2.0" />
     <PackageReference Include="QuestPDF" Version="2024.12.3" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.0.0" />

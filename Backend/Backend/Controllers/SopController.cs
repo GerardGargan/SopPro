@@ -141,9 +141,9 @@ namespace Backend.Controllers
         [AllowAnonymous]
         [HttpGet]
         [Route("test")]
-        public async Task<IActionResult> Test()
+        public async Task<IActionResult> GenerateAiSop()
         {
-            var result = await _chatService.GetChatMessageContentAsync("What is the colour of the sky");
+            var result = await _sopService.GenerateAiSop("Generate a sop for Setting up a heidelberg printnig press");
             return Ok(result);
         }
 

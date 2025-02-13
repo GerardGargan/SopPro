@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json;
 using Backend.Data;
 using Backend.Models;
 using Backend.Models.DatabaseModels;
@@ -11,6 +12,12 @@ using Backend.Utility;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Connectors.OpenAI;
+using OpenAI.Chat;
+using Newtonsoft.Json.Schema;
+using Newtonsoft.Json.Schema.Generation;
+using Newtonsoft.Json;
 
 namespace Backend.Service.Implementation
 {
@@ -24,8 +31,10 @@ namespace Backend.Service.Implementation
         private readonly IEmailService _emailService;
         private readonly ITemplateService _templateService;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IChatCompletionService _chatService;
 
-        public SopService(IUnitOfWork unitOfWork, ITenancyResolver tenancyResolver, ApplicationDbContext db, IBlobService blobService, IOptions<ApplicationSettings> appSettings, IEmailService emailService, ITemplateService templateService, UserManager<ApplicationUser> userManager)
+
+        public SopService(IUnitOfWork unitOfWork, ITenancyResolver tenancyResolver, ApplicationDbContext db, IBlobService blobService, IOptions<ApplicationSettings> appSettings, IEmailService emailService, ITemplateService templateService, UserManager<ApplicationUser> userManager, IChatCompletionService chatService)
         {
             _unitOfWork = unitOfWork;
             _tenancyResolver = tenancyResolver;
@@ -35,6 +44,7 @@ namespace Backend.Service.Implementation
             _emailService = emailService;
             _templateService = templateService;
             _userManager = userManager;
+            _chatService = chatService;
         }
 
         public async Task<ApiResponse> CreateSop(SopDto model)
@@ -510,6 +520,80 @@ namespace Backend.Service.Implementation
             return response;
 
         }
+
+        public async Task<string> GenerateAiSop(string description)
+        {
+            // Create JSON Schema with desired response type from string.
+            ChatResponseFormat chatResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(
+    "sop_structure",
+    jsonSchema: BinaryData.FromString("""
+    {
+        "type": "object",
+        "properties": {
+            "SopVersion": {
+                "type": "object",
+                "properties": {
+                    "Title": { "type": "string" },
+                    "Description": { "type": "string" },
+                    "SopSteps": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "Position": { "type": ["integer", "null"] },
+                                "Title": { "type": "string" },
+                                "Text": { "type": "string" }
+                            },
+                            "required": ["Position", "Title", "Text"],
+                            "additionalProperties": false
+                        }
+                    },
+                    "SopHazards": {
+                        "type": "array",
+                        "items": {
+                            "type": "object",
+                            "properties": {
+                                "Name": { "type": "string" },
+                                "ControlMeasure": { "type": "string" },
+                                "RiskLevel": {
+                                    "type": ["string", "null"],
+                                    "enum": ["Low", "Medium", "High"]
+                                }
+                            },
+                            "required": ["Name", "ControlMeasure", "RiskLevel"],
+                            "additionalProperties": false
+                        }
+                    }
+                },
+                "required": ["Title", "Description", "SopSteps", "SopHazards"],
+                "additionalProperties": false
+            }
+        },
+        "required": ["SopVersion"],
+        "additionalProperties": false
+    }
+    """), null, true);
+
+
+
+
+
+#pragma warning disable SKEXP0010 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+            var executionSettings = new OpenAIPromptExecutionSettings
+            {
+                ResponseFormat = chatResponseFormat
+            };
+#pragma warning restore SKEXP0010 // Type is for evaluation purposes only and is subject to change or removal in future updates. Suppress this diagnostic to proceed.
+
+            // Replace the prompt with the actual request for your Sop generation
+            var result = await _chatService.GetChatMessageContentAsync(description, executionSettings);
+
+            return result.ToString();
+        }
+
+
+
+
 
         /// <summary>
         /// Deletes sops and associated data from the database and blob storage
