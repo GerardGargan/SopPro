@@ -5,6 +5,7 @@ using Backend.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Backend.Utility;
+using Microsoft.SemanticKernel.ChatCompletion;
 
 namespace Backend.Controllers
 {
@@ -15,12 +16,14 @@ namespace Backend.Controllers
     {
         private readonly ISopService _sopService;
         private readonly IPdfService _pdfService;
+        private readonly IChatCompletionService _chatService;
 
-        public SopController(ISopService sopService, IPdfService pdfService)
+        public SopController(ISopService sopService, IPdfService pdfService, IChatCompletionService chatService)
         {
 
             _sopService = sopService;
             _pdfService = pdfService;
+            _chatService = chatService;
         }
 
         [HttpPost]
@@ -133,6 +136,15 @@ namespace Backend.Controllers
 
             return File(pdf, "application/pdf", "test.pdf");
 
+        }
+
+        [AllowAnonymous]
+        [HttpGet]
+        [Route("test")]
+        public async Task<IActionResult> Test()
+        {
+            var result = await _chatService.GetChatMessageContentAsync("What is the colour of the sky");
+            return Ok(result);
         }
 
     }
