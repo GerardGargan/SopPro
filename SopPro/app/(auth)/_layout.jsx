@@ -78,6 +78,10 @@ export default function RootLayout() {
       <Stack.Screen name="(admin)" options={{ headerShown: false }} />
       <Stack.Screen name="upsert/[id]" options={{ title: "Create SOP" }} />
       <Stack.Screen
+        name="updaert/ai"
+        options={{ title: "Generate an SOP with AI" }}
+      />
+      <Stack.Screen
         name="user/changePassword"
         options={{ title: "Change Password" }}
       />
