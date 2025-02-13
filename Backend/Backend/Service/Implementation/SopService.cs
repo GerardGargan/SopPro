@@ -554,8 +554,8 @@ namespace Backend.Service.Implementation
                                         "Name": { "type": "string" },
                                         "ControlMeasure": { "type": "string" },
                                         "RiskLevel": {
-                                            "type": ["string", "null"],
-                                            "enum": ["Low", "Medium", "High"]
+                                            "type": ["integer", "null"],
+                                            "enum": [0, 1, 2]
                                         }
                                     },
                                     "required": ["Name", "ControlMeasure", "RiskLevel"],
@@ -581,7 +581,7 @@ namespace Backend.Service.Implementation
 
             var systemInstructions = "You are an assistant that generates SOPs (Standard operating procedures) as JSON data. The response must conform to the provided schema. " +
                              "Each SOP should contain SopVersion (with Title and Description), SopSteps (array with Position, Title, and Text), and SopHazards " +
-                             "(array with Name, ControlMeasure, and RiskLevel [Low, Medium, High]). Return a valid JSON object. Please generate a sop in this format for the following task or job: ";
+                             "(array with Name, ControlMeasure, and RiskLevel [Low, Medium, High]). Use the following mapping for 'riskLevel' in each hazard: 1 = Low, 2 = Medium, 3 = High - Always return the integer, not the text. Return a valid JSON object.  Please generate a sop in this format for the following task or job: ";
 
             string fullPrompt = $"{systemInstructions}\n\n{description}";
 
@@ -653,7 +653,7 @@ namespace Backend.Service.Implementation
                         SopVersionId = sopVersion.Id,
                         Name = hazard.Name,
                         ControlMeasure = hazard.ControlMeasure,
-                        // RiskLevel = hazard.RiskLevel,
+                        RiskLevel = (RiskLevel)hazard.RiskLevel,
                         OrganisationId = _tenancyResolver.GetOrganisationid().Value
                     };
 

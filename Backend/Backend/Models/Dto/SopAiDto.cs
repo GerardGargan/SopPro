@@ -24,7 +24,7 @@ namespace Backend.Models.Dto
     {
         public string Name { get; set; }
         public string ControlMeasure { get; set; }
-        public string RiskLevel { get; set; }
+        public int RiskLevel { get; set; }
     }
 
 }
