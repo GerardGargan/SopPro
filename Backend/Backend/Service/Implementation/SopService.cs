@@ -579,11 +579,12 @@ namespace Backend.Service.Implementation
             };
 #pragma warning restore SKEXP0010 
 
-            var systemInstructions = "You are an assistant that generates SOPs (Standard operating procedures) as JSON data. The response must conform to the provided schema. " +
-                             "Each SOP should contain SopVersion (with Title and Description), SopSteps (array with Position, Title, and Text), and SopHazards " +
-                             "(array with Name, ControlMeasure, and RiskLevel [Low, Medium, High]). Use the following mapping for 'riskLevel' in each hazard: 1 = Low, 2 = Medium, 3 = High - Always return the integer, not the text. Return a valid JSON object.  Please generate a sop in this format for the following task or job: ";
-
-            string fullPrompt = $"{systemInstructions}\n\n{model.description}";
+            var fullPrompt =
+  "You are an assistant that generates SOPs (Standard Operating Procedures) as JSON data. The response must conform to the provided schema. " +
+  "Each SOP should contain SopVersion (with Title and Description), SopSteps (array with Position, Title, and Text), and SopHazards " +
+  "(array with Name, ControlMeasure, and RiskLevel [Low, Medium, High]). Use the following mapping for 'RiskLevel' in each hazard: 1 = Low, 2 = Medium, 3 = High - always return the integer, not the text. " +
+  "When generating the SOP, take into consideration the provided task, primary goal, key considerations, and potential risks. These inputs are meant to guide you in writing a clear and complete SOP. " +
+  $"Return a valid JSON object. Here is the information provided about the sop from the user: \n\n Description of the job: {model.JobDescription} \n\n PrimaryGoal: {model.PrimaryGoal} \n\n Key risks or considerations: {model.KeyRisks}";
 
             var result = await _chatService.GetChatMessageContentAsync(fullPrompt, executionSettings);
 
