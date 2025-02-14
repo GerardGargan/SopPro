@@ -2,9 +2,11 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import React, { useState } from "react";
 import { ActivityIndicator, Button, TextInput } from "react-native-paper";
 import { generateAiSop } from "../../../util/httpRequests";
-import { useMutation } from "@tanstack/react-query";
-import { useRouter } from "expo-router";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useFocusEffect, useRouter } from "expo-router";
 import InputErrorMessage from "./../../../components/UI/InputErrorMessage";
+import { QueryClient } from "@tanstack/react-query";
+import Toast from "react-native-toast-message";
 
 const ai = () => {
   const [jobDescription, setJobDescription] = useState("");
@@ -16,16 +18,46 @@ const ai = () => {
   const [keyRisksError, setKeyRisksError] = useState(null);
 
   const router = useRouter();
+  const queryClient = useQueryClient();
+
+  const isFocusedRef = React.useRef(true);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      isFocusedRef.current = true;
+      return () => {
+        isFocusedRef.current = false;
+      };
+    }, [])
+  );
 
   const { mutate, isPending, isError } = useMutation({
     mutationFn: generateAiSop,
     onSuccess: (data) => {
-      router.replace({
-        pathname: "/(auth)/upsert/[id]",
-        params: {
-          id: data.id,
+      Toast.show({
+        type: "success",
+        text1: "AI Generated SOP is ready!",
+        text2: "You can now view and edit the SOP",
+        onPress: () => {
+          router.replace({
+            pathname: "/(auth)/upsert/[id]",
+            params: {
+              id: data.id,
+            },
+          });
         },
+        visibilityTime: 5000,
       });
+      queryClient.invalidateQueries(["sops"]);
+
+      if (isFocusedRef.current) {
+        router.replace({
+          pathname: "/(auth)/upsert/[id]",
+          params: {
+            id: data.id,
+          },
+        });
+      }
     },
   });
 
