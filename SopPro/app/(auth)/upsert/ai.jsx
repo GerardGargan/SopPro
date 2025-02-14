@@ -59,6 +59,14 @@ const ai = () => {
         });
       }
     },
+    onError: () => {
+      Toast.show({
+        type: "error",
+        text1: "Oops something went wrong!",
+        text2: "The AI generator failed",
+        visibilityTime: 5000,
+      });
+    },
   });
 
   function handleSubmit() {
