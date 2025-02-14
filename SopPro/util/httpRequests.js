@@ -281,3 +281,16 @@ export async function completeRegistration({
     throw error;
   }
 }
+
+export async function generateAiSop({ jobDescription, keyRisks, primaryGoal }) {
+  const data = { jobDescription, keyRisks, primaryGoal };
+  try {
+    const response = await api.post("/sop/aigenerator", data);
+    return response.data;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error sending invite"
+    );
+    throw error;
+  }
+}

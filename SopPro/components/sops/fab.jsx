@@ -32,7 +32,10 @@ const Fab = () => {
           {
             icon: "lightbulb",
             label: "AI Generator",
-            onPress: () => console.log("Pressed AI"),
+            onPress: () =>
+              router.push({
+                pathname: "/(auth)/upsert/ai",
+              }),
           },
         ]}
         onStateChange={onStateChange}

@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text.Json;
 using Backend.Data;
 using Backend.Models;
 using Backend.Models.DatabaseModels;
@@ -11,6 +12,10 @@ using Backend.Utility;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Microsoft.SemanticKernel.ChatCompletion;
+using Microsoft.SemanticKernel.Connectors.OpenAI;
+using OpenAI.Chat;
+using Newtonsoft.Json;
 
 namespace Backend.Service.Implementation
 {
@@ -24,8 +29,10 @@ namespace Backend.Service.Implementation
         private readonly IEmailService _emailService;
         private readonly ITemplateService _templateService;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IChatCompletionService _chatService;
 
-        public SopService(IUnitOfWork unitOfWork, ITenancyResolver tenancyResolver, ApplicationDbContext db, IBlobService blobService, IOptions<ApplicationSettings> appSettings, IEmailService emailService, ITemplateService templateService, UserManager<ApplicationUser> userManager)
+
+        public SopService(IUnitOfWork unitOfWork, ITenancyResolver tenancyResolver, ApplicationDbContext db, IBlobService blobService, IOptions<ApplicationSettings> appSettings, IEmailService emailService, ITemplateService templateService, UserManager<ApplicationUser> userManager, IChatCompletionService chatService)
         {
             _unitOfWork = unitOfWork;
             _tenancyResolver = tenancyResolver;
@@ -35,6 +42,7 @@ namespace Backend.Service.Implementation
             _emailService = emailService;
             _templateService = templateService;
             _userManager = userManager;
+            _chatService = chatService;
         }
 
         public async Task<ApiResponse> CreateSop(SopDto model)
@@ -510,6 +518,162 @@ namespace Backend.Service.Implementation
             return response;
 
         }
+
+        public async Task<SopDto> GenerateAiSop(AiRequestDto model)
+        {
+            // Create JSON Schema with desired response type from string.
+            ChatResponseFormat chatResponseFormat = ChatResponseFormat.CreateJsonSchemaFormat(
+            "sop_structure",
+            jsonSchema: BinaryData.FromString("""
+            {
+                "type": "object",
+                "properties": {
+                    "SopVersion": {
+                        "type": "object",
+                        "properties": {
+                            "Title": { "type": "string" },
+                            "Description": { "type": "string" },
+                            "SopSteps": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "Position": { "type": ["integer", "null"] },
+                                        "Title": { "type": "string" },
+                                        "Text": { "type": "string" }
+                                    },
+                                    "required": ["Position", "Title", "Text"],
+                                    "additionalProperties": false
+                                }
+                            },
+                            "SopHazards": {
+                                "type": "array",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "Name": { "type": "string" },
+                                        "ControlMeasure": { "type": "string" },
+                                        "RiskLevel": {
+                                            "type": ["integer", "null"],
+                                            "enum": [0, 1, 2]
+                                        }
+                                    },
+                                    "required": ["Name", "ControlMeasure", "RiskLevel"],
+                                    "additionalProperties": false
+                                }
+                            }
+                        },
+                        "required": ["Title", "Description", "SopSteps", "SopHazards"],
+                        "additionalProperties": false
+                    }
+                },
+                "required": ["SopVersion"],
+                "additionalProperties": false
+            }
+            """), null, true);
+
+#pragma warning disable SKEXP0010 
+            var executionSettings = new OpenAIPromptExecutionSettings
+            {
+                ResponseFormat = chatResponseFormat
+            };
+#pragma warning restore SKEXP0010 
+
+            var fullPrompt =
+  "You are an assistant that generates SOPs (Standard Operating Procedures) as JSON data. The response must conform to the provided schema. " +
+  "Each SOP should contain SopVersion (with Title and Description), SopSteps (array with Position, Title, and Text), and SopHazards " +
+  "(array with Name, ControlMeasure, and RiskLevel [Low, Medium, High]). Use the following mapping for 'RiskLevel' in each hazard: 1 = Low, 2 = Medium, 3 = High - always return the integer, not the text. " +
+  "When generating the SOP, take into consideration the provided task, primary goal, key considerations, and potential risks. These inputs are meant to guide you in writing a clear and complete SOP. " +
+  $"Return a valid JSON object. Here is the information provided about the sop from the user: \n\n Description of the job: {model.JobDescription} \n\n PrimaryGoal: {model.PrimaryGoal} \n\n Key risks or considerations: {model.KeyRisks}";
+
+            var result = await _chatService.GetChatMessageContentAsync(fullPrompt, executionSettings);
+
+            string jsonResult = result.ToString();
+
+            AiSop sopAiDto = System.Text.Json.JsonSerializer.Deserialize<AiSop>(jsonResult, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true,
+                AllowTrailingCommas = true
+            });
+
+            SopDto sopDto = new SopDto();
+
+            await _unitOfWork.ExecuteInTransactionAsync(async () =>
+            {
+                Sop sop = new Sop()
+                {
+                    Reference = new Random().Next(10000000).ToString(),
+                    DepartmentId = null,
+                    isAiGenerated = true,
+                    OrganisationId = _tenancyResolver.GetOrganisationid().Value,
+                };
+
+                await _unitOfWork.Sops.AddAsync(sop);
+                await _unitOfWork.SaveAsync();
+
+                SopVersion sopVersion = new SopVersion()
+                {
+                    SopId = sop.Id,
+                    Version = 1,
+                    Status = SopStatus.Draft,
+                    AuthorId = _tenancyResolver.GetUserId(),
+                    CreateDate = DateTime.UtcNow,
+                    LastUpdated = DateTime.UtcNow,
+                    Title = sopAiDto.SopVersion.Title,
+                    Description = sopAiDto.SopVersion.Description,
+                    OrganisationId = _tenancyResolver.GetOrganisationid().Value
+                };
+
+                await _unitOfWork.SopVersions.AddAsync(sopVersion);
+                await _unitOfWork.SaveAsync();
+
+                List<SopStep> sopSteps = new List<SopStep>(sopAiDto.SopVersion.SopSteps.Count);
+
+                int position = 1;
+                foreach (var step in sopAiDto.SopVersion.SopSteps)
+                {
+                    var sopStep = new SopStep()
+                    {
+                        SopVersionId = sopVersion.Id,
+                        Position = position,
+                        Title = step.Title,
+                        Text = step.Text,
+                        OrganisationId = _tenancyResolver.GetOrganisationid().Value
+                    };
+                    sopSteps.Add(sopStep);
+                    position += 1;
+                }
+                await _unitOfWork.SopSteps.AddRangeAsync(sopSteps);
+
+                List<SopHazard> sopHazards = new List<SopHazard>(sopAiDto.SopVersion.SopHazards.Count);
+
+                foreach (var hazard in sopAiDto.SopVersion.SopHazards)
+                {
+                    var sopHazard = new SopHazard()
+                    {
+                        SopVersionId = sopVersion.Id,
+                        Name = hazard.Name,
+                        ControlMeasure = hazard.ControlMeasure,
+                        RiskLevel = (RiskLevel)hazard.RiskLevel,
+                        OrganisationId = _tenancyResolver.GetOrganisationid().Value
+                    };
+
+                    sopHazards.Add(sopHazard);
+                }
+                await _unitOfWork.SopHazards.AddRangeAsync(sopHazards);
+
+
+                await _unitOfWork.SaveAsync();
+
+                sopDto = SopDto.FromSop(sop);
+            });
+
+            return sopDto;
+        }
+
+
+
+
 
         /// <summary>
         /// Deletes sops and associated data from the database and blob storage
