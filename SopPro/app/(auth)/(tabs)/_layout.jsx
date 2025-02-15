@@ -37,20 +37,20 @@ const _layout = () => {
           }}
         />
         <Tabs.Screen
-          name="sops"
-          options={{
-            title: "Sops",
-            tabBarIcon: ({ color }) => (
-              <TabBarIcon Icon={FileText} color={color} />
-            ),
-          }}
-        />
-        <Tabs.Screen
           name="analytics"
           options={{
             title: "Analytics",
             tabBarIcon: ({ color }) => (
               <TabBarIcon Icon={ChartPie} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="sops"
+          options={{
+            title: "Sops",
+            tabBarIcon: ({ color }) => (
+              <TabBarIcon Icon={FileText} color={color} />
             ),
           }}
         />

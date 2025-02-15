@@ -125,6 +125,7 @@ const Analytics = () => {
             chartConfig={chartConfig}
             style={styles.chart}
             showValuesOnTopOfBars
+            fromZero={true}
           />
         </View>
         <View style={{ marginVertical: 16 }}></View>
