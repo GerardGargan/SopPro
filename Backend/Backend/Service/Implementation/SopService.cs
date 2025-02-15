@@ -1108,6 +1108,12 @@ namespace Backend.Service.Implementation
                     Title = "Under Review",
                     Value = totalInReview.ToString(),
                     Subtitle = "Pending approval"
+                },
+                new SummaryCardData()
+                {
+                    Title = "Drafts",
+                    Value = totalDraft.ToString(),
+                    Subtitle = "SOPs drafted"
                 }
             };
 
