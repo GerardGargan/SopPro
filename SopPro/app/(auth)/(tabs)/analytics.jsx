@@ -33,13 +33,17 @@ const Analytics = () => {
     style: {
       borderRadius: 16,
     },
+    propsForLabels: {
+      fontSize: 10,
+      rotation: -45,
+    },
   };
 
   const lineData = {
-    labels: ["Jan", "Feb", "Mar", "Apr"],
+    labels: data.lineData.labels,
     datasets: [
       {
-        data: [4, 6, 3, 8],
+        data: data.lineData.datasets[0].data,
         color: (opacity = 1) => `rgba(0, 136, 254, ${opacity})`,
         strokeWidth: 2,
       },

@@ -1007,7 +1007,7 @@ namespace Backend.Service.Implementation
 
             // Get a list of the most recent sop version for each sop
             List<SopVersion> latestSopVersions = sops
-                .Where(sop => sop.SopVersions.Any()) // Ensure it has versions
+                .Where(sop => sop.SopVersions.Any())
                 .Select(sop => sop.SopVersions.OrderByDescending(v => v.Version).FirstOrDefault())
                 .ToList();
 
@@ -1020,6 +1020,54 @@ namespace Backend.Service.Implementation
 
             int totalDraft = flattenedVersions.Count(sv => sv.Status == SopStatus.Draft);
             int totalRejected = flattenedVersions.Count(sv => sv.Status == SopStatus.Rejected);
+
+            // Generate the last 12 months, starting from the current month
+            var last12Months = Enumerable.Range(0, 12)
+                .Select(i => DateTime.UtcNow.AddMonths(-i)) // Create the last 12 months
+                .OrderBy(date => date)
+                .Select(date => new
+                {
+                    MonthYearLabel = $"{date:MM/yyyy}", // Format as MM/YYYY
+                    Month = date.Month,
+                    Year = date.Year
+                })
+                .ToList();
+
+            // Group the actual data by year and month
+            var monthlyData = flattenedVersions
+                .Where(sv => sv.CreateDate >= DateTime.UtcNow.AddMonths(-12)) // Filter versions within the last 12 months
+                .GroupBy(sv => new { sv.CreateDate.Value.Year, sv.CreateDate.Value.Month }) // Group by year and month
+                .Select(g => new
+                {
+                    MonthYearLabel = $"{g.Key.Month:D2}/{g.Key.Year}", // Format as MM/YYYY
+                    Count = g.Count()
+                })
+                .ToList();
+
+            // Merge the last 12 months with the actual data, filling in zeros for months with no data
+            var mergedData = last12Months.Select(month => new
+            {
+                MonthYearLabel = month.MonthYearLabel, // MM/YYYY format
+                Count = monthlyData.FirstOrDefault(d => d.MonthYearLabel == month.MonthYearLabel)?.Count ?? 0
+            }).ToList();
+
+            // Prepare the chart data
+            var lineData = new ChartData
+            {
+                Labels = mergedData.Select(x => x.MonthYearLabel).ToList(),
+                Datasets = new List<ChartDataset>
+    {
+        new ChartDataset
+        {
+            Data = mergedData.Select(x => x.Count).ToList(),
+            Color = "#0088FE",
+            StrokeWidth = 2
+        }
+    }
+            };
+
+
+
 
 
             List<SummaryCardData> summaryCards = new List<SummaryCardData>(3)
@@ -1075,7 +1123,9 @@ namespace Backend.Service.Implementation
             AnalyticsResponseDto analyticsDto = new AnalyticsResponseDto()
             {
                 SummaryCards = summaryCards,
-                PieData = pieChartData
+                PieData = pieChartData,
+                LineData = lineData,
+
             };
 
             return analyticsDto;
