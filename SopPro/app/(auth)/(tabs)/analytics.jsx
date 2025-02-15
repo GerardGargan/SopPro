@@ -127,6 +127,7 @@ const Analytics = () => {
             showValuesOnTopOfBars
           />
         </View>
+        <View style={{ marginVertical: 16 }}></View>
       </ScrollView>
     </SafeAreaView>
   );
