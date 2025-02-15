@@ -55,30 +55,6 @@ const Analytics = () => {
     ],
   };
 
-  const pieData = [
-    {
-      name: "Draft",
-      population: 3,
-      color: "#0088FE",
-      legendFontColor: "#7F7F7F",
-      legendFontSize: 12,
-    },
-    {
-      name: "Approved",
-      population: 2,
-      color: "#00C49F",
-      legendFontColor: "#7F7F7F",
-      legendFontSize: 12,
-    },
-    {
-      name: "Review",
-      population: 1,
-      color: "#FFBB28",
-      legendFontColor: "#7F7F7F",
-      legendFontSize: 12,
-    },
-  ];
-
   const SummaryCard = ({ title, value, subtitle }) => (
     <View style={styles.card}>
       <Text style={styles.cardTitle}>{title}</Text>
@@ -110,7 +86,7 @@ const Analytics = () => {
         <View style={styles.chartCard}>
           <Text style={styles.chartTitle}>Status Distribution</Text>
           <PieChart
-            data={pieData}
+            data={data.pieData}
             width={screenWidth - 32}
             height={220}
             chartConfig={chartConfig}

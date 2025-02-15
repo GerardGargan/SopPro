@@ -1016,8 +1016,11 @@ namespace Backend.Service.Implementation
 
             int totalApproved = flattenedVersions.Count(sv => sv.Status == SopStatus.Approved);
             int totalInReview = flattenedVersions.Count(sv => sv.Status == SopStatus.InReview);
-
             double approvalRate = (totalSops > 0) ? ((double)totalApproved / totalSops) * 100 : 0;
+
+            int totalDraft = flattenedVersions.Count(sv => sv.Status == SopStatus.Draft);
+            int totalRejected = flattenedVersions.Count(sv => sv.Status == SopStatus.Rejected);
+
 
             List<SummaryCardData> summaryCards = new List<SummaryCardData>(3)
             {
@@ -1041,9 +1044,38 @@ namespace Backend.Service.Implementation
                 }
             };
 
+            List<PieChartData> pieChartData = new List<PieChartData>()
+            {
+                new PieChartData()
+                {
+                    Name = "Approved",
+                    Population = totalApproved,
+                    Color = "#00C49F",
+                },
+                new PieChartData()
+                {
+                    Name = "Draft",
+                    Population = totalDraft,
+                    Color = "#0088FE",
+                },
+                new PieChartData()
+                {
+                    Name = "In Review",
+                    Population = totalInReview,
+                    Color = "#FFBB28",
+                },
+                new PieChartData()
+                {
+                    Name = "Rejected",
+                    Population = totalRejected,
+                    Color = "#FF4C4C",
+                },
+            };
+
             AnalyticsResponseDto analyticsDto = new AnalyticsResponseDto()
             {
-                SummaryCards = summaryCards
+                SummaryCards = summaryCards,
+                PieData = pieChartData
             };
 
             return analyticsDto;
