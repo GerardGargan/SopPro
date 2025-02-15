@@ -2,7 +2,7 @@ import { Tabs } from "expo-router";
 import React from "react";
 import SafeAreaHeader from "../../../components/UI/SareAreaHeader";
 import { useTheme } from "react-native-paper";
-import { House, FileText, Grid2X2 } from "lucide-react-native";
+import { House, FileText, Grid2X2, ChartPie } from "lucide-react-native";
 
 function TabBarIcon({ Icon, ...props }) {
   return <Icon size={28} style={{ marginBottom: -3 }} {...props} />;
@@ -42,6 +42,15 @@ const _layout = () => {
             title: "Sops",
             tabBarIcon: ({ color }) => (
               <TabBarIcon Icon={FileText} color={color} />
+            ),
+          }}
+        />
+        <Tabs.Screen
+          name="analytics"
+          options={{
+            title: "Analytics",
+            tabBarIcon: ({ color }) => (
+              <TabBarIcon Icon={ChartPie} color={color} />
             ),
           }}
         />

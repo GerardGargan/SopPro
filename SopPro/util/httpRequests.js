@@ -294,3 +294,15 @@ export async function generateAiSop({ jobDescription, keyRisks, primaryGoal }) {
     throw error;
   }
 }
+
+export async function getAnalytics() {
+  try {
+    const response = await api.get("/sop/analytics");
+    return response.data;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error sending invite"
+    );
+    throw error;
+  }
+}
