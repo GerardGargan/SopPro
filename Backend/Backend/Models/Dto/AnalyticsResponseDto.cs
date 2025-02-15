@@ -25,8 +25,6 @@ namespace Backend.Models.Dto
     public class ChartDataset
     {
         public List<int> Data { get; set; }
-        public string Color { get; set; } = "rgba(0, 136, 254, 1)";
-        public int StrokeWidth { get; set; } = 2;
     }
 
     public class PieChartData

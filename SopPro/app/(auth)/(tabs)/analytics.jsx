@@ -22,8 +22,6 @@ const Analytics = () => {
   if (isPending) {
     return <Text>Loading</Text>;
   }
-  console.log(data);
-  // Chart configurations
   const chartConfig = {
     backgroundColor: "#ffffff",
     backgroundGradientFrom: "#ffffff",
@@ -51,10 +49,12 @@ const Analytics = () => {
   };
 
   const barData = {
-    labels: ["Printing", "QC", "Setup", "Prod"],
+    labels: data.barData.labels,
     datasets: [
       {
-        data: [3, 2, 1, 1],
+        data: data.barData.datasets[0].data,
+        color: (opacity = 1) => `rgba(0, 136, 254, ${opacity})`,
+        strokeWidth: 2,
       },
     ],
   };
@@ -111,12 +111,13 @@ const Analytics = () => {
             chartConfig={chartConfig}
             bezier
             style={styles.chart}
+            fromZero={true}
           />
         </View>
 
         {/* Category Distribution */}
         <View style={styles.chartCard}>
-          <Text style={styles.chartTitle}>SOPs by Category</Text>
+          <Text style={styles.chartTitle}>SOPs by Department</Text>
           <BarChart
             data={barData}
             width={screenWidth - 64}

@@ -16,6 +16,7 @@ using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using OpenAI.Chat;
 using Newtonsoft.Json;
+using System.IO.Compression;
 
 namespace Backend.Service.Implementation
 {
@@ -1001,7 +1002,7 @@ namespace Backend.Service.Implementation
 
         public async Task<AnalyticsResponseDto> GetAnalytics()
         {
-            List<Sop> sops = await _unitOfWork.Sops.GetAll(includeProperties: "SopVersions").ToListAsync();
+            List<Sop> sops = await _unitOfWork.Sops.GetAll(includeProperties: "SopVersions,Department").ToListAsync();
 
             int totalSops = sops.Count;
 
@@ -1033,7 +1034,7 @@ namespace Backend.Service.Implementation
                 })
                 .ToList();
 
-            // Group the actual data by year and month
+            // Group the data by year and month
             var monthlyData = flattenedVersions
                 .Where(sv => sv.CreateDate >= DateTime.UtcNow.AddMonths(-12)) // Filter versions within the last 12 months
                 .GroupBy(sv => new { sv.CreateDate.Value.Year, sv.CreateDate.Value.Month }) // Group by year and month
@@ -1051,22 +1052,40 @@ namespace Backend.Service.Implementation
                 Count = monthlyData.FirstOrDefault(d => d.MonthYearLabel == month.MonthYearLabel)?.Count ?? 0
             }).ToList();
 
-            // Prepare the chart data
+            Dictionary<int, string> departmentDict = await _unitOfWork.Departments.GetAll().ToDictionaryAsync(x => x.Id, x => x.Name);
+
+            var departmentData = sops
+                .GroupBy(x => x.DepartmentId)
+                .Select(x => new
+                {
+                    DepartmentId = x.Key,
+                    DepartmentName = x.Key != null ? departmentDict[x.Key.Value] : "None",
+                    Count = x.Count()
+                })
+                .ToList();
+
+            var barData = new ChartData
+            {
+                Labels = departmentData.Select(x => x.DepartmentName).ToList(),
+                Datasets = new List<ChartDataset>
+                {
+                    new ChartDataset {
+                        Data = departmentData.Select(x => x.Count).ToList()
+                    }
+                }
+            };
+
             var lineData = new ChartData
             {
                 Labels = mergedData.Select(x => x.MonthYearLabel).ToList(),
                 Datasets = new List<ChartDataset>
-    {
-        new ChartDataset
-        {
-            Data = mergedData.Select(x => x.Count).ToList(),
-            Color = "#0088FE",
-            StrokeWidth = 2
-        }
-    }
+                {
+                    new ChartDataset
+                    {
+                        Data = mergedData.Select(x => x.Count).ToList(),
+                    }
+                }
             };
-
-
 
 
 
@@ -1125,7 +1144,7 @@ namespace Backend.Service.Implementation
                 SummaryCards = summaryCards,
                 PieData = pieChartData,
                 LineData = lineData,
-
+                BarData = barData
             };
 
             return analyticsDto;
