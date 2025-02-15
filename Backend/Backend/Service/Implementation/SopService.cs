@@ -1062,6 +1062,7 @@ namespace Backend.Service.Implementation
                     DepartmentName = x.Key != null ? departmentDict[x.Key.Value] : "None",
                     Count = x.Count()
                 })
+                .OrderByDescending(x => x.Count)
                 .ToList();
 
             var barData = new ChartData
