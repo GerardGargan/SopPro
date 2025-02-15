@@ -146,5 +146,13 @@ namespace Backend.Controllers
             return Ok(result);
         }
 
+        [HttpGet]
+        [Route("analytics")]
+        public async Task<IActionResult> GetAnalytics()
+        {
+            var analyticsDto = await _sopService.GetAnalytics();
+            return Ok(analyticsDto);
+        }
+
     }
 }

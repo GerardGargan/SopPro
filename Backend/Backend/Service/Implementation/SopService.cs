@@ -999,6 +999,56 @@ namespace Backend.Service.Implementation
             return sopEntity;
         }
 
+        public async Task<AnalyticsResponseDto> GetAnalytics()
+        {
+            List<Sop> sops = await _unitOfWork.Sops.GetAll(includeProperties: "SopVersions").ToListAsync();
+
+            int totalSops = sops.Count;
+
+            // Get a list of the most recent sop version for each sop
+            List<SopVersion> latestSopVersions = sops
+                .Where(sop => sop.SopVersions.Any()) // Ensure it has versions
+                .Select(sop => sop.SopVersions.OrderByDescending(v => v.Version).FirstOrDefault())
+                .ToList();
+
+            IEnumerable<SopVersion> flattenedVersions = sops
+            .SelectMany(sop => sop.SopVersions);
+
+            int totalApproved = flattenedVersions.Count(sv => sv.Status == SopStatus.Approved);
+            int totalInReview = flattenedVersions.Count(sv => sv.Status == SopStatus.InReview);
+
+            double approvalRate = (totalSops > 0) ? ((double)totalApproved / totalSops) * 100 : 0;
+
+            List<SummaryCardData> summaryCards = new List<SummaryCardData>(3)
+            {
+                new SummaryCardData()
+                {
+                    Title = "Total SOPs",
+                    Value = totalSops.ToString(),
+                    Subtitle = "All categories"
+                },
+                new SummaryCardData()
+                {
+                    Title = "Approval Rate",
+                    Value = $"{approvalRate:0}%",
+                    Subtitle = "SOPs approved"
+                },
+                new SummaryCardData()
+                {
+                    Title = "Under Review",
+                    Value = totalInReview.ToString(),
+                    Subtitle = "Pending approval"
+                }
+            };
+
+            AnalyticsResponseDto analyticsDto = new AnalyticsResponseDto()
+            {
+                SummaryCards = summaryCards
+            };
+
+            return analyticsDto;
+        }
+
 
         public async Task<ApiResponse> UploadImage(FileDto file)
         {

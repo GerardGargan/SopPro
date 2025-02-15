@@ -19,6 +19,7 @@ namespace Backend.Service.Interface
         public Task<ApiResponse> RequestApproval(int id);
         public Task<SopVersionDto> GetSopVersion(int sopVersionId);
         public Task<SopDto> GenerateAiSop(AiRequestDto model);
+        public Task<AnalyticsResponseDto> GetAnalytics();
 
     };
 }
