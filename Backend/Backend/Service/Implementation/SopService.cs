@@ -16,6 +16,7 @@ using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using OpenAI.Chat;
 using Newtonsoft.Json;
+using System.IO.Compression;
 
 namespace Backend.Service.Implementation
 {
@@ -997,6 +998,163 @@ namespace Backend.Service.Implementation
             await _unitOfWork.SaveAsync();
 
             return sopEntity;
+        }
+
+        public async Task<AnalyticsResponseDto> GetAnalytics()
+        {
+            List<Sop> sops = await _unitOfWork.Sops.GetAll(includeProperties: "SopVersions,Department").ToListAsync();
+
+            int totalSops = sops.Count;
+
+            // Get a list of the most recent sop version for each sop
+            List<SopVersion> latestSopVersions = sops
+                .Where(sop => sop.SopVersions.Any())
+                .Select(sop => sop.SopVersions.OrderByDescending(v => v.Version).FirstOrDefault())
+                .ToList();
+
+            IEnumerable<SopVersion> flattenedVersions = sops
+            .SelectMany(sop => sop.SopVersions);
+
+            int totalApproved = flattenedVersions.Count(sv => sv.Status == SopStatus.Approved);
+            int totalInReview = flattenedVersions.Count(sv => sv.Status == SopStatus.InReview);
+            double approvalRate = (totalSops > 0) ? ((double)totalApproved / totalSops) * 100 : 0;
+
+            int totalDraft = flattenedVersions.Count(sv => sv.Status == SopStatus.Draft);
+            int totalRejected = flattenedVersions.Count(sv => sv.Status == SopStatus.Rejected);
+
+            // Generate the last 12 months, starting from the current month
+            var last12Months = Enumerable.Range(0, 12)
+                .Select(i => DateTime.UtcNow.AddMonths(-i)) // Create the last 12 months
+                .OrderBy(date => date)
+                .Select(date => new
+                {
+                    MonthYearLabel = $"{date:MM/yyyy}", // Format as MM/YYYY
+                    Month = date.Month,
+                    Year = date.Year
+                })
+                .ToList();
+
+            // Group the data by year and month
+            var monthlyData = flattenedVersions
+                .Where(sv => sv.CreateDate >= DateTime.UtcNow.AddMonths(-12)) // Filter versions within the last 12 months
+                .GroupBy(sv => new { sv.CreateDate.Value.Year, sv.CreateDate.Value.Month }) // Group by year and month
+                .Select(g => new
+                {
+                    MonthYearLabel = $"{g.Key.Month:D2}/{g.Key.Year}", // Format as MM/YYYY
+                    Count = g.Count()
+                })
+                .ToList();
+
+            // Merge the last 12 months with the actual data, filling in zeros for months with no data
+            var mergedData = last12Months.Select(month => new
+            {
+                MonthYearLabel = month.MonthYearLabel, // MM/YYYY format
+                Count = monthlyData.FirstOrDefault(d => d.MonthYearLabel == month.MonthYearLabel)?.Count ?? 0
+            }).ToList();
+
+            Dictionary<int, string> departmentDict = await _unitOfWork.Departments.GetAll().ToDictionaryAsync(x => x.Id, x => x.Name);
+
+            var departmentData = sops
+                .GroupBy(x => x.DepartmentId)
+                .Select(x => new
+                {
+                    DepartmentId = x.Key,
+                    DepartmentName = x.Key != null ? departmentDict[x.Key.Value] : "None",
+                    Count = x.Count()
+                })
+                .OrderByDescending(x => x.Count)
+                .ToList();
+
+            var barData = new ChartData
+            {
+                Labels = departmentData.Select(x => x.DepartmentName).ToList(),
+                Datasets = new List<ChartDataset>
+                {
+                    new ChartDataset {
+                        Data = departmentData.Select(x => x.Count).ToList()
+                    }
+                }
+            };
+
+            var lineData = new ChartData
+            {
+                Labels = mergedData.Select(x => x.MonthYearLabel).ToList(),
+                Datasets = new List<ChartDataset>
+                {
+                    new ChartDataset
+                    {
+                        Data = mergedData.Select(x => x.Count).ToList(),
+                    }
+                }
+            };
+
+
+
+            List<SummaryCardData> summaryCards = new List<SummaryCardData>(3)
+            {
+                new SummaryCardData()
+                {
+                    Title = "Total SOPs",
+                    Value = totalSops.ToString(),
+                    Subtitle = "All categories"
+                },
+                new SummaryCardData()
+                {
+                    Title = "Approval Rate",
+                    Value = $"{approvalRate:0}%",
+                    Subtitle = "SOPs approved"
+                },
+                new SummaryCardData()
+                {
+                    Title = "Under Review",
+                    Value = totalInReview.ToString(),
+                    Subtitle = "Pending approval"
+                },
+                new SummaryCardData()
+                {
+                    Title = "Drafts",
+                    Value = totalDraft.ToString(),
+                    Subtitle = "SOPs drafted"
+                }
+            };
+
+            List<PieChartData> pieChartData = new List<PieChartData>()
+            {
+                new PieChartData()
+                {
+                    Name = "Approved",
+                    Population = totalApproved,
+                    Color = "#00C49F",
+                },
+                new PieChartData()
+                {
+                    Name = "Draft",
+                    Population = totalDraft,
+                    Color = "#0088FE",
+                },
+                new PieChartData()
+                {
+                    Name = "In Review",
+                    Population = totalInReview,
+                    Color = "#FFBB28",
+                },
+                new PieChartData()
+                {
+                    Name = "Rejected",
+                    Population = totalRejected,
+                    Color = "#FF4C4C",
+                },
+            };
+
+            AnalyticsResponseDto analyticsDto = new AnalyticsResponseDto()
+            {
+                SummaryCards = summaryCards,
+                PieData = pieChartData,
+                LineData = lineData,
+                BarData = barData
+            };
+
+            return analyticsDto;
         }
 
 
