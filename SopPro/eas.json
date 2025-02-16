@@ -9,7 +9,11 @@
       "distribution": "internal"
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "developmentClient": false,
+      "env": {
+        "EXPO_PUBLIC_API_URL": "http://192.168.1.47:5000/api"
+      }
     },
     "production": {
       "autoIncrement": true
