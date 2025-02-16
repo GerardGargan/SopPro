@@ -10,17 +10,28 @@ import {
 import { LineChart, BarChart, PieChart } from "react-native-chart-kit";
 import { useQuery } from "@tanstack/react-query";
 import { getAnalytics } from "../../../util/httpRequests";
+import AnalyticsSkeleton from "../../../components/skeletons/AnalyticsSkeleton";
+import Toast from "react-native-toast-message";
 
 const screenWidth = Dimensions.get("window").width;
 
 const Analytics = () => {
-  const { data, isPending } = useQuery({
+  const { data, isPending, isError, error } = useQuery({
     queryKey: ["analytics", "sops"],
     queryFn: getAnalytics,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+    cacheTime: 10 * 60 * 1000, // 10 minutes
   });
 
-  if (isPending) {
-    return <Text>Loading</Text>;
+  if (isPending || isError) {
+    if (isError) {
+      Toast.show({
+        type: "error",
+        text1: error.message,
+        visibilityTime: 3000,
+      });
+    }
+    return <AnalyticsSkeleton />;
   }
   const chartConfig = {
     backgroundColor: "#ffffff",
@@ -72,7 +83,6 @@ const Analytics = () => {
       <ScrollView style={styles.container}>
         <Text style={styles.header}>SOP Analytics</Text>
 
-        {/* Summary Cards */}
         <View style={styles.summaryContainer}>
           {data.summaryCards.map((item) => {
             return (
@@ -86,7 +96,6 @@ const Analytics = () => {
           })}
         </View>
 
-        {/* Status Distribution */}
         <View style={styles.chartCard}>
           <Text style={styles.chartTitle}>Status Distribution</Text>
           <PieChart
@@ -101,7 +110,6 @@ const Analytics = () => {
           />
         </View>
 
-        {/* Monthly Activity */}
         <View style={styles.chartCard}>
           <Text style={styles.chartTitle}>Monthly Activity</Text>
           <LineChart
@@ -115,7 +123,6 @@ const Analytics = () => {
           />
         </View>
 
-        {/* Category Distribution */}
         <View style={styles.chartCard}>
           <Text style={styles.chartTitle}>SOPs by Department</Text>
           <BarChart

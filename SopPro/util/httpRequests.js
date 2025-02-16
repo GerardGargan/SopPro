@@ -301,7 +301,7 @@ export async function getAnalytics() {
     return response.data;
   } catch (e) {
     const error = new Error(
-      e.response?.data?.errorMessage || "Error sending invite"
+      e.response?.data?.errorMessage || "Error loading analytics"
     );
     throw error;
   }
