@@ -79,6 +79,7 @@ builder.Services.AddTransient<IEmailService, EmailService>();
 builder.Services.AddScoped<ITenancyResolver, TenancyResolver>();
 builder.Services.AddSingleton<IBlobService, BlobService>();
 builder.Services.AddScoped<IPdfService, PdfService>();
+builder.Services.AddScoped<IDbInitializer, DbInitializer>();
 
 
 var templateFolder = Path.Combine(Directory.GetCurrentDirectory(), "Templates");
@@ -135,5 +136,14 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
+SeedDatabase();
 app.Run();
+
+void SeedDatabase()
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
+        dbInitializer.Initialize();
+    }
+}
