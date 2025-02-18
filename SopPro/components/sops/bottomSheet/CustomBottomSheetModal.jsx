@@ -33,6 +33,7 @@ import {
 import ExportModal from "../exportModal/ExportModal";
 import { useBottomSheetBackHandler } from "../../../hooks/useBottomSheetBackHandler";
 import { ScrollView } from "react-native-gesture-handler";
+import ConfirmationModal from "../../UI/ConfirmationModal";
 
 const CustomBottomSheetModal = forwardRef((props, ref) => {
   const router = useRouter();
@@ -46,6 +47,13 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
 
   const { handleSheetPositionChange } = useBottomSheetBackHandler(ref);
   const [exportModalVisibile, setExportModalVisible] = useState(false);
+  const [confirmationModal, setConfirmationModal] = useState({
+    visible: false,
+    title: "",
+    subtitle: "",
+    onCancel: () => {},
+    onConfirm: () => {},
+  });
 
   function closeSheet() {
     ref.current?.close();
@@ -176,6 +184,26 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     },
   });
 
+  function openConfirmationModal(title, subtitle, callback) {
+    setConfirmationModal({
+      visible: true,
+      title: title,
+      subtitle: subtitle,
+      onCancel: dismissConfirmationModal,
+      onConfirm: callback,
+    });
+  }
+
+  function dismissConfirmationModal() {
+    setConfirmationModal({
+      visible: false,
+      title: "",
+      subtitle: "",
+      onCancel: () => {},
+      onConfirm: () => {},
+    });
+  }
+
   function handleEditPress() {
     closeSheet();
     router.push({
@@ -188,7 +216,14 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
 
   function handleApproval() {
     closeSheet();
-    mutateApproveSop(sop.id);
+    openConfirmationModal(
+      "Confirm Approval",
+      "This SOP will be approved",
+      () => {
+        mutateApproveSop(sop.id);
+        dismissConfirmationModal();
+      }
+    );
   }
 
   function handleAddToFavouritesPress() {
@@ -203,17 +238,38 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
 
   function handleDeletePress() {
     closeSheet();
-    deleteSopsMutation([sop.id]);
+    openConfirmationModal(
+      "Confirm SOP deletion",
+      "All versions will be deleted permenantly",
+      () => {
+        deleteSopsMutation([sop.id]);
+        dismissConfirmationModal();
+      }
+    );
   }
 
   function handleRequestApproval() {
     closeSheet();
-    mutateRequestApproval(sop.id);
+    openConfirmationModal(
+      "Confirm Approval Request",
+      "Request approval for this SOP",
+      () => {
+        mutateRequestApproval(sop.id);
+        dismissConfirmationModal();
+      }
+    );
   }
 
   function handleRejectPress() {
     closeSheet();
-    mutateReject(sop.id);
+    openConfirmationModal(
+      "Confirm rejection",
+      "The author will be notified",
+      () => {
+        mutateReject(sop.id);
+        dismissConfirmationModal();
+      }
+    );
   }
 
   function handleExportPress() {
@@ -221,64 +277,67 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     setExportModalVisible(true);
   }
 
-  const editCard = (
-    <MenuCard Icon={Pencil} title="Edit" onPress={handleEditPress} />
-  );
+  const userOptions = [
+    {
+      key: 1,
+      title: "Edit",
+      icon: Pencil,
+      onPress: handleEditPress,
+      visible: true,
+    },
+    {
+      key: 2,
+      title: "Request Approval",
+      icon: FileCheck2,
+      onPress: handleRequestApproval,
+      visible: sop?.status === 1 || sop?.status === 5,
+    },
+    {
+      key: 3,
+      title: "Add to favourites",
+      icon: Star,
+      onPress: handleAddToFavouritesPress,
+      visible: sop?.isFavourite === false,
+    },
+    {
+      key: 4,
+      title: "Remove from favourites",
+      icon: Star,
+      onPress: handleRemoveFromFavouritesPress,
+      visible: sop?.isFavourite === true,
+    },
+    {
+      key: 5,
+      title: "Export",
+      icon: FileDown,
+      onPress: handleExportPress,
+      visible: true,
+    },
+  ];
 
-  const deleteCard = (
-    <MenuCard Icon={Trash2} title="Delete" onPress={handleDeletePress} />
-  );
-
-  const favouritesCard = sop?.isFavourite ? (
-    <MenuCard
-      Icon={Star}
-      title="Remove from favourites"
-      onPress={handleRemoveFromFavouritesPress}
-    />
-  ) : (
-    <MenuCard
-      Icon={Star}
-      title="Add to favourites"
-      onPress={handleAddToFavouritesPress}
-    />
-  );
-
-  const approvalCard = (
-    <MenuCard Icon={ThumbsUp} title="Approve" onPress={handleApproval} />
-  );
-
-  const rejectApprovalCard = (
-    <MenuCard Icon={ThumbsDown} title="Reject" onPress={handleRejectPress} />
-  );
-
-  const requestApprovalCard = (
-    <MenuCard
-      Icon={FileCheck2}
-      title="Request Approval"
-      onPress={handleRequestApproval}
-    />
-  );
-
-  const exportCard = (
-    <MenuCard Icon={FileDown} title="Export" onPress={handleExportPress} />
-  );
-
-  // Group cards based on user role
-  const userCardStack = (
-    <>
-      {editCard}
-      {(sop?.status === 1 || sop?.status === 5) && requestApprovalCard}
-      {favouritesCard}
-      {exportCard}
-      {deleteCard}
-    </>
-  );
-  const adminCardStack = (
-    <>
-      {sop?.status === 2 && approvalCard}
-      {sop?.status === 2 && rejectApprovalCard}
-    </>
-  );
+  const adminOptions = [
+    {
+      key: 1,
+      title: "Approve",
+      icon: ThumbsUp,
+      onPress: handleApproval,
+      visible: sop?.status === 2,
+    },
+    {
+      key: 2,
+      title: "Reject",
+      icon: ThumbsDown,
+      onPress: handleRejectPress,
+      visible: sop?.status === 2,
+    },
+    {
+      key: 3,
+      title: "Delete",
+      icon: Trash2,
+      onPress: handleDeletePress,
+      visible: true,
+    },
+  ];
 
   return (
     <>
@@ -314,8 +373,32 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
           </ScrollView>
           <Divider style={styles.divider} />
           <ScrollView style={{ width: "100%" }}>
-            {isAdmin && adminCardStack}
-            {userCardStack}
+            {userOptions.map((option) => {
+              return (
+                option.visible && (
+                  <MenuCard
+                    key={option.key}
+                    title={option.title}
+                    Icon={option.icon}
+                    onPress={option.onPress}
+                  />
+                )
+              );
+            })}
+
+            {isAdmin &&
+              adminOptions.map((option) => {
+                return (
+                  option.visible && (
+                    <MenuCard
+                      key={option.key}
+                      title={option.title}
+                      Icon={option.icon}
+                      onPress={option.onPress}
+                    />
+                  )
+                );
+              })}
           </ScrollView>
         </BottomSheetView>
       </BottomSheetModal>
@@ -327,6 +410,14 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
           setVisibility={setExportModalVisible}
         />
       )}
+
+      <ConfirmationModal
+        visible={confirmationModal.visible}
+        onConfirm={confirmationModal.onConfirm}
+        onCancel={confirmationModal.onCancel}
+        title={confirmationModal.title}
+        subtitle={confirmationModal.subtitle}
+      />
     </>
   );
 });
