@@ -116,6 +116,18 @@ export async function fetchDepartments() {
   }
 }
 
+export async function fetchDepartment(id) {
+  try {
+    const response = await api.get(`/department/${id}`);
+    return response.data.result;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error fetching departments"
+    );
+    throw error;
+  }
+}
+
 export async function deleteSops(ids) {
   try {
     if (!ids || ids.length === 0) throw Error("No ids provided");
