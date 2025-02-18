@@ -3,7 +3,7 @@ import React from "react";
 import { ChevronRight, CircleDot } from "lucide-react-native";
 import { useRouter } from "expo-router";
 
-const DepartmentCard = ({ id, name, onPress }) => {
+const DepartmentCard = ({ id, name }) => {
   const router = useRouter();
 
   return (

@@ -19,21 +19,13 @@ const DepartmentList = () => {
   }
 
   return (
-    <View>
-      <FlatList
-        data={data}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <DepartmentCard
-            id={item.id}
-            name={item.name}
-            onPress={() => {
-              console.log("Pressed");
-            }}
-          />
-        )}
-      />
-    </View>
+    <FlatList
+      data={data}
+      keyExtractor={(item) => item.id}
+      renderItem={({ item }) => (
+        <DepartmentCard id={item.id} name={item.name} />
+      )}
+    />
   );
 };
 
