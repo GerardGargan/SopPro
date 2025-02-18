@@ -13,6 +13,10 @@ const _layout = () => {
     <>
       <Stack>
         <Stack.Screen name="invite" options={{ title: "Invite user" }} />
+        <Stack.Screen
+          name="department/departments"
+          options={{ title: "Manage departments" }}
+        />
       </Stack>
     </>
   );

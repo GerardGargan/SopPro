@@ -116,6 +116,56 @@ export async function fetchDepartments() {
   }
 }
 
+export async function fetchDepartment(id) {
+  try {
+    const response = await api.get(`/department/${id}`);
+    return response.data.result;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error fetching departments"
+    );
+    throw error;
+  }
+}
+
+export async function createDepartment({ name }) {
+  const data = { name };
+  try {
+    const response = await api.post(`/department`, data);
+    return response.data;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error creating department"
+    );
+    throw error;
+  }
+}
+
+export async function updateDepartment({ name, id }) {
+  const data = { name, id };
+  try {
+    const response = await api.put(`/department/${id}`, data);
+    return response.data;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error updating department"
+    );
+    throw error;
+  }
+}
+
+export async function deleteDepartment({ id }) {
+  try {
+    const response = await api.delete(`/department/${id}`);
+    return response.data;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error deleting department"
+    );
+    throw error;
+  }
+}
+
 export async function deleteSops(ids) {
   try {
     if (!ids || ids.length === 0) throw Error("No ids provided");

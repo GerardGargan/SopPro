@@ -2,7 +2,7 @@ import React from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSelector } from "react-redux";
-import { KeyRound, LogOut, UserPlus } from "lucide-react-native";
+import { Building, KeyRound, LogOut, UserPlus } from "lucide-react-native";
 import MenuSection from "../../../components/UI/MenuSection";
 
 const More = () => {
@@ -15,6 +15,12 @@ const More = () => {
       icon: UserPlus,
       title: "Invite user",
       onPress: () => router.push("(auth)/(admin)/invite"),
+    },
+    {
+      key: 2,
+      icon: Building,
+      title: "Manage departments",
+      onPress: () => router.push("(auth)/(admin)/department/departments"),
     },
   ];
 
