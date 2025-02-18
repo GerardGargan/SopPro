@@ -33,6 +33,7 @@ import {
 import ExportModal from "../exportModal/ExportModal";
 import { useBottomSheetBackHandler } from "../../../hooks/useBottomSheetBackHandler";
 import { ScrollView } from "react-native-gesture-handler";
+import ConfirmationModal from "../../UI/ConfirmationModal";
 
 const CustomBottomSheetModal = forwardRef((props, ref) => {
   const router = useRouter();
@@ -46,6 +47,13 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
 
   const { handleSheetPositionChange } = useBottomSheetBackHandler(ref);
   const [exportModalVisibile, setExportModalVisible] = useState(false);
+  const [confirmationModal, setConfirmationModal] = useState({
+    visible: false,
+    title: "",
+    subtitle: "",
+    onCancel: () => {},
+    onConfirm: () => {},
+  });
 
   function closeSheet() {
     ref.current?.close();
@@ -176,6 +184,26 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     },
   });
 
+  function openConfirmationModal(title, subtitle, callback) {
+    setConfirmationModal({
+      visible: true,
+      title: title,
+      subtitle: subtitle,
+      onCancel: dismissConfirmationModal,
+      onConfirm: callback,
+    });
+  }
+
+  function dismissConfirmationModal() {
+    setConfirmationModal({
+      visible: false,
+      title: "",
+      subtitle: "",
+      onCancel: () => {},
+      onConfirm: () => {},
+    });
+  }
+
   function handleEditPress() {
     closeSheet();
     router.push({
@@ -188,7 +216,14 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
 
   function handleApproval() {
     closeSheet();
-    mutateApproveSop(sop.id);
+    openConfirmationModal(
+      "Confirm Approval",
+      "This SOP will be approved",
+      () => {
+        mutateApproveSop(sop.id);
+        dismissConfirmationModal();
+      }
+    );
   }
 
   function handleAddToFavouritesPress() {
@@ -203,17 +238,38 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
 
   function handleDeletePress() {
     closeSheet();
-    deleteSopsMutation([sop.id]);
+    openConfirmationModal(
+      "Confirm SOP deletion",
+      "All versions will be deleted permenantly",
+      () => {
+        deleteSopsMutation([sop.id]);
+        dismissConfirmationModal();
+      }
+    );
   }
 
   function handleRequestApproval() {
     closeSheet();
-    mutateRequestApproval(sop.id);
+    openConfirmationModal(
+      "Confirm Approval Request",
+      "Request approval for this SOP",
+      () => {
+        mutateRequestApproval(sop.id);
+        dismissConfirmationModal();
+      }
+    );
   }
 
   function handleRejectPress() {
     closeSheet();
-    mutateReject(sop.id);
+    openConfirmationModal(
+      "Confirm rejection",
+      "The author will be notified",
+      () => {
+        mutateReject(sop.id);
+        dismissConfirmationModal();
+      }
+    );
   }
 
   function handleExportPress() {
@@ -354,6 +410,14 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
           setVisibility={setExportModalVisible}
         />
       )}
+
+      <ConfirmationModal
+        visible={confirmationModal.visible}
+        onConfirm={confirmationModal.onConfirm}
+        onCancel={confirmationModal.onCancel}
+        title={confirmationModal.title}
+        subtitle={confirmationModal.subtitle}
+      />
     </>
   );
 });
