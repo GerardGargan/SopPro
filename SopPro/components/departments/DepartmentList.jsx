@@ -3,19 +3,31 @@ import React from "react";
 import { useQuery } from "@tanstack/react-query";
 import DepartmentCard from "./DepartmentCard";
 import { fetchDepartments } from "../../util/httpRequests";
+import { ActivityIndicator } from "react-native-paper";
+import ErrorBlock from "../UI/ErrorBlock";
 
 const DepartmentList = () => {
-  const { data, isPending, isError, error } = useQuery({
+  const { data, isFetching, isError, error } = useQuery({
     queryKey: ["departments"],
     queryFn: fetchDepartments,
   });
 
-  if (isPending) {
-    return <Text>Loading</Text>;
+  if (isFetching) {
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator animating={true} />
+      </View>
+    );
   }
 
   if (isError) {
-    return <Text>{error.message}</Text>;
+    return (
+      <View style={styles.errorContainer}>
+        <ErrorBlock>
+          <Text>{error?.message}</Text>
+        </ErrorBlock>
+      </View>
+    );
   }
 
   return (
@@ -31,4 +43,12 @@ const DepartmentList = () => {
 
 export default DepartmentList;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  loader: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  errorContainer: {
+    marginHorizontal: 20,
+  },
+});

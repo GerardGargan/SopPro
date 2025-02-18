@@ -1,14 +1,22 @@
 import { StyleSheet, Text, View } from "react-native";
 import React, { useEffect, useLayoutEffect, useState } from "react";
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { fetchDepartment } from "../../../../util/httpRequests";
-import { useQuery } from "@tanstack/react-query";
-import { Button, TextInput } from "react-native-paper";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { ActivityIndicator, Button, TextInput } from "react-native-paper";
 import InputErrorMessage from "../../../../components/UI/InputErrorMessage";
+import ErrorBlock from "../../../../components/UI/ErrorBlock";
+import {
+  createDepartment,
+  updateDepartment,
+} from "../../../../util/httpRequests";
+import Toast from "react-native-toast-message";
 
 const Upsert = () => {
   const navigation = useNavigation();
   const { id } = useLocalSearchParams();
+  const queryClient = useQueryClient();
+  const router = useRouter();
   const isCreate = id == -1;
 
   const [name, setName] = useState("");
@@ -18,6 +26,31 @@ const Upsert = () => {
     navigation.setOptions({
       title: isCreate ? "Create Department" : "Update Department",
     });
+  });
+
+  const mutationFunction = isCreate ? createDepartment : updateDepartment;
+
+  const { mutate } = useMutation({
+    mutationFn: mutationFunction,
+    onSuccess: () => {
+      console.log("success");
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: `Department ${isCreate ? "Creaed" : "Updated"}`,
+        visibilityTime: 5000,
+      });
+      queryClient.invalidateQueries("departments");
+      router.back();
+    },
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: "Oops something went wrong!",
+        text2: error.message || "The department was not updated",
+        visibilityTime: 5000,
+      });
+    },
   });
 
   const { data, isFetching, isError, error } = useQuery({
@@ -41,18 +74,28 @@ const Upsert = () => {
 
     // handle creation or update
     if (isCreate) {
-      console.log("Create");
+      mutate({ name });
     } else {
-      console.log("Update");
+      mutate({ name, id });
     }
   }
 
   if (isFetching) {
-    return <Text>Loading...</Text>;
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator animating={true} />
+      </View>
+    );
   }
 
   if (isError) {
-    return <Text>{error.message}</Text>;
+    return (
+      <View style={styles.errorContainer}>
+        <ErrorBlock>
+          <Text>{error?.message}</Text>
+        </ErrorBlock>
+      </View>
+    );
   }
 
   return (
@@ -97,5 +140,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     marginBottom: 6,
+  },
+  loader: {
+    flex: 1,
+    justifyContent: "center",
+  },
+  errorContainer: {
+    marginHorizontal: 20,
   },
 });
