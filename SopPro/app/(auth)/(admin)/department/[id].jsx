@@ -13,6 +13,7 @@ import {
 } from "../../../../util/httpRequests";
 import Toast from "react-native-toast-message";
 import { Trash2 } from "lucide-react-native";
+import ConfirmationModal from "../../../../components/UI/ConfirmationModal";
 
 const Upsert = () => {
   const navigation = useNavigation();
@@ -23,6 +24,7 @@ const Upsert = () => {
 
   const [name, setName] = useState("");
   const [nameError, setNameError] = useState(null);
+  const [modalVisible, setModalVisisble] = useState(false);
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -104,8 +106,17 @@ const Upsert = () => {
     }
   }
 
+  function handleShowDeletePrompt() {
+    setModalVisisble(true);
+  }
+
   function handleDeletion() {
     mutateDelete({ id });
+    dismissModal();
+  }
+
+  function dismissModal() {
+    setModalVisisble(false);
   }
 
   if (isFetching) {
@@ -127,40 +138,49 @@ const Upsert = () => {
   }
 
   const deleteButton = (
-    <TouchableOpacity onPress={handleDeletion} disabled={isDeleting}>
+    <TouchableOpacity onPress={handleShowDeletePrompt} disabled={isDeleting}>
       <Trash2 size={24} color={isDeleting ? "#999" : "#ff4444"} />
     </TouchableOpacity>
   );
 
   return (
-    <View style={styles.rootContainer}>
-      <View style={styles.headerContainer}>
-        <Text style={styles.title}>
-          {isCreate ? "Create" : "Update"} Department
-        </Text>
-        {!isCreate && deleteButton}
+    <>
+      <View style={styles.rootContainer}>
+        <View style={styles.headerContainer}>
+          <Text style={styles.title}>
+            {isCreate ? "Create" : "Update"} Department
+          </Text>
+          {!isCreate && deleteButton}
+        </View>
+        <TextInput
+          style={styles.input}
+          label="Department name"
+          value={name}
+          onChangeText={(value) => {
+            setName(value);
+            nameError && setNameError(null);
+          }}
+          error={nameError}
+        />
+        {nameError && <InputErrorMessage>{nameError}</InputErrorMessage>}
+        <Button
+          mode="contained"
+          contentStyle={{ height: 50 }}
+          labelStyle={{ fontSize: 20 }}
+          style={{ borderRadius: 0, marginVertical: 10 }}
+          onPress={handleSubmit}
+        >
+          Save
+        </Button>
       </View>
-      <TextInput
-        style={styles.input}
-        label="Department name"
-        value={name}
-        onChangeText={(value) => {
-          setName(value);
-          nameError && setNameError(null);
-        }}
-        error={nameError}
+      <ConfirmationModal
+        visible={modalVisible}
+        onConfirm={handleDeletion}
+        onCancel={dismissModal}
+        title="Confirm Department Deletion"
+        subtitle="This department will be removed from all associated SOPs"
       />
-      {nameError && <InputErrorMessage>{nameError}</InputErrorMessage>}
-      <Button
-        mode="contained"
-        contentStyle={{ height: 50 }}
-        labelStyle={{ fontSize: 20 }}
-        style={{ borderRadius: 0, marginVertical: 10 }}
-        onPress={handleSubmit}
-      >
-        Save
-      </Button>
-    </View>
+    </>
   );
 };
 
