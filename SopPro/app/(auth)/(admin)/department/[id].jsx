@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React, { useEffect, useLayoutEffect, useState } from "react";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { fetchDepartment } from "../../../../util/httpRequests";
@@ -9,8 +9,10 @@ import ErrorBlock from "../../../../components/UI/ErrorBlock";
 import {
   createDepartment,
   updateDepartment,
+  deleteDepartment,
 } from "../../../../util/httpRequests";
 import Toast from "react-native-toast-message";
+import { Trash2 } from "lucide-react-native";
 
 const Upsert = () => {
   const navigation = useNavigation();
@@ -33,7 +35,6 @@ const Upsert = () => {
   const { mutate } = useMutation({
     mutationFn: mutationFunction,
     onSuccess: () => {
-      console.log("success");
       Toast.show({
         type: "success",
         text1: "Success",
@@ -48,6 +49,29 @@ const Upsert = () => {
         type: "error",
         text1: "Oops something went wrong!",
         text2: error.message || "The department was not updated",
+        visibilityTime: 5000,
+      });
+    },
+  });
+
+  const { mutate: mutateDelete, isPending: isDeleting } = useMutation({
+    mutationFn: deleteDepartment,
+    onSuccess: () => {
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: `Department Deleted`,
+        visibilityTime: 5000,
+      });
+      queryClient.removeQueries({ queryKey: ["departments", id] });
+      queryClient.invalidateQueries("departments");
+      router.back();
+    },
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: "Oops something went wrong!",
+        text2: error.message || "The department was not deleted",
         visibilityTime: 5000,
       });
     },
@@ -80,6 +104,10 @@ const Upsert = () => {
     }
   }
 
+  function handleDeletion() {
+    mutateDelete({ id });
+  }
+
   if (isFetching) {
     return (
       <View style={styles.loader}>
@@ -98,11 +126,20 @@ const Upsert = () => {
     );
   }
 
+  const deleteButton = (
+    <TouchableOpacity onPress={handleDeletion} disabled={isDeleting}>
+      <Trash2 size={24} color={isDeleting ? "#999" : "#ff4444"} />
+    </TouchableOpacity>
+  );
+
   return (
     <View style={styles.rootContainer}>
-      <Text style={styles.title}>
-        {isCreate ? "Create" : "Update"} Department
-      </Text>
+      <View style={styles.headerContainer}>
+        <Text style={styles.title}>
+          {isCreate ? "Create" : "Update"} Department
+        </Text>
+        {!isCreate && deleteButton}
+      </View>
       <TextInput
         style={styles.input}
         label="Department name"
@@ -132,7 +169,7 @@ export default Upsert;
 const styles = StyleSheet.create({
   rootContainer: {
     flex: 1,
-    padding: 20,
+    margin: 20,
   },
   input: {
     marginTop: 8,
@@ -140,6 +177,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 20,
     marginBottom: 6,
+    flex: 1,
   },
   loader: {
     flex: 1,
@@ -147,5 +185,8 @@ const styles = StyleSheet.create({
   },
   errorContainer: {
     marginHorizontal: 20,
+  },
+  headerContainer: {
+    flexDirection: "row",
   },
 });

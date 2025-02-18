@@ -154,6 +154,18 @@ export async function updateDepartment({ name, id }) {
   }
 }
 
+export async function deleteDepartment({ id }) {
+  try {
+    const response = await api.delete(`/department/${id}`);
+    return response.data;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error deleting department"
+    );
+    throw error;
+  }
+}
+
 export async function deleteSops(ids) {
   try {
     if (!ids || ids.length === 0) throw Error("No ids provided");
