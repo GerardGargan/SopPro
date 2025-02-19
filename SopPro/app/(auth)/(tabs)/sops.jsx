@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Platform, StyleSheet, Text, TextInput, View } from "react-native";
 import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { Appbar, Button, Modal, Portal } from "react-native-paper";
 import { useIsFocused } from "@react-navigation/native";
 import Fab from "../../../components/sops/fab";
-import SearchInput from "../../../components/UI/SearchInput.jsx";
 import SopList from "../../../components/sops/SopList.jsx";
 import { deleteSops } from "../../../util/httpRequests.js";
 import Toast from "react-native-toast-message";
@@ -113,7 +112,17 @@ const Sops = () => {
       </Portal>
 
       <View style={styles.container}>
-        <SearchInput value={searchQuery} onChangeText={setSearchQuery} />
+        <View style={styles.header}>
+          <View style={styles.searchContainer}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Search"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              placeholderTextColor="#6b7280"
+            />
+          </View>
+        </View>
         {selectedIds.length > 0 && (
           <Appbar style={{ height: APPBAR_HEIGHT }}>
             <Appbar.Content
@@ -174,5 +183,32 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     color: "red",
     fontWeight: "bold",
+  },
+  header: {
+    flexDirection: "row",
+    padding: 16,
+    gap: 12,
+    zIndex: 1,
+  },
+  searchContainer: {
+    flex: 1,
+  },
+  searchInput: {
+    backgroundColor: "#ffffff",
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    fontSize: 16,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
   },
 });
