@@ -1,5 +1,14 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Platform, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  Animated,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { Appbar, Button, Modal, Portal } from "react-native-paper";
 import { useIsFocused } from "@react-navigation/native";
@@ -18,11 +27,78 @@ const Sops = () => {
   const [selectedIds, setSelectedIds] = useState([]);
   const [showDeleteWarning, setShowDeleteWarning] = useState(false);
   const [bottomSheetSelectedSop, setBottomSheetSelectedSop] = useState(null);
+  const [selectedStatus, setSelectedStatus] = useState({
+    status: "all",
+    val: null,
+  });
+  const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const statusFilter = 1;
 
   const isFocused = useIsFocused();
   const queryClient = useQueryClient();
   const bottomSheetModalRef = useRef();
+
+  const dropdownAnimation = useRef(new Animated.Value(0)).current;
+  const statuses = [
+    { status: "all", val: null },
+    { status: "Draft", val: 1 },
+    { status: "Approved", val: 3 },
+    { status: "In Review", val: 2 },
+    { status: "Rejected", val: 4 },
+  ];
+
+  const toggleDropdown = () => {
+    const toValue = showStatusDropdown ? 0 : 1;
+    setShowStatusDropdown(!showStatusDropdown);
+    Animated.spring(dropdownAnimation, {
+      toValue,
+      useNativeDriver: true,
+      friction: 8,
+      tension: 40,
+    }).start();
+  };
+
+  const StatusDropdown = () => {
+    return (
+      <Animated.View
+        style={[
+          styles.dropdownContainer,
+          {
+            opacity: dropdownAnimation,
+            transform: [
+              {
+                translateY: dropdownAnimation.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [-20, 0],
+                }),
+              },
+            ],
+          },
+        ]}
+      >
+        {statuses.map((status) => (
+          <TouchableOpacity
+            key={status.val}
+            style={styles.dropdownItem}
+            onPress={() => {
+              setSelectedStatus(status);
+              toggleDropdown();
+            }}
+          >
+            <Text
+              style={[
+                styles.dropdownText,
+                status.status === selectedStatus.status &&
+                  styles.dropdownTextSelected,
+              ]}
+            >
+              {status.status === "all" ? "All Statuses" : status.status}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </Animated.View>
+    );
+  };
 
   const { mutate: mutateDelete } = useMutation({
     mutationFn: deleteSops,
@@ -88,6 +164,16 @@ const Sops = () => {
     bottomSheetModalRef.current?.present();
   }, []);
 
+  const renderOverlay = () => {
+    if (!showStatusDropdown) return null;
+
+    return (
+      <TouchableWithoutFeedback onPress={toggleDropdown}>
+        <View style={styles.overlay} />
+      </TouchableWithoutFeedback>
+    );
+  };
+
   return (
     <>
       <Portal>
@@ -112,6 +198,7 @@ const Sops = () => {
       </Portal>
 
       <View style={styles.container}>
+        {renderOverlay()}
         <View style={styles.header}>
           <View style={styles.searchContainer}>
             <TextInput
@@ -121,6 +208,19 @@ const Sops = () => {
               onChangeText={setSearchQuery}
               placeholderTextColor="#6b7280"
             />
+          </View>
+          <View>
+            <TouchableOpacity
+              style={styles.filterButton}
+              onPress={toggleDropdown}
+            >
+              <Text style={styles.filterButtonText}>
+                {selectedStatus.status === "all"
+                  ? "Filter"
+                  : selectedStatus.status}
+              </Text>
+            </TouchableOpacity>
+            {showStatusDropdown && <StatusDropdown />}
           </View>
         </View>
         {selectedIds.length > 0 && (
@@ -136,7 +236,7 @@ const Sops = () => {
 
         <SopList
           debouncedSearchQuery={debouncedSearchQuery}
-          statusFilter={statusFilter}
+          statusFilter={selectedStatus.val}
           searchQuery={searchQuery}
           selectedIds={selectedIds}
           selectSop={selectSop}
@@ -188,6 +288,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     padding: 16,
     gap: 12,
+    zIndex: 2,
+  },
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "transparent",
     zIndex: 1,
   },
   searchContainer: {
@@ -210,5 +319,61 @@ const styles = StyleSheet.create({
         elevation: 2,
       },
     }),
+  },
+  dropdownContainer: {
+    position: "absolute",
+    top: "100%",
+    right: 0,
+    backgroundColor: "#ffffff",
+    borderRadius: 12,
+    width: 180,
+    marginTop: 4,
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.15,
+        shadowRadius: 6,
+      },
+      android: {
+        elevation: 4,
+      },
+    }),
+  },
+  dropdownItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f3f4f6",
+  },
+  dropdownText: {
+    fontSize: 16,
+    color: "#374151",
+  },
+  dropdownTextSelected: {
+    color: "#2563eb",
+    fontWeight: "500",
+  },
+  filterButton: {
+    backgroundColor: "#ffffff",
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    justifyContent: "center",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 4,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
+  },
+  filterButtonText: {
+    color: "#374151",
+    fontSize: 16,
   },
 });
