@@ -127,7 +127,7 @@ const Sops = () => {
   useEffect(() => {
     // reset selected ids when search query changes
     resetSelected();
-  }, [debouncedSearchQuery]);
+  }, [debouncedSearchQuery, selectedStatus]);
 
   function selectSop(id) {
     setSelectedIds((prevState) => {
@@ -208,6 +208,14 @@ const Sops = () => {
               onChangeText={setSearchQuery}
               placeholderTextColor="#6b7280"
             />
+            {searchQuery.length > 0 && (
+              <TouchableOpacity
+                style={styles.clearButton}
+                onPress={() => setSearchQuery("")}
+              >
+                <Text style={styles.clearButtonText}>✕</Text>
+              </TouchableOpacity>
+            )}
           </View>
           <View>
             <TouchableOpacity
@@ -301,6 +309,7 @@ const styles = StyleSheet.create({
   },
   searchContainer: {
     flex: 1,
+    position: "relative",
   },
   searchInput: {
     backgroundColor: "#ffffff",
@@ -308,6 +317,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     fontSize: 16,
+    paddingRight: 40,
     ...Platform.select({
       ios: {
         shadowColor: "#000",
@@ -319,6 +329,23 @@ const styles = StyleSheet.create({
         elevation: 2,
       },
     }),
+  },
+  clearButton: {
+    position: "absolute",
+    right: 12,
+    top: "50%",
+    transform: [{ translateY: -12 }], // Center vertically
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: "#e5e7eb",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  clearButtonText: {
+    fontSize: 14,
+    color: "#6b7280",
+    fontWeight: "600",
   },
   dropdownContainer: {
     position: "absolute",
