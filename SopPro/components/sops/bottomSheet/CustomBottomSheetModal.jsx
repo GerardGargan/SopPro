@@ -30,10 +30,11 @@ import {
   FileCheck2,
   FileDown,
 } from "lucide-react-native";
-import ExportModal from "../exportModal/ExportModal";
+import VersionPickerModal from "../exportModal/VersionPickerModal";
 import { useBottomSheetBackHandler } from "../../../hooks/useBottomSheetBackHandler";
 import { ScrollView } from "react-native-gesture-handler";
 import ConfirmationModal from "../../UI/ConfirmationModal";
+import useDownload from "../../../hooks/useDownload";
 
 const CustomBottomSheetModal = forwardRef((props, ref) => {
   const router = useRouter();
@@ -54,6 +55,14 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     onCancel: () => {},
     onConfirm: () => {},
   });
+
+  const {
+    isDownloading,
+    isSuccessful: isDownloadSuccessful,
+    isError: isDownloadError,
+    handleDownload,
+    resetState: resetDownloadState,
+  } = useDownload();
 
   function closeSheet() {
     ref.current?.close();
@@ -404,10 +413,19 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
       </BottomSheetModal>
 
       {exportModalVisibile && (
-        <ExportModal
+        <VersionPickerModal
           sopVersions={sopVersions}
           visible={exportModalVisibile}
           setVisibility={setExportModalVisible}
+          onPress={handleDownload}
+          title="Export to PDF"
+          subtitle="Select a version to export"
+          isSuccessful={isDownloadSuccessful}
+          isError={isDownloadError}
+          isDownloading={isDownloading}
+          successMessage="Download successful! ✅"
+          errorMessage="An error occured, download failed."
+          onDismiss={resetDownloadState}
         />
       )}
 

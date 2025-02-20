@@ -4,32 +4,27 @@ import { ActivityIndicator, Button, Modal, Portal } from "react-native-paper";
 import VersionCard from "./VersionCard";
 import { downloadSopVersion } from "../../../util/downloadHelper";
 import ErrorBlock from "../../UI/ErrorBlock";
+import useDownload from "../../../hooks/useDownload";
 
-const ExportModal = ({ sopVersions, visible, setVisibility }) => {
-  const [isDownloading, setIsDownloading] = useState(false);
-  const [isSuccessful, setIsSuccessful] = useState(false);
-  const [isError, setIsError] = useState(false);
+const VersionPickerModal = ({
+  sopVersions,
+  title,
+  subtitle,
+  visible,
+  setVisibility,
+  onPress,
+  isSuccessful,
+  isError,
+  successMessage,
+  errorMessage,
+  isDownloading,
+  onDismiss,
+}) => {
+  const successText = <Text style={styles.successText}>{successMessage}</Text>;
 
-  async function handleDownload(versionId, reference, title) {
-    setIsDownloading(true);
-    setIsSuccessful(false);
-    setIsError(false);
-    try {
-      await downloadSopVersion(versionId, reference, title);
-      setIsSuccessful(true);
-    } catch (e) {
-      setIsError(true);
-    }
-    setIsDownloading(false);
-  }
-
-  const successMessage = (
-    <Text style={styles.successText}>Download successful! ✅</Text>
-  );
-
-  const errorMessage = (
+  const errorText = (
     <ErrorBlock>
-      <Text>An error occured, download failed.</Text>
+      <Text>{errorMessage}</Text>
     </ErrorBlock>
   );
 
@@ -38,14 +33,17 @@ const ExportModal = ({ sopVersions, visible, setVisibility }) => {
       <Modal
         visible={visible}
         contentContainerStyle={styles.modalContainer}
-        onDismiss={() => setVisibility(false)}
+        onDismiss={() => {
+          onDismiss && onDismiss();
+          setVisibility(false);
+        }}
       >
         <View style={styles.exportContainer}>
           {isDownloading && <ActivityIndicator />}
-          {isError && errorMessage}
-          {isSuccessful && successMessage}
-          <Text style={styles.exportTitle}>Export to PDF</Text>
-          <Text style={styles.exportSubtitle}>Select a version to export</Text>
+          {isError && errorText}
+          {isSuccessful && successText}
+          <Text style={styles.title}>{title}</Text>
+          <Text style={styles.subtitle}>{subtitle}</Text>
 
           <ScrollView style={styles.versionsContainer}>
             {sopVersions?.map((version) => {
@@ -57,7 +55,7 @@ const ExportModal = ({ sopVersions, visible, setVisibility }) => {
                   createDate={version.createDate}
                   status={version.status}
                   title={version.title}
-                  handleVersionSelect={handleDownload}
+                  handleVersionSelect={onPress}
                 />
               );
             })}
@@ -68,7 +66,7 @@ const ExportModal = ({ sopVersions, visible, setVisibility }) => {
   );
 };
 
-export default ExportModal;
+export default VersionPickerModal;
 
 const styles = StyleSheet.create({
   modalContainer: {
@@ -83,12 +81,12 @@ const styles = StyleSheet.create({
   versionsContainer: {
     flex: 1,
   },
-  exportTitle: {
+  title: {
     fontSize: 20,
     fontWeight: "bold",
     marginBottom: 8,
   },
-  exportSubtitle: {
+  subtitle: {
     fontSize: 14,
     color: "#666",
     marginBottom: 16,
