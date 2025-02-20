@@ -29,6 +29,7 @@ import {
   Trash2,
   FileCheck2,
   FileDown,
+  History,
 } from "lucide-react-native";
 import VersionPickerModal from "../exportModal/VersionPickerModal";
 import { useBottomSheetBackHandler } from "../../../hooks/useBottomSheetBackHandler";
@@ -48,6 +49,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
 
   const { handleSheetPositionChange } = useBottomSheetBackHandler(ref);
   const [exportModalVisibile, setExportModalVisible] = useState(false);
+  const [revertModalVisible, setRevertModalVisible] = useState(false);
   const [confirmationModal, setConfirmationModal] = useState({
     visible: false,
     title: "",
@@ -286,6 +288,11 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     setExportModalVisible(true);
   }
 
+  function handleRevertPress() {
+    closeSheet();
+    setRevertModalVisible(true);
+  }
+
   const userOptions = [
     {
       key: 1,
@@ -341,6 +348,13 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     },
     {
       key: 3,
+      title: "Revert version",
+      icon: History,
+      onPress: handleRevertPress,
+      visible: true,
+    },
+    {
+      key: 4,
       title: "Delete",
       icon: Trash2,
       onPress: handleDeletePress,
@@ -423,6 +437,25 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
           isSuccessful={isDownloadSuccessful}
           isError={isDownloadError}
           isDownloading={isDownloading}
+          successMessage="Download successful! ✅"
+          errorMessage="An error occured, download failed."
+          onDismiss={resetDownloadState}
+        />
+      )}
+
+      {revertModalVisible && (
+        <VersionPickerModal
+          sopVersions={sopVersions}
+          visible={revertModalVisible}
+          setVisibility={setRevertModalVisible}
+          onPress={() => {
+            console.log("pressed");
+          }}
+          title="Revert to a previous version"
+          subtitle="Select a version to revert to"
+          isSuccessful={false}
+          isError={false}
+          isDownloading={false}
           successMessage="Download successful! ✅"
           errorMessage="An error occured, download failed."
           onDismiss={resetDownloadState}
