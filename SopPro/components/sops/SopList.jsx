@@ -30,7 +30,7 @@ const SopList = ({
     queryFn: ({ pageParam = 1 }) =>
       fetchSops({
         searchQuery: debouncedSearchQuery,
-        statusFilter,
+        status: statusFilter,
         page: pageParam,
         pageSize: PAGE_SIZE,
       }),

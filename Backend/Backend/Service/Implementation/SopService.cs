@@ -119,7 +119,7 @@ namespace Backend.Service.Implementation
             };
         }
 
-        public async Task<ApiResponse<List<SopDto>>> GetAllSops(string search, string status, int page, int pageSize, bool isFavourite = false, string soryBy = "recent", string sortOrder = "desc")
+        public async Task<ApiResponse<List<SopDto>>> GetAllSops(string search, int? status, int page, int pageSize, bool isFavourite = false, string soryBy = "recent", string sortOrder = "desc")
         {
 
             var query = _unitOfWork.Sops.GetAll();
@@ -127,6 +127,11 @@ namespace Backend.Service.Implementation
             if (!string.IsNullOrEmpty(search))
             {
                 query = query.Where(sop => sop.Reference.Contains(search) || sop.SopVersions.Any(sv => sv.Title.Contains(search) || sv.Description.Contains(search)));
+            }
+
+            if (status != null)
+            {
+                query = query.Where(sop => sop.SopVersions.OrderByDescending(x => x.Version).FirstOrDefault().Status == (SopStatus)status);
             }
 
             // Get a list of user favourited sop ids
