@@ -31,11 +31,11 @@ import {
   FileDown,
   History,
 } from "lucide-react-native";
-import VersionPickerModal from "../exportModal/VersionPickerModal";
 import { useBottomSheetBackHandler } from "../../../hooks/useBottomSheetBackHandler";
 import { ScrollView } from "react-native-gesture-handler";
 import ConfirmationModal from "../../UI/ConfirmationModal";
-import useDownload from "../../../hooks/useDownload";
+import ExportModal from "../modals/ExportModal";
+import RevertModal from "../modals/RevertModal";
 
 const CustomBottomSheetModal = forwardRef((props, ref) => {
   const router = useRouter();
@@ -57,14 +57,6 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     onCancel: () => {},
     onConfirm: () => {},
   });
-
-  const {
-    isDownloading,
-    isSuccessful: isDownloadSuccessful,
-    isError: isDownloadError,
-    handleDownload,
-    resetState: resetDownloadState,
-  } = useDownload();
 
   function closeSheet() {
     ref.current?.close();
@@ -293,6 +285,8 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     setRevertModalVisible(true);
   }
 
+  function handleRevert({ id, version }) {}
+
   const userOptions = [
     {
       key: 1,
@@ -427,38 +421,18 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
       </BottomSheetModal>
 
       {exportModalVisibile && (
-        <VersionPickerModal
+        <ExportModal
           sopVersions={sopVersions}
           visible={exportModalVisibile}
           setVisibility={setExportModalVisible}
-          onPress={handleDownload}
-          title="Export to PDF"
-          subtitle="Select a version to export"
-          isSuccessful={isDownloadSuccessful}
-          isError={isDownloadError}
-          isDownloading={isDownloading}
-          successMessage="Download successful! ✅"
-          errorMessage="An error occured, download failed."
-          onDismiss={resetDownloadState}
         />
       )}
 
       {revertModalVisible && (
-        <VersionPickerModal
+        <RevertModal
           sopVersions={sopVersions}
           visible={revertModalVisible}
           setVisibility={setRevertModalVisible}
-          onPress={() => {
-            console.log("pressed");
-          }}
-          title="Revert to a previous version"
-          subtitle="Select a version to revert to"
-          isSuccessful={false}
-          isError={false}
-          isDownloading={false}
-          successMessage="Download successful! ✅"
-          errorMessage="An error occured, download failed."
-          onDismiss={resetDownloadState}
         />
       )}
 

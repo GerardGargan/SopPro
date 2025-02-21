@@ -6,7 +6,7 @@ import {
   View,
 } from "react-native";
 import React from "react";
-import { getStatus, getStatusColour } from "../../../util/statusHelper";
+import { getStatus, getStatusColour } from "../../util/statusHelper";
 
 const VersionCard = ({
   id,
@@ -20,7 +20,7 @@ const VersionCard = ({
   return (
     <TouchableOpacity
       style={styles.versionCard}
-      onPress={() => handleVersionSelect(id, versionNumber, title)}
+      onPress={() => handleVersionSelect({ id, versionNumber, title })}
     >
       <View style={styles.versionInfo}>
         <Text style={styles.versionTitle}>Version {versionNumber}</Text>

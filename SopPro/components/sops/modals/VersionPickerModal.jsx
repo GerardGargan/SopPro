@@ -1,10 +1,8 @@
 import { ScrollView, StyleSheet, Text, View } from "react-native";
-import React, { useState } from "react";
+import React from "react";
 import { ActivityIndicator, Button, Modal, Portal } from "react-native-paper";
-import VersionCard from "./VersionCard";
-import { downloadSopVersion } from "../../../util/downloadHelper";
+import VersionCard from "../VersionCard";
 import ErrorBlock from "../../UI/ErrorBlock";
-import useDownload from "../../../hooks/useDownload";
 
 const VersionPickerModal = ({
   sopVersions,
@@ -18,7 +16,6 @@ const VersionPickerModal = ({
   successMessage,
   errorMessage,
   isDownloading,
-  onDismiss,
 }) => {
   const successText = <Text style={styles.successText}>{successMessage}</Text>;
 
@@ -34,7 +31,6 @@ const VersionPickerModal = ({
         visible={visible}
         contentContainerStyle={styles.modalContainer}
         onDismiss={() => {
-          onDismiss && onDismiss();
           setVisibility(false);
         }}
       >
