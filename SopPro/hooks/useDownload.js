@@ -6,19 +6,13 @@ export default downloadSop = () => {
   const [isSuccessful, setIsSuccessful] = useState(false);
   const [isError, setIsError] = useState(false);
 
-  function resetState() {
-    setIsDownloading(false);
-    setIsSuccessful(false);
-    setIsError(false);
-  }
-
-  const handleDownload = async (versionId, reference, title) => {
+  const handleDownload = async ({ id, reference, title }) => {
     setIsDownloading(true);
     setIsSuccessful(false);
     setIsError(false);
 
     try {
-      await downloadSopVersion(versionId, reference, title);
+      await downloadSopVersion(id, reference, title);
       setIsSuccessful(true);
     } catch (e) {
       setIsError(true);
@@ -31,6 +25,5 @@ export default downloadSop = () => {
     isSuccessful,
     isError,
     handleDownload,
-    resetState,
   };
 };
