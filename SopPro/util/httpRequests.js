@@ -1,3 +1,4 @@
+import { version } from "react";
 import api from "../api/axiosApi";
 
 export async function registerCompany(data) {
@@ -178,6 +179,19 @@ export async function deleteSops(ids) {
   } catch (e) {
     const error = new Error(
       e.response?.data?.errorMessage || "Error deleting SOPs"
+    );
+    throw error;
+  }
+}
+
+export async function revertSopVersion({ versionId }) {
+  const data = { versionId };
+  try {
+    const response = await api.post("/sop/revert", data);
+    return response.data;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error reverting version"
     );
     throw error;
   }

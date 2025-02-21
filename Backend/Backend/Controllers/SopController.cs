@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Backend.Utility;
 using Microsoft.SemanticKernel.ChatCompletion;
+using System.Net;
 
 namespace Backend.Controllers
 {
@@ -152,6 +153,25 @@ namespace Backend.Controllers
         {
             var analyticsDto = await _sopService.GetAnalytics();
             return Ok(analyticsDto);
+        }
+
+        [HttpPost]
+        [Route("revert")]
+        [Authorize(Roles = StaticDetails.Role_Admin)]
+        [ProducesResponseType(200, Type = typeof(ApiResponse))]
+        public async Task<IActionResult> RevertSopVersion([FromBody] RevertRequestDto model)
+        {
+
+            await _sopService.RevertSop(model);
+            ApiResponse response = new ApiResponse()
+            {
+                IsSuccess = true,
+                StatusCode = HttpStatusCode.OK,
+                SuccessMessage = "Version reverted successfully"
+            }
+            ;
+
+            return Ok(response);
         }
 
     }

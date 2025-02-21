@@ -20,6 +20,7 @@ namespace Backend.Service.Interface
         public Task<SopVersionDto> GetSopVersion(int sopVersionId);
         public Task<SopDto> GenerateAiSop(AiRequestDto model);
         public Task<AnalyticsResponseDto> GetAnalytics();
+        public Task RevertSop(RevertRequestDto model);
 
     };
 }

@@ -769,6 +769,72 @@ namespace Backend.Service.Implementation
             return response;
         }
 
+
+        public async Task RevertSop(RevertRequestDto model)
+        {
+            // fetch the sopVersion
+            SopVersion sopVersionFromDb = await _unitOfWork.SopVersions.GetAsync(x => x.Id == model.versionId);
+
+            if (sopVersionFromDb == null)
+            {
+                throw new Exception("Version not found");
+            }
+
+            int sopId = sopVersionFromDb.SopId;
+
+            // fetch all sopVersions for this sop
+            List<SopVersion> allVersions = await _unitOfWork.SopVersions.GetAll(x => x.SopId == sopId).OrderByDescending(x => x.Version).ToListAsync();
+
+            if (!allVersions.Any())
+            {
+                throw new Exception("No versions found for the specified SOP");
+            }
+
+            // check if the version chosen is the current version
+            if (allVersions.FirstOrDefault().Id == sopVersionFromDb.Id)
+            {
+                throw new Exception("Error - Version selected is the current version");
+            }
+
+            // Delete versions, and associated ppe, steps, hazards in the correct order for FK relationships
+            List<SopVersion> versionsToDelete = allVersions.Where(x => x.Version > sopVersionFromDb.Version).ToList();
+            var sopVersionIds = versionsToDelete.Select(x => x.Id).ToList();
+
+            var sopHazards = await _unitOfWork.SopHazards.GetAll(x => sopVersionIds.Contains(x.SopVersionId)).ToListAsync();
+            var sopSteps = await _unitOfWork.SopSteps.GetAll(x => sopVersionIds.Contains(x.SopVersionId)).ToListAsync();
+            var sopStepIds = sopSteps.Select(x => x.Id).ToList();
+            var sopStepPpe = _db.SopStepPpe.Where(x => sopStepIds.Contains(x.SopStepId)).ToList();
+
+            await _unitOfWork.ExecuteInTransactionAsync(async () =>
+            {
+                // delete sop step ppe
+                if (sopStepPpe.Count > 0)
+                {
+                    _db.SopStepPpe.RemoveRange(sopStepPpe);
+                }
+
+                // delete sop steps
+                if (sopStepIds.Count > 0)
+                {
+                    _unitOfWork.SopSteps.RemoveRange(sopSteps);
+                }
+
+                if (sopHazards.Count > 0)
+                {
+                    // delete sop hazards
+                    _unitOfWork.SopHazards.RemoveRange(sopHazards);
+                }
+
+                if (sopVersionIds.Count > 0)
+                {
+                    // delete sop versions
+                    _unitOfWork.SopVersions.RemoveRange(versionsToDelete);
+                }
+
+                await _unitOfWork.SaveAsync();
+            });
+        }
+
         /// <summary>
         /// Adds a sop to the user's favourites
         /// </summary>

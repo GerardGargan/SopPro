@@ -62,7 +62,7 @@ namespace Backend.Service.Implementation
 
             string emailBody = await _templateService.RenderTemplateAsync("PdfExport", emailTemplateModel);
             string pdfName = "SOP" + "-" + sop.Reference + "-V" + model.Version + "-" + DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm");
-            _emailService.SendEmailWithPdfAttachmentAsync(recipients, null, "Exported sop is ready", emailBody, template, pdfName);
+            // _emailService.SendEmailWithPdfAttachmentAsync(recipients, null, "Exported sop is ready", emailBody, template, pdfName);
 
             return template;
         }
