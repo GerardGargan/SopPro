@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import React, { useState } from "react";
 import { ScrollView } from "react-native-gesture-handler";
 import Header from "../components/UI/Header";
