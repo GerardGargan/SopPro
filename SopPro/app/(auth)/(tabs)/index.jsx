@@ -1,4 +1,4 @@
-import { FlatList, ScrollView, StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet } from "react-native";
 import Fab from "../../../components/sops/fab";
 import { useIsFocused } from "@react-navigation/native";
 import { useSelector } from "react-redux";
@@ -6,8 +6,6 @@ import Header from "../../../components/UI/Header";
 import { capitiliseFirstLetter } from "../../../util/validationHelpers";
 import { fetchSops } from "../../../util/httpRequests";
 import { useQuery } from "@tanstack/react-query";
-import SopCardLarge from "../../../components/sops/SopCardLarge";
-import SopCardLargeSkeleton from "../../../components/skeletons/SopCardLargeSkeleton";
 import CustomBottomSheetModal from "../../../components/sops/bottomSheet/CustomBottomSheetModal";
 import { useCallback, useRef, useState } from "react";
 import LargeNoDataCard from "../../../components/favourites/LargeNoDataCard";
@@ -23,7 +21,7 @@ const index = () => {
 
   const {
     data: favouritesData,
-    isFetching: isFetchingFavourites,
+    isPending: isFetchingFavourites,
     isFetched: isFetchedFavourites,
     isError: isErrorFavourites,
     error: erroFavourites,
@@ -36,7 +34,7 @@ const index = () => {
 
   const {
     data: recentData,
-    isFetching: isFetchingRecent,
+    isPending: isFetchingRecent,
     isFetched: isFetchedRecent,
     isError: isErrorRecent,
     error: errorRecent,
