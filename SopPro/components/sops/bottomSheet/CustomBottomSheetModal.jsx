@@ -29,11 +29,13 @@ import {
   Trash2,
   FileCheck2,
   FileDown,
+  History,
 } from "lucide-react-native";
-import ExportModal from "../exportModal/ExportModal";
 import { useBottomSheetBackHandler } from "../../../hooks/useBottomSheetBackHandler";
 import { ScrollView } from "react-native-gesture-handler";
 import ConfirmationModal from "../../UI/ConfirmationModal";
+import ExportModal from "../modals/ExportModal";
+import RevertModal from "../modals/RevertModal";
 
 const CustomBottomSheetModal = forwardRef((props, ref) => {
   const router = useRouter();
@@ -47,6 +49,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
 
   const { handleSheetPositionChange } = useBottomSheetBackHandler(ref);
   const [exportModalVisibile, setExportModalVisible] = useState(false);
+  const [revertModalVisible, setRevertModalVisible] = useState(false);
   const [confirmationModal, setConfirmationModal] = useState({
     visible: false,
     title: "",
@@ -277,6 +280,13 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     setExportModalVisible(true);
   }
 
+  function handleRevertPress() {
+    closeSheet();
+    setRevertModalVisible(true);
+  }
+
+  function handleRevert({ id, version }) {}
+
   const userOptions = [
     {
       key: 1,
@@ -332,6 +342,13 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     },
     {
       key: 3,
+      title: "Revert version",
+      icon: History,
+      onPress: handleRevertPress,
+      visible: true,
+    },
+    {
+      key: 4,
       title: "Delete",
       icon: Trash2,
       onPress: handleDeletePress,
@@ -408,6 +425,14 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
           sopVersions={sopVersions}
           visible={exportModalVisibile}
           setVisibility={setExportModalVisible}
+        />
+      )}
+
+      {revertModalVisible && (
+        <RevertModal
+          sopVersions={sopVersions}
+          visible={revertModalVisible}
+          setVisibility={setRevertModalVisible}
         />
       )}
 
