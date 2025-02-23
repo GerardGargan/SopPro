@@ -26,7 +26,7 @@ namespace Backend.Controllers
         {
             var apiResponse = await _authService.Login(model, ModelState);
 
-            return Ok(apiResponse);
+            return StatusCode((int)apiResponse.StatusCode, apiResponse);
         }
 
         [HttpPost("signuporganisation")]

@@ -20,6 +20,7 @@ namespace Backend.Service.Implementation
     {
         private readonly ApplicationDbContext _db;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IJwtService _jwtService;
         private readonly IdentityOptions _identityOptions;
@@ -29,10 +30,11 @@ namespace Backend.Service.Implementation
         private readonly IEmailService _emailService;
         private readonly ITemplateService _templateService;
 
-        public AuthService(ApplicationDbContext db, IConfiguration configuration, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IJwtService jwtService, IOptions<IdentityOptions> identityOptions, IUnitOfWork unitOfWork, IOptions<ApplicationSettings> appSettings, ITenancyResolver tenancyResolver, IEmailService emailService, ITemplateService templateService)
+        public AuthService(ApplicationDbContext db, IConfiguration configuration, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IJwtService jwtService, IOptions<IdentityOptions> identityOptions, IUnitOfWork unitOfWork, IOptions<ApplicationSettings> appSettings, ITenancyResolver tenancyResolver, IEmailService emailService, ITemplateService templateService, SignInManager<ApplicationUser> signInManager)
         {
             _db = db;
             _userManager = userManager;
+            _signInManager = signInManager;
             _roleManager = roleManager;
             _jwtService = jwtService;
             _identityOptions = identityOptions.Value;
@@ -45,19 +47,51 @@ namespace Backend.Service.Implementation
 
         public async Task<ApiResponse<LoginResponseDTO>> Login(LoginRequestDTO model, ModelStateDictionary modelState)
         {
-            ApplicationUser userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(user => user.UserName.ToLower() == model.Email.ToLower());
-            bool isValid = await _userManager.CheckPasswordAsync(userFromDb, model.Password);
+            ApplicationUser userFromDb = await _userManager.FindByEmailAsync(model.Email.ToLower());
 
-            if (userFromDb == null || !isValid)
+            if (userFromDb == null)
             {
                 throw new Exception("Email or password is incorrect");
             }
 
+            if (await _userManager.IsLockedOutAsync(userFromDb))
+            {
+                return new ApiResponse<LoginResponseDTO>
+                {
+                    StatusCode = HttpStatusCode.Forbidden,
+                    IsSuccess = false,
+                    ErrorMessage = "Your account is locked due to multiple failed attempts. Try again later."
+                };
+            }
+
+            var result = await _signInManager.PasswordSignInAsync(userFromDb, model.Password, false, lockoutOnFailure: true);
+
+            if (result.IsLockedOut)
+            {
+                return new ApiResponse<LoginResponseDTO>
+                {
+                    StatusCode = HttpStatusCode.Forbidden,
+                    IsSuccess = false,
+                    ErrorMessage = "Your account is locked due to multiple failed attempts. Try again later."
+                };
+            }
+
+            if (!result.Succeeded)
+            {
+                return new ApiResponse<LoginResponseDTO>
+                {
+                    StatusCode = HttpStatusCode.Unauthorized,
+                    IsSuccess = false,
+                    ErrorMessage = "Email or password is incorrect"
+                };
+            }
+
+            // Reset failed attempts after successful login
+            await _userManager.ResetAccessFailedCountAsync(userFromDb);
+
             var roles = await _userManager.GetRolesAsync(userFromDb);
 
             // Generate JWT Token
-
-
             string token = _jwtService.GenerateAuthToken(userFromDb, roles, _appSettings.JwtSecret, _appSettings.JwtAuthExpireDays);
 
             LoginResponseDTO loginResponse = new()

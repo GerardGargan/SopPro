@@ -25,8 +25,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ad3137",
     borderRadius: 8,
+    maxWidth: "100%",
   },
   text: {
+    flexShrink: 1,
     color: "#ad3137",
+    flexWrap: "wrap",
   },
 });

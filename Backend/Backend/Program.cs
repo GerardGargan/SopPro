@@ -43,6 +43,11 @@ builder.Services.Configure<IdentityOptions>(options =>
     options.Password.RequireUppercase = true;
     options.Password.RequiredLength = 8;
     options.Password.RequiredUniqueChars = 1;
+
+    // lockout options
+    options.Lockout.AllowedForNewUsers = true;
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+    options.Lockout.MaxFailedAccessAttempts = 5;
 });
 
 var key = builder.Configuration.GetValue<string>("ApplicationSettings:JwtSecret");
