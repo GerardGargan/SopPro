@@ -1,11 +1,11 @@
-import { View, StyleSheet, Text, Image } from "react-native";
+import { View, StyleSheet, Text } from "react-native";
 import React from "react";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
 import { SvgXml } from "react-native-svg";
-import Button from "../components/UI/Button";
+import CustomButton from "../components/UI/form/CustomButton";
 
 const App = () => {
   const router = useRouter();
@@ -28,7 +28,7 @@ const App = () => {
             </View>
 
             <View style={styles.buttonsContainer}>
-              <Button
+              <CustomButton
                 icon="login"
                 mode="contained"
                 contentStyle={styles.buttonContent}
@@ -37,9 +37,9 @@ const App = () => {
                 onPress={() => router.push("/login")}
               >
                 Log in
-              </Button>
+              </CustomButton>
 
-              <Button
+              <CustomButton
                 icon="account-plus"
                 mode="outlined"
                 contentStyle={styles.buttonContent}
@@ -48,7 +48,7 @@ const App = () => {
                 onPress={() => router.push("/register")}
               >
                 Sign up your company!
-              </Button>
+              </CustomButton>
 
               <Text style={styles.tagline}>
                 Create and manage SOPs with ease

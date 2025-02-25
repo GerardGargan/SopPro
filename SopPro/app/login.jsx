@@ -4,17 +4,15 @@ import {
   Platform,
   StyleSheet,
   KeyboardAvoidingView,
-  ScrollView
+  ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Header from "../components/UI/Header";
 import LoginForm from "../components/login/LoginForm";
-import ErrorBlock from '../components/UI/ErrorBlock'
-import useLogin from '../hooks/useLogin';
-
+import ErrorBlock from "../components/UI/ErrorBlock";
+import useLogin from "../hooks/useLogin";
 
 const Login = () => {
-
   const { mutate, isPending, isError, error } = useLogin();
 
   function handleLogin(data) {
@@ -22,23 +20,22 @@ const Login = () => {
   }
 
   return (
-      <ScrollView
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={styles.scrollViewContent}
+    <ScrollView
+      keyboardShouldPersistTaps="handled"
+      contentContainerStyle={styles.scrollViewContent}
+    >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
       >
-        <KeyboardAvoidingView
-          behavior={Platform.OS === "ios" ? "padding" : "height"}
-          style={{ flex: 1 }}
-        >
-          <SafeAreaView style={styles.rootContainer}>
-            <Header text="Log in" textStyle={{ color: 'black '}} />
-            <View style={styles.formContainer}>
+        <SafeAreaView style={styles.rootContainer}>
+          <View style={styles.formContainer}>
             {isError && <ErrorBlock>{error.message}</ErrorBlock>}
-              <LoginForm isPending={isPending} onSubmit={handleLogin} />
-            </View>
-          </SafeAreaView>
-        </KeyboardAvoidingView>
-      </ScrollView>
+            <LoginForm isPending={isPending} onSubmit={handleLogin} />
+          </View>
+        </SafeAreaView>
+      </KeyboardAvoidingView>
+    </ScrollView>
   );
 };
 
