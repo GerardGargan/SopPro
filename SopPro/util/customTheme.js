@@ -1,6 +1,6 @@
 export const customLightTheme = {
   colors: {
-    primary: "rgb(0, 91, 191)",
+    primary: "#3b82f6",
     onPrimary: "rgb(255, 255, 255)",
     primaryContainer: "rgb(215, 226, 255)",
     onPrimaryContainer: "rgb(0, 26, 64)",

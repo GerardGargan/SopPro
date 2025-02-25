@@ -1,9 +1,11 @@
 import { StyleSheet } from "react-native";
-import { Button } from "react-native-paper";
+import { Button, useTheme } from "react-native-paper";
 
 import React from "react";
 
 const CustomButton = ({ mode = "contained", children, ...props }) => {
+  const theme = useTheme();
+
   let labelStyle = {
     fontSize: 18,
     fontWeight: "600",
@@ -14,9 +16,9 @@ const CustomButton = ({ mode = "contained", children, ...props }) => {
   let style = {
     borderRadius: 12,
     marginBottom: 16,
-    backgroundColor: "#3b82f6",
+    backgroundColor: theme.colors.primary,
     elevation: 4,
-    shadowColor: "#3b82f6",
+    shadowColor: theme.colors.primary,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
@@ -27,12 +29,12 @@ const CustomButton = ({ mode = "contained", children, ...props }) => {
       fontSize: 18,
       fontWeight: "600",
       letterSpacing: 0.5,
-      color: "#3b82f6",
+      color: theme.colors.primary,
     };
 
     style = {
       borderRadius: 12,
-      borderColor: "#3b82f6",
+      borderColor: theme.colors.primary,
       borderWidth: 2,
     };
   }
