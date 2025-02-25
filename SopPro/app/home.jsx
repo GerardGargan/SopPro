@@ -2,10 +2,10 @@ import { View, StyleSheet, Text, Image } from "react-native";
 import React from "react";
 import { useRouter } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Button } from "react-native-paper";
 import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
 import { SvgXml } from "react-native-svg";
+import Button from "../components/UI/Button";
 
 const App = () => {
   const router = useRouter();
@@ -19,7 +19,7 @@ const App = () => {
         <SafeAreaView style={styles.container}>
           <View style={styles.contentContainer}>
             <View style={styles.headerContainer}>
-              <Text style={styles.mainHeader}>Simplify SOP Creation</Text>
+              <Text style={styles.mainHeader}>Simplify SOPs</Text>
               <Text style={styles.subHeader}>Transform How You Work</Text>
             </View>
 
@@ -105,35 +105,6 @@ const styles = StyleSheet.create({
   buttonsContainer: {
     width: "100%",
     marginTop: 20,
-  },
-  buttonContent: {
-    height: 56,
-  },
-  buttonLabel: {
-    fontSize: 18,
-    fontWeight: "600",
-    letterSpacing: 0.5,
-  },
-  signupButtonLabel: {
-    fontSize: 18,
-    fontWeight: "600",
-    letterSpacing: 0.5,
-    color: "#3b82f6",
-  },
-  loginButton: {
-    borderRadius: 12,
-    marginBottom: 16,
-    backgroundColor: "#3b82f6",
-    elevation: 4,
-    shadowColor: "#3b82f6",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-  },
-  signupButton: {
-    borderRadius: 12,
-    borderColor: "#3b82f6",
-    borderWidth: 2,
   },
   tagline: {
     textAlign: "center",

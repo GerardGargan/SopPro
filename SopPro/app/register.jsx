@@ -15,7 +15,11 @@ import ErrorBlock from "../components/UI/ErrorBlock";
 import Header from "../components/UI/Header";
 
 const register = () => {
-  const { mutate: loginMutate, isPending: isPendingLogin, isError: isLoginError } = useLogin();
+  const {
+    mutate: loginMutate,
+    isPending: isPendingLogin,
+    isError: isLoginError,
+  } = useLogin();
 
   const { mutate, isPending, isError, error } = useMutation({
     mutationFn: registerCompany,
@@ -34,7 +38,13 @@ const register = () => {
 
   let content;
 
-  content = <RegisterForm onSubmit={handleRegister} isPendingRegistration={isPending} isPendingLogin={isPendingLogin} />;
+  content = (
+    <RegisterForm
+      onSubmit={handleRegister}
+      isPendingRegistration={isPending}
+      isPendingLogin={isPendingLogin}
+    />
+  );
 
   return (
     <ScrollView
@@ -47,13 +57,18 @@ const register = () => {
           style={{ flex: 1 }}
         >
           <View>
-          <Header
-        text="Sign up your company!"
-        textStyle={{ color: "black", textAlign: "left" }}
-        containerStyle={{ alignItems: "start" }}
-      />
+            <Header
+              text="Sign up your company!"
+              textStyle={{ color: "black", textAlign: "left" }}
+              containerStyle={{ alignItems: "start" }}
+            />
             {isError && <ErrorBlock>{error.message}</ErrorBlock>}
-            {isLoginError && <ErrorBlock>Registration was successful but automatic log in failed. Please try to login manually.</ErrorBlock>}
+            {isLoginError && (
+              <ErrorBlock>
+                Registration was successful but automatic log in failed. Please
+                try to login manually.
+              </ErrorBlock>
+            )}
             {content}
           </View>
         </KeyboardAvoidingView>
