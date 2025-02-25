@@ -5,6 +5,8 @@ import Toast from "react-native-toast-message";
 import { validatePassword } from "../../../util/validationHelpers";
 import { useMutation } from "@tanstack/react-query";
 import { changePasswordRequest } from "../../../util/httpRequests";
+import CustomTextInput from "../../../components/UI/form/CustomTextInput";
+import CustomButton from "../../../components/UI/form/CustomButton";
 
 const ChangePassword = () => {
   const [oldPassword, setCurrentPassword] = useState("");
@@ -74,7 +76,7 @@ const ChangePassword = () => {
   return (
     <ScrollView style={styles.rootContainer}>
       <Text style={styles.title}>Change your password</Text>
-      <TextInput
+      <CustomTextInput
         style={styles.input}
         label="Current password"
         value={oldPassword}
@@ -87,7 +89,7 @@ const ChangePassword = () => {
           />
         }
       />
-      <TextInput
+      <CustomTextInput
         style={styles.input}
         label="New password"
         value={newPassword}
@@ -100,7 +102,7 @@ const ChangePassword = () => {
           />
         }
       />
-      <TextInput
+      <CustomTextInput
         style={styles.input}
         label="Confirm new password "
         value={confirmNewPassword}
@@ -115,16 +117,14 @@ const ChangePassword = () => {
           />
         }
       />
-      <Button
+      <CustomButton
         icon="login"
         mode="contained"
-        contentStyle={{ height: 50 }}
-        labelStyle={{ fontSize: 20 }}
-        style={{ borderRadius: 0, marginVertical: 10 }}
+        style={{ marginVertical: 10 }}
         onPress={handlePasswordChange}
       >
         Update password
-      </Button>
+      </CustomButton>
     </ScrollView>
   );
 };
@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   input: {
-    marginVertical: 8,
+    marginVertical: 4,
   },
   title: {
     fontSize: 20,

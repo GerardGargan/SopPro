@@ -9,6 +9,8 @@ import InputErrorMessage from "../../../components/UI/InputErrorMessage";
 import { inviteUser } from "../../../util/httpRequests";
 import { useMutation } from "@tanstack/react-query";
 import Toast from "react-native-toast-message";
+import CustomTextInput from "../../../components/UI/form/CustomTextInput";
+import CustomButton from "../../../components/UI/form/CustomButton";
 
 const invite = () => {
   const [email, setEmail] = useState("");
@@ -59,7 +61,7 @@ const invite = () => {
     <ScrollView style={styles.rootContainer}>
       <View style={styles.formContainer}>
         <Header text="Invite user" textStyle={{ color: "black" }} />
-        <TextInput
+        <CustomTextInput
           style={styles.textInput}
           label="Email address"
           keyboardType="email-address"
@@ -76,16 +78,15 @@ const invite = () => {
           <Picker.Item label="Basic user" value={"user"} />
           <Picker.Item label="Administrator" value={"admin"} />
         </SelectPicker>
-        <Button
+        <CustomButton
           mode="contained"
           loading={isPending}
-          contentStyle={{ height: 50 }}
           labelStyle={{ fontSize: 20 }}
           style={styles.buttonContainer}
           onPress={handlePress}
         >
           Invite user
-        </Button>
+        </CustomButton>
       </View>
     </ScrollView>
   );
@@ -103,7 +104,6 @@ const styles = StyleSheet.create({
     marginVertical: 8,
   },
   buttonContainer: {
-    borderRadius: 0,
     marginVertical: 14,
   },
 });

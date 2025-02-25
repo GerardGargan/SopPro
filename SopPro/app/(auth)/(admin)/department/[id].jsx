@@ -14,6 +14,8 @@ import {
 import Toast from "react-native-toast-message";
 import { Trash2 } from "lucide-react-native";
 import ConfirmationModal from "../../../../components/UI/ConfirmationModal";
+import CustomTextInput from "../../../../components/UI/form/CustomTextInput";
+import CustomButton from "../../../../components/UI/form/CustomButton";
 
 const Upsert = () => {
   const navigation = useNavigation();
@@ -152,7 +154,7 @@ const Upsert = () => {
           </Text>
           {!isCreate && deleteButton}
         </View>
-        <TextInput
+        <CustomTextInput
           style={styles.input}
           label="Department name"
           value={name}
@@ -163,15 +165,13 @@ const Upsert = () => {
           error={nameError}
         />
         {nameError && <InputErrorMessage>{nameError}</InputErrorMessage>}
-        <Button
+        <CustomButton
           mode="contained"
-          contentStyle={{ height: 50 }}
-          labelStyle={{ fontSize: 20 }}
-          style={{ borderRadius: 0, marginVertical: 10 }}
+          style={{ marginVertical: 10 }}
           onPress={handleSubmit}
         >
           Save
-        </Button>
+        </CustomButton>
       </View>
       <ConfirmationModal
         visible={modalVisible}

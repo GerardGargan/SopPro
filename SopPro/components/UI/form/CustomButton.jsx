@@ -13,7 +13,7 @@ const CustomButton = ({
   const theme = useTheme();
 
   const buttonContent = {
-    height: height || 36,
+    height: height || 40,
   };
 
   let labelStyle = {
