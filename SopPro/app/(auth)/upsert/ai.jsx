@@ -5,8 +5,9 @@ import { generateAiSop } from "../../../util/httpRequests";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useFocusEffect, useRouter } from "expo-router";
 import InputErrorMessage from "./../../../components/UI/InputErrorMessage";
-import { QueryClient } from "@tanstack/react-query";
 import Toast from "react-native-toast-message";
+import CustomTextInput from "../../../components/UI/form/CustomTextInput";
+import CustomButton from "../../../components/UI/form/CustomButton";
 
 const ai = () => {
   const [jobDescription, setJobDescription] = useState("");
@@ -119,7 +120,7 @@ const ai = () => {
         accurate and useful SOP.
       </Text>
 
-      <TextInput
+      <CustomTextInput
         style={[styles.textInput, styles.descInput]}
         label="Job Description"
         error={jobDescriptionError}
@@ -136,7 +137,7 @@ const ai = () => {
         <InputErrorMessage>{jobDescriptionError}</InputErrorMessage>
       )}
 
-      <TextInput
+      <CustomTextInput
         style={[styles.textInput]}
         error={primaryGoalError}
         label="Primary Objective or Goal"
@@ -153,7 +154,7 @@ const ai = () => {
         <InputErrorMessage>{primaryGoalError}</InputErrorMessage>
       )}
 
-      <TextInput
+      <CustomTextInput
         style={[styles.textInput]}
         error={keyRisksError}
         label="Key Considerations or Risks"
@@ -168,16 +169,16 @@ const ai = () => {
       />
       {keyRisksError && <InputErrorMessage>{keyRisksError}</InputErrorMessage>}
 
-      <Button
+      <CustomButton
         icon="lightbulb"
         mode="contained"
-        contentStyle={{ height: 50 }}
+        height={50}
         labelStyle={{ fontSize: 20 }}
-        style={{ borderRadius: 0, marginVertical: 10 }}
+        style={{ marginVertical: 10 }}
         onPress={handleSubmit}
       >
         Generate SOP
-      </Button>
+      </CustomButton>
 
       <Text style={styles.exampleText}>
         Example: Cleaning the factory floor involves sweeping and mopping the
@@ -196,7 +197,7 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   textInput: {
-    marginTop: 16,
+    marginTop: 8,
   },
   descInput: {
     height: 120,

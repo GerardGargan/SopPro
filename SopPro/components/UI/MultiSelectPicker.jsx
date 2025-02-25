@@ -11,8 +11,8 @@ const MultiSelectPicker = ({ data, value, onChange }) => {
       style={[
         styles.dropdown,
         {
-          backgroundColor: theme.colors.surfaceVariant,
-          borderBottomColor: theme.colors.outline,
+          backgroundColor: theme.colors.background,
+          borderColor: theme.colors.outline,
         },
       ]}
       placeholderStyle={styles.placeholderStyle}
@@ -36,7 +36,8 @@ export default MultiSelectPicker;
 const styles = StyleSheet.create({
   dropdown: {
     height: 50,
-    borderBottomWidth: 1,
+    borderWidth: 1,
+    borderRadius: 4,
     padding: 15,
   },
   selectedStyle: {

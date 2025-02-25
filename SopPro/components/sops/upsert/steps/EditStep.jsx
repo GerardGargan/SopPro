@@ -8,6 +8,8 @@ import { Modal as PaperModal } from "react-native-paper";
 import { Portal } from "react-native-paper";
 import Toast from "react-native-toast-message";
 import MultiSelectPicker from "../../../UI/MultiSelectPicker";
+import CustomTextInput from "../../../UI/form/CustomTextInput";
+import CustomButton from "../../../UI/form/CustomButton";
 
 const EditStep = ({
   visible,
@@ -94,18 +96,17 @@ const EditStep = ({
             icon="trash-can"
             onPress={() => setShowDeleteWarning(true)}
             style={{ alignSelf: "flex-end", marginBottom: 10 }}
-            mode="contained"
+            mode="outlined"
           >
             Delete
           </Button>
-          <TextInput
+          <CustomTextInput
             label="Title"
             placeholder="Step title"
-            style={styles.textInput}
             defaultValue={step?.title}
             onChangeText={(value) => handleEditStep(step.key, "title", value)}
           />
-          <TextInput
+          <CustomTextInput
             label="Details"
             placeholder="Enter details or instructions"
             style={[styles.textInput, styles.detailInput]}
@@ -124,13 +125,11 @@ const EditStep = ({
             onSelect={(image) => handleImageUpload(image, step.key)}
           />
 
-          <Button
-            mode="text"
-            onPress={handleClose}
-            style={{ marginBottom: 50 }}
-          >
-            Close
-          </Button>
+          <View style={{ alignItems: "center" }}>
+            <CustomButton onPress={handleClose} style={{ width: "80%" }}>
+              Save
+            </CustomButton>
+          </View>
         </ScrollView>
       </Modal>
     </>

@@ -35,7 +35,7 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     backgroundColor: "#f5f5f5",
     borderRadius: 8,
-    elevation: 4,
+    elevation: 2,
   },
   hazardDetails: {
     flex: 1,

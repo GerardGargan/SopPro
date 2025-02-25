@@ -3,6 +3,8 @@ import React from "react";
 import { TextInput } from "react-native-paper";
 import { Picker } from "@react-native-picker/picker";
 import SelectPicker from "../../../UI/SelectPicker";
+import CustomTextInput from "../../../UI/form/CustomTextInput";
+
 const SopForm = ({
   selectedDepartment,
   departments,
@@ -14,14 +16,14 @@ const SopForm = ({
 }) => {
   return (
     <>
-      <TextInput
+      <CustomTextInput
         style={styles.textInput}
         label="Title"
         placeholder="Enter title"
         value={title}
         onChangeText={(text) => handleTitleChange(text)}
       />
-      <TextInput
+      <CustomTextInput
         style={[styles.textInput, styles.descInput]}
         label="Description"
         placeholder="Enter description"

@@ -7,6 +7,8 @@ import {
   validatePassword,
   validateName,
 } from "../../util/validationHelpers";
+import CustomTextInput from "../UI/form/CustomTextInput";
+import CustomButton from "../UI/form/CustomButton";
 
 const RegisterForm = ({ onSubmit, isPendingRegistration, isPendingLogin }) => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
@@ -95,15 +97,10 @@ const RegisterForm = ({ onSubmit, isPendingRegistration, isPendingLogin }) => {
     });
   }
 
-  let buttonText = "Create account";
-  if (isPendingRegistration || isPendingLogin) {
-    buttonText = "Registering and logging you in...";
-  }
-
   return (
     <>
       <View style={styles.inputContainer}>
-        <TextInput
+        <CustomTextInput
           label="Email"
           value={formData.email}
           keyboardType="email-address"
@@ -117,7 +114,7 @@ const RegisterForm = ({ onSubmit, isPendingRegistration, isPendingLogin }) => {
         )}
       </View>
       <View style={styles.inputContainer}>
-        <TextInput
+        <CustomTextInput
           label="Forename"
           value={formData.forename}
           error={!isValid.forename}
@@ -129,7 +126,7 @@ const RegisterForm = ({ onSubmit, isPendingRegistration, isPendingLogin }) => {
         )}
       </View>
       <View style={styles.inputContainer}>
-        <TextInput
+        <CustomTextInput
           label="Surname"
           error={!isValid.surname}
           value={formData.surname}
@@ -141,7 +138,7 @@ const RegisterForm = ({ onSubmit, isPendingRegistration, isPendingLogin }) => {
         )}
       </View>
       <View style={styles.inputContainer}>
-        <TextInput
+        <CustomTextInput
           label="Company name"
           error={!isValid.company}
           value={formData.company}
@@ -153,7 +150,7 @@ const RegisterForm = ({ onSubmit, isPendingRegistration, isPendingLogin }) => {
         )}
       </View>
       <View style={styles.inputContainer}>
-        <TextInput
+        <CustomTextInput
           label="Password"
           error={!isValid.password}
           value={formData.password}
@@ -172,16 +169,14 @@ const RegisterForm = ({ onSubmit, isPendingRegistration, isPendingLogin }) => {
         )}
       </View>
       <View style={styles.buttonContainer}>
-        <Button
+        <CustomButton
           mode="contained"
           loading={isPendingRegistration || isPendingLogin}
-          contentStyle={{ height: 50 }}
-          labelStyle={{ fontSize: 20 }}
-          style={{ borderRadius: 0 }}
+          height={56}
           onPress={handleSubmit}
         >
-          {buttonText}
-        </Button>
+          Create account
+        </CustomButton>
       </View>
     </>
   );

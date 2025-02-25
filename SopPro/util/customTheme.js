@@ -1,6 +1,6 @@
 export const customLightTheme = {
   colors: {
-    primary: "rgb(0, 91, 191)",
+    primary: "#3b82f6",
     onPrimary: "rgb(255, 255, 255)",
     primaryContainer: "rgb(215, 226, 255)",
     onPrimaryContainer: "rgb(0, 26, 64)",
@@ -16,13 +16,13 @@ export const customLightTheme = {
     onError: "rgb(255, 255, 255)",
     errorContainer: "rgb(255, 218, 214)",
     onErrorContainer: "rgb(65, 0, 2)",
-    background: "rgb(254, 251, 255)",
+    background: "#ffffff",
     onBackground: "rgb(27, 27, 31)",
     surface: "rgb(254, 251, 255)",
     onSurface: "rgb(27, 27, 31)",
     surfaceVariant: "rgb(225, 226, 236)",
     onSurfaceVariant: "rgb(68, 71, 79)",
-    outline: "rgb(116, 119, 127)",
+    outline: "#E0E0E0",
     outlineVariant: "rgb(196, 198, 208)",
     shadow: "rgb(0, 0, 0)",
     scrim: "rgb(0, 0, 0)",

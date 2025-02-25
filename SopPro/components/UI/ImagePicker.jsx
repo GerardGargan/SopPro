@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { Image, View, StyleSheet } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { Icon, Button } from "react-native-paper";
+import { Icon, Button, useTheme } from "react-native-paper";
 
 export default function ImagePickerComponent({ imageUrl, onSelect }) {
+  const theme = useTheme();
   const [image, setImage] = useState(imageUrl);
 
   const pickImage = async () => {
@@ -41,7 +42,13 @@ export default function ImagePickerComponent({ imageUrl, onSelect }) {
       {image ? (
         <Image source={{ uri: image }} style={styles.image} />
       ) : (
-        <View style={[styles.image, styles.iconContainer]}>
+        <View
+          style={[
+            styles.image,
+            styles.iconContainer,
+            { backgroundColor: theme.colors.surfaceVariant },
+          ]}
+        >
           <Icon source="camera" size={45} />
         </View>
       )}
