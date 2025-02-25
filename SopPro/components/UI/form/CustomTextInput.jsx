@@ -2,7 +2,7 @@ import { StyleSheet } from "react-native";
 import React from "react";
 import { TextInput, useTheme } from "react-native-paper";
 
-const CustomInput = ({ ...props }) => {
+const CustomTextInput = ({ ...props }) => {
   const theme = useTheme();
 
   return (
@@ -17,7 +17,7 @@ const CustomInput = ({ ...props }) => {
   );
 };
 
-export default CustomInput;
+export default CustomTextInput;
 
 const styles = StyleSheet.create({
   input: {

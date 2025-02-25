@@ -30,8 +30,12 @@ const Login = () => {
       >
         <SafeAreaView style={styles.rootContainer}>
           <View style={styles.formContainer}>
-            {isError && <ErrorBlock>{error.message}</ErrorBlock>}
-            <LoginForm isPending={isPending} onSubmit={handleLogin} />
+            <LoginForm
+              isPending={isPending}
+              onSubmit={handleLogin}
+              isError={isError}
+              error={error}
+            />
           </View>
         </SafeAreaView>
       </KeyboardAvoidingView>

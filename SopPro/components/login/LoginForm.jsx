@@ -4,9 +4,10 @@ import { TextInput, Button } from "react-native-paper";
 import Header from "../UI/Header";
 import { useRouter } from "expo-router";
 import CustomButton from "../UI/form/CustomButton";
-import CustomInput from "../UI/form/CustomInput";
+import CustomTextInput from "../UI/form/CustomTextInput";
+import ErrorBlock from "../UI/ErrorBlock";
 
-const LoginForm = ({ onSubmit, isPending }) => {
+const LoginForm = ({ onSubmit, isPending, isError, error }) => {
   const router = useRouter();
 
   const [email, setEmail] = useState("");
@@ -29,7 +30,7 @@ const LoginForm = ({ onSubmit, isPending }) => {
         containerStyle={{ alignItems: "start" }}
       />
       <View style={styles.inputContainer}>
-        <CustomInput
+        <CustomTextInput
           label="Email"
           keyboardType="email-address"
           value={email}
@@ -37,7 +38,7 @@ const LoginForm = ({ onSubmit, isPending }) => {
         />
       </View>
       <View style={styles.inputContainer}>
-        <CustomInput
+        <CustomTextInput
           label="Password"
           value={password}
           onChangeText={(value) => setPassword(value)}
@@ -50,6 +51,7 @@ const LoginForm = ({ onSubmit, isPending }) => {
           }
         />
       </View>
+      {isError && <ErrorBlock>{error.message}</ErrorBlock>}
       <View style={styles.buttonContainer}>
         <CustomButton
           icon="login"
