@@ -3,8 +3,18 @@ import { Button, useTheme } from "react-native-paper";
 
 import React from "react";
 
-const CustomButton = ({ mode = "contained", children, ...props }) => {
+const CustomButton = ({
+  mode = "contained",
+  height,
+  children,
+  style,
+  ...props
+}) => {
   const theme = useTheme();
+
+  const buttonContent = {
+    height: height || 36,
+  };
 
   let labelStyle = {
     fontSize: 18,
@@ -13,7 +23,7 @@ const CustomButton = ({ mode = "contained", children, ...props }) => {
     color: "white",
   };
 
-  let style = {
+  let styles = {
     borderRadius: 12,
     marginBottom: 16,
     backgroundColor: theme.colors.primary,
@@ -32,7 +42,7 @@ const CustomButton = ({ mode = "contained", children, ...props }) => {
       color: theme.colors.primary,
     };
 
-    style = {
+    styles = {
       borderRadius: 12,
       borderColor: theme.colors.primary,
       borderWidth: 2,
@@ -42,9 +52,9 @@ const CustomButton = ({ mode = "contained", children, ...props }) => {
   return (
     <Button
       {...props}
-      contentStyle={styles.buttonContent}
+      contentStyle={buttonContent}
       labelStyle={labelStyle}
-      style={style}
+      style={[styles, style && style]}
     >
       {children}
     </Button>
@@ -52,9 +62,3 @@ const CustomButton = ({ mode = "contained", children, ...props }) => {
 };
 
 export default CustomButton;
-
-const styles = StyleSheet.create({
-  buttonContent: {
-    height: 56,
-  },
-});

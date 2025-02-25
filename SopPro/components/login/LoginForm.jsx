@@ -56,6 +56,7 @@ const LoginForm = ({ onSubmit, isPending, isError, error }) => {
         <CustomButton
           icon="login"
           mode="contained"
+          height={56}
           loading={isPending}
           onPress={handlePress}
         >

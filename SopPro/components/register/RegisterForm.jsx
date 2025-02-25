@@ -172,9 +172,7 @@ const RegisterForm = ({ onSubmit, isPendingRegistration, isPendingLogin }) => {
         <CustomButton
           mode="contained"
           loading={isPendingRegistration || isPendingLogin}
-          contentStyle={{ height: 50 }}
-          labelStyle={{ fontSize: 20 }}
-          style={{ borderRadius: 0 }}
+          height={56}
           onPress={handleSubmit}
         >
           Create account

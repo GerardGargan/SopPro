@@ -31,9 +31,7 @@ const App = () => {
               <CustomButton
                 icon="login"
                 mode="contained"
-                contentStyle={styles.buttonContent}
-                labelStyle={styles.buttonLabel}
-                style={styles.loginButton}
+                height={56}
                 onPress={() => router.push("/login")}
               >
                 Log in
@@ -42,9 +40,7 @@ const App = () => {
               <CustomButton
                 icon="account-plus"
                 mode="outlined"
-                contentStyle={styles.buttonContent}
-                labelStyle={styles.signupButtonLabel}
-                style={styles.signupButton}
+                height={56}
                 onPress={() => router.push("/register")}
               >
                 Sign up your company!

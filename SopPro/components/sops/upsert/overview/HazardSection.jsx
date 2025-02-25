@@ -5,6 +5,8 @@ import { Button, Modal, Portal, TextInput } from "react-native-paper";
 import SelectPicker from "../../../UI/SelectPicker";
 import { Picker } from "@react-native-picker/picker";
 import { useTheme } from "react-native-paper";
+import CustomTextInput from "../../../UI/form/CustomTextInput";
+import CustomButton from "../../../UI/form/CustomButton";
 
 const HazardSection = ({
   hazards,
@@ -71,11 +73,11 @@ const HazardSection = ({
             icon="trash-can"
             onPress={() => setShowDeleteWarning(true)}
             style={{ alignSelf: "flex-end", marginBottom: 10 }}
-            mode="contained"
+            mode="outlined"
           >
             Delete
           </Button>
-          <TextInput
+          <CustomTextInput
             label="Hazard"
             placeholder="Hazard description"
             style={styles.textInput}
@@ -86,7 +88,7 @@ const HazardSection = ({
               handleUpdateHazard(selectedHazard, "name", text)
             }
           />
-          <TextInput
+          <CustomTextInput
             label="Control measure"
             placeholder="Control measure"
             style={[styles.textInput, styles.controlMeasureInput]}
@@ -114,9 +116,9 @@ const HazardSection = ({
             <Picker.Item label="Medium" value={2} />
             <Picker.Item label="High" value={3} />
           </SelectPicker>
-          <Button mode="text" onPress={() => setSelectedHazard(null)}>
-            Close
-          </Button>
+          <CustomButton onPress={() => setSelectedHazard(null)}>
+            Save
+          </CustomButton>
         </Modal>
       </Portal>
     </>

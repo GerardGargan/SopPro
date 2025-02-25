@@ -5,18 +5,19 @@ import { View } from "react-native";
 
 const SelectPicker = ({ children, ...props }) => {
   const theme = useTheme();
-
   return (
     <View
       style={{
-        borderBottomWidth: 1,
-        borderBottomColor: theme.colors.outline,
+        overflow: "hidden",
+        borderWidth: 1,
+        borderRadius: 4,
+        borderColor: theme.colors.outline,
         marginBottom: 10,
       }}
     >
       <Picker
         style={{
-          backgroundColor: theme.colors.surfaceVariant,
+          backgroundColor: theme.colors.background,
         }}
         {...props}
       >
