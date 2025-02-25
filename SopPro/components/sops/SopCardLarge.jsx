@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 3,
+    elevation: 2,
     margin: 4,
     overflow: "hidden",
     width: Dimensions.get("window").width / 3,
