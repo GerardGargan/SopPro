@@ -2,7 +2,13 @@ import React from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSelector } from "react-redux";
-import { Building, KeyRound, LogOut, UserPlus } from "lucide-react-native";
+import {
+  Building,
+  KeyRound,
+  LogOut,
+  User,
+  UserPlus,
+} from "lucide-react-native";
 import MenuSection from "../../../components/UI/MenuSection";
 
 const More = () => {
@@ -18,6 +24,12 @@ const More = () => {
     },
     {
       key: 2,
+      icon: User,
+      title: "Manage users",
+      onPress: () => router.push("(auth)/(admin)/user/users"),
+    },
+    {
+      key: 3,
       icon: Building,
       title: "Manage departments",
       onPress: () => router.push("(auth)/(admin)/department/departments"),
