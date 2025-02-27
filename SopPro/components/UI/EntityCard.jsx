@@ -6,10 +6,10 @@ import {
   Animated,
 } from "react-native";
 import React, { useState } from "react";
-import { ChevronRight, Building } from "lucide-react-native";
+import { ChevronRight } from "lucide-react-native";
 import { useRouter } from "expo-router";
 
-const DepartmentCard = ({ id, name }) => {
+const EntityCard = ({ Icon, name, onPress }) => {
   const router = useRouter();
   const [scaleValue] = useState(new Animated.Value(1));
 
@@ -38,13 +38,13 @@ const DepartmentCard = ({ id, name }) => {
     >
       <TouchableOpacity
         style={styles.cardContainer}
-        onPress={() => router.navigate(`(auth)/(admin)/department/${id}`)}
+        onPress={onPress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         activeOpacity={0.7}
       >
         <View style={styles.iconContainer}>
-          <Building size={22} color="#666" />
+          <Icon size={22} color="#666" />
         </View>
         <Text numberOfLines={1} style={styles.text}>
           {name}
@@ -55,7 +55,7 @@ const DepartmentCard = ({ id, name }) => {
   );
 };
 
-export default DepartmentCard;
+export default EntityCard;
 
 const styles = StyleSheet.create({
   cardWrapper: {

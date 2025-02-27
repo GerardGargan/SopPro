@@ -1,12 +1,16 @@
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import DepartmentCard from "./DepartmentCard";
 import { fetchDepartments } from "../../util/httpRequests";
 import { ActivityIndicator } from "react-native-paper";
 import ErrorBlock from "../UI/ErrorBlock";
+import EntityCard from "../UI/EntityCard";
+import { Building } from "lucide-react-native";
+import { useRouter } from "expo-router";
 
 const DepartmentList = () => {
+  const router = useRouter();
+
   const { data, isFetching, isError, error } = useQuery({
     queryKey: ["departments"],
     queryFn: fetchDepartments,
@@ -35,7 +39,13 @@ const DepartmentList = () => {
       data={data}
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => (
-        <DepartmentCard id={item.id} name={item.name} />
+        <EntityCard
+          name={item.name}
+          Icon={Building}
+          onPress={() =>
+            router.navigate(`(auth)/(admin)/department/${item.id}`)
+          }
+        />
       )}
     />
   );
