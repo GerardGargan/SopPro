@@ -328,6 +328,18 @@ export async function inviteUser({ email, role }) {
   }
 }
 
+export async function fetchAllUsers() {
+  try {
+    const response = await api.get("/auth");
+    return response.data.result;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error fetching users"
+    );
+    throw error;
+  }
+}
+
 export async function completeRegistration({
   forename,
   surname,

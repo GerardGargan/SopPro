@@ -126,6 +126,7 @@ namespace Backend.Service.Implementation
                 .GetAll()
                 .Select(x => new ApplicationUserDto()
                 {
+                    Id = x.Id,
                     Forename = x.Forename,
                     Surname = x.Surname,
                     OrganisationId = x.OrganisationId,

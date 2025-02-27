@@ -1,15 +1,12 @@
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import React, { useLayoutEffect } from "react";
+import { StyleSheet, View } from "react-native";
+import React from "react";
 import DepartmentList from "../../../../components/departments/DepartmentList";
-import { useNavigation, useRouter } from "expo-router";
-import { Button, FAB, Portal, useTheme } from "react-native-paper";
-import { PlusCircle } from "lucide-react-native";
+import { useRouter } from "expo-router";
+import { FAB, Portal } from "react-native-paper";
 import { useIsFocused } from "@react-navigation/native";
 
 const departments = () => {
-  const navigation = useNavigation();
   const router = useRouter();
-  const theme = useTheme();
   const isFocused = useIsFocused();
 
   return (
