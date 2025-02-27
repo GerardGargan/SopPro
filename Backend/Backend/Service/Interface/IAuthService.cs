@@ -16,5 +16,6 @@ namespace Backend.Service.Interface
         Task ForgotPassword(ForgotPasswordRequest model);
         Task<ApiResponse> ResetPassword(ResetPasswordRequest model);
         Task<List<ApplicationUserDto>> GetAll();
+        Task<List<RoleDto>> GetRoles();
     }
 }

@@ -108,6 +108,23 @@ namespace Backend.Controllers
             return Ok(apiResponse);
         }
 
+        [HttpGet("roles")]
+        [Authorize]
+        [ProducesResponseType(200, Type = typeof(ApiResponse))]
+        public async Task<IActionResult> GetRoles()
+        {
+            var allRoles = await _authService.GetRoles();
+
+            ApiResponse<List<RoleDto>> apiResponse = new ApiResponse<List<RoleDto>>()
+            {
+                IsSuccess = true,
+                StatusCode = HttpStatusCode.OK,
+                Result = allRoles
+            };
+
+            return Ok(apiResponse);
+        }
+
         [Authorize]
         [HttpPost("password")]
         [ProducesResponseType(200, Type = typeof(ApiResponse))]

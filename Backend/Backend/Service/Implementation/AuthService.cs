@@ -454,6 +454,17 @@ namespace Backend.Service.Implementation
             };
         }
 
+        public async Task<List<RoleDto>> GetRoles()
+        {
+            List<RoleDto> allRoles = await _db.Roles.Select(x => new RoleDto()
+            {
+                Id = x.Id,
+                Name = x.Name
+            }).ToListAsync();
+
+            return allRoles;
+        }
+
         public bool ValidatePassword(string password)
         {
             // Check if the password length is sufficient
