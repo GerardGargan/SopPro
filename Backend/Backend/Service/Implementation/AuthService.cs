@@ -10,6 +10,7 @@ using Backend.Utility;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Net;
 using System.Security.Claims;
@@ -116,6 +117,25 @@ namespace Backend.Service.Implementation
             };
 
         }
+
+        public async Task<List<ApplicationUserDto>> GetAll()
+        {
+            Dictionary<string, string> UserRoleLookup = await _db.UserRoles.ToDictionaryAsync(x => x.UserId, x => x.RoleId);
+
+            List<ApplicationUserDto> allUsers = await _unitOfWork.ApplicationUsers
+                .GetAll()
+                .Select(x => new ApplicationUserDto()
+                {
+                    Forename = x.Forename,
+                    Surname = x.Surname,
+                    OrganisationId = x.OrganisationId,
+                    RoleId = UserRoleLookup.GetValueOrDefault(x.Id, null),
+                }).ToListAsync();
+
+            return allUsers;
+
+        }
+
         public async Task<ApiResponse> RegisterInvitedUser(RegisterInviteRequestDTO model, ModelStateDictionary modelState)
         {
             // Sanitise inputs

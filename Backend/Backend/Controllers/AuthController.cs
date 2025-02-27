@@ -91,6 +91,23 @@ namespace Backend.Controllers
 
         }
 
+        [HttpGet]
+        [Authorize]
+        [ProducesResponseType(200, Type = typeof(ApiResponse))]
+        public async Task<IActionResult> GetAll()
+        {
+            List<ApplicationUserDto> allUsers = await _authService.GetAll();
+
+            ApiResponse<List<ApplicationUserDto>> apiResponse = new ApiResponse<List<ApplicationUserDto>>()
+            {
+                IsSuccess = true,
+                StatusCode = HttpStatusCode.OK,
+                Result = allUsers
+            };
+
+            return Ok(apiResponse);
+        }
+
         [Authorize]
         [HttpPost("password")]
         [ProducesResponseType(200, Type = typeof(ApiResponse))]

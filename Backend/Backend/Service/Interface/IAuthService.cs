@@ -1,4 +1,5 @@
 ﻿using Backend.Models;
+using Backend.Models.DatabaseModels;
 using Backend.Models.Dto;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
@@ -14,5 +15,6 @@ namespace Backend.Service.Interface
         Task<ApiResponse> ChangePassword(ChangePasswordDto model);
         Task ForgotPassword(ForgotPasswordRequest model);
         Task<ApiResponse> ResetPassword(ResetPasswordRequest model);
+        Task<List<ApplicationUserDto>> GetAll();
     }
 }
