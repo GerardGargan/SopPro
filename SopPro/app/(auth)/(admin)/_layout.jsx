@@ -18,6 +18,7 @@ const _layout = () => {
           options={{ title: "Manage departments" }}
         />
         <Stack.Screen name="user/users" options={{ title: "Manage users" }} />
+        <Stack.Screen name="user/[id]" options={{ title: "Edit user " }} />
       </Stack>
     </>
   );

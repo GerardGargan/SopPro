@@ -340,6 +340,18 @@ export async function fetchAllUsers() {
   }
 }
 
+export async function fetchUser({ id }) {
+  try {
+    const response = await api.get(`/auth/${id}`);
+    return response.data.result;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error fetching users"
+    );
+    throw error;
+  }
+}
+
 export async function completeRegistration({
   forename,
   surname,
