@@ -108,6 +108,25 @@ namespace Backend.Controllers
             return Ok(apiResponse);
         }
 
+        [HttpGet]
+        [Route("{id}")]
+        [Authorize]
+        [ProducesResponseType(200, Type = typeof(ApiResponse))]
+        public async Task<IActionResult> GetUser([FromRoute] string id)
+        {
+            ApplicationUserDto userDto = await _authService.GetById(id);
+
+            var apiResponse = new ApiResponse<ApplicationUserDto>()
+            {
+                IsSuccess = true,
+                StatusCode = HttpStatusCode.OK,
+                Result = userDto
+            };
+
+            return Ok(apiResponse);
+        }
+
+
         [HttpGet("roles")]
         [Authorize]
         [ProducesResponseType(200, Type = typeof(ApiResponse))]

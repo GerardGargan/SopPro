@@ -137,6 +137,32 @@ namespace Backend.Service.Implementation
 
         }
 
+        public async Task<ApplicationUserDto> GetById(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                throw new Exception("Id cant be empty");
+            }
+
+            var userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(x => x.Id == id);
+            if (userFromDb == null)
+            {
+                throw new Exception("User not found");
+            }
+
+            string userRoleId = await _db.UserRoles.Where(x => x.UserId == userFromDb.Id).Select(x => x.RoleId).FirstOrDefaultAsync();
+
+            ApplicationUserDto userDto = new ApplicationUserDto()
+            {
+                Forename = userFromDb.Forename,
+                Surname = userFromDb.Surname,
+                Id = userFromDb.Id,
+                RoleId = userRoleId
+            };
+
+            return userDto;
+        }
+
         public async Task<ApiResponse> RegisterInvitedUser(RegisterInviteRequestDTO model, ModelStateDictionary modelState)
         {
             // Sanitise inputs
