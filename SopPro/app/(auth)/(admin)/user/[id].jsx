@@ -26,6 +26,14 @@ const Upsert = () => {
     roleName: "",
     email: "",
   });
+
+  const [fieldError, setFieldError] = useState({
+    forename: null,
+    surname: null,
+    roleName: null,
+    email: null,
+  });
+
   const [modalVisible, setModalVisisble] = useState(false);
 
   const { data, isFetching, isError, error } = useQuery({
@@ -43,11 +51,45 @@ const Upsert = () => {
     setUser((prevState) => {
       return { ...prevState, [identifier]: value };
     });
+
+    setFieldError((prevState) => {
+      return { ...prevState, [identifier]: null };
+    });
+  }
+
+  function resetErrors() {
+    setFieldError({
+      forename: null,
+      surname: null,
+      roleName: null,
+      email: null,
+    });
   }
 
   function handleSubmit() {
+    resetErrors();
     // validate fields
+    let isError = false;
+
+    if (user.forename.trim().length === 0) {
+      setFieldError((prevState) => {
+        return { ...prevState, forename: "Forename cant be empty" };
+      });
+      isError = true;
+    }
+
+    if (user.surname.trim().length === 0) {
+      setFieldError((prevState) => {
+        return { ...prevState, surname: "Surname cant be empty" };
+      });
+      isError = true;
+    }
+
+    if (isError) {
+      return;
+    }
     // handle creation or update
+    console.log("updating...");
   }
 
   function handleShowDeletePrompt() {
@@ -85,7 +127,6 @@ const Upsert = () => {
       <Trash2 size={24} color={false ? "#999" : "#ff4444"} />
     </TouchableOpacity>
   );
-  console.log(user);
 
   return (
     <>
@@ -107,7 +148,11 @@ const Upsert = () => {
           onChangeText={(value) => {
             handleInput("forename", value);
           }}
+          error={fieldError.forename}
         />
+        {fieldError.forename && (
+          <InputErrorMessage>{fieldError.forename}</InputErrorMessage>
+        )}
         <CustomTextInput
           style={styles.input}
           label="Surname"
@@ -115,7 +160,11 @@ const Upsert = () => {
           onChangeText={(value) => {
             handleInput("surname", value);
           }}
+          error={fieldError.surname}
         />
+        {fieldError.surname && (
+          <InputErrorMessage>{fieldError.surname}</InputErrorMessage>
+        )}
         <View style={{ paddingTop: 10 }}>
           <SelectPicker
             selectedValue={user.roleName}
