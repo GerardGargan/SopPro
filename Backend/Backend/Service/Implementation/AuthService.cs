@@ -151,13 +151,16 @@ namespace Backend.Service.Implementation
             }
 
             string userRoleId = await _db.UserRoles.Where(x => x.UserId == userFromDb.Id).Select(x => x.RoleId).FirstOrDefaultAsync();
+            string roleName = await _db.Roles.Where(x => x.Id == userRoleId).Select(x => x.Name).FirstOrDefaultAsync();
 
             ApplicationUserDto userDto = new ApplicationUserDto()
             {
                 Forename = userFromDb.Forename,
                 Surname = userFromDb.Surname,
+                Email = userFromDb.Email,
                 Id = userFromDb.Id,
-                RoleId = userRoleId
+                RoleId = userRoleId,
+                RoleName = roleName
             };
 
             return userDto;

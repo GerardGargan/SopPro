@@ -11,6 +11,8 @@ import { Trash2 } from "lucide-react-native";
 import ConfirmationModal from "../../../../components/UI/ConfirmationModal";
 import CustomTextInput from "../../../../components/UI/form/CustomTextInput";
 import CustomButton from "../../../../components/UI/form/CustomButton";
+import SelectPicker from "../../../../components/UI/SelectPicker";
+import { Picker } from "@react-native-picker/picker";
 
 const Upsert = () => {
   const navigation = useNavigation();
@@ -18,7 +20,12 @@ const Upsert = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
 
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState({
+    forname: "",
+    surname: "",
+    roleName: "",
+    email: "",
+  });
   const [modalVisible, setModalVisisble] = useState(false);
 
   const { data, isFetching, isError, error } = useQuery({
@@ -31,6 +38,12 @@ const Upsert = () => {
       setUser(data);
     }
   }, [data]);
+
+  function handleInput(identifier, value) {
+    setUser((prevState) => {
+      return { ...prevState, [identifier]: value };
+    });
+  }
 
   function handleSubmit() {
     // validate fields
@@ -49,14 +62,6 @@ const Upsert = () => {
     setModalVisisble(false);
   }
 
-  if (isFetching) {
-    return (
-      <View style={styles.loader}>
-        <ActivityIndicator animating={true} />
-      </View>
-    );
-  }
-
   if (isError) {
     return (
       <View style={styles.errorContainer}>
@@ -67,11 +72,20 @@ const Upsert = () => {
     );
   }
 
+  if (isFetching) {
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator animating={true} />
+      </View>
+    );
+  }
+
   const deleteButton = (
     <TouchableOpacity onPress={handleShowDeletePrompt} disabled={false}>
       <Trash2 size={24} color={false ? "#999" : "#ff4444"} />
     </TouchableOpacity>
   );
+  console.log(user);
 
   return (
     <>
@@ -82,16 +96,35 @@ const Upsert = () => {
         </View>
         <CustomTextInput
           style={styles.input}
+          disabled
+          label="Email"
+          value={user.email}
+        />
+        <CustomTextInput
+          style={styles.input}
           label="Forename"
           value={user.forename}
-          onChangeText={(value) => {}}
+          onChangeText={(value) => {
+            handleInput("forename", value);
+          }}
         />
         <CustomTextInput
           style={styles.input}
           label="Surname"
           value={user.surname}
-          onChangeText={(value) => {}}
+          onChangeText={(value) => {
+            handleInput("surname", value);
+          }}
         />
+        <View style={{ paddingTop: 10 }}>
+          <SelectPicker
+            selectedValue={user.roleName}
+            onValueChange={(value) => handleInput("roleName", value)}
+          >
+            <Picker.Item label="Basic user" value={"user"} />
+            <Picker.Item label="Administrator" value={"admin"} />
+          </SelectPicker>
+        </View>
         <CustomButton
           mode="contained"
           style={{ marginVertical: 10 }}
