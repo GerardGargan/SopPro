@@ -352,6 +352,19 @@ export async function fetchUser({ id }) {
   }
 }
 
+export async function updateUser(id, { forename, surname, roleName }) {
+  const data = { id, forename, surname, roleName };
+  try {
+    const response = await api.put(`/auth/${id}`, data);
+    return response.data;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error updating user"
+    );
+    throw error;
+  }
+}
+
 export async function completeRegistration({
   forename,
   surname,

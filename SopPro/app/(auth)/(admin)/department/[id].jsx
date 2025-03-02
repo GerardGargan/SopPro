@@ -36,7 +36,7 @@ const Upsert = () => {
 
   const mutationFunction = isCreate ? createDepartment : updateDepartment;
 
-  const { mutate } = useMutation({
+  const { mutate, isPending } = useMutation({
     mutationFn: mutationFunction,
     onSuccess: () => {
       Toast.show({
@@ -169,6 +169,7 @@ const Upsert = () => {
           mode="contained"
           style={{ marginVertical: 10 }}
           onPress={handleSubmit}
+          loading={isPending}
         >
           Save
         </CustomButton>

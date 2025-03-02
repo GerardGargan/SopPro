@@ -1,7 +1,11 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React, { useEffect, useLayoutEffect, useState } from "react";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { fetchDepartment, fetchUser } from "../../../../util/httpRequests";
+import {
+  fetchDepartment,
+  fetchUser,
+  updateUser,
+} from "../../../../util/httpRequests";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ActivityIndicator, Button, TextInput } from "react-native-paper";
 import InputErrorMessage from "../../../../components/UI/InputErrorMessage";
@@ -35,6 +39,33 @@ const Upsert = () => {
   });
 
   const [modalVisible, setModalVisisble] = useState(false);
+
+  const {
+    mutate: mutateUpdate,
+    isPending: isPendingUpdate,
+    isError: isErrorUpdate,
+    error: errorUpdate,
+  } = useMutation({
+    mutationFn: () => updateUser(id, user),
+    onSuccess: () => {
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: `User Updated`,
+        visibilityTime: 5000,
+      });
+      queryClient.invalidateQueries("users");
+      router.back();
+    },
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: "Oops something went wrong!",
+        text2: error.message || "The user was not updated",
+        visibilityTime: 5000,
+      });
+    },
+  });
 
   const { data, isFetching, isError, error } = useQuery({
     queryKey: ["users", id],
@@ -88,8 +119,9 @@ const Upsert = () => {
     if (isError) {
       return;
     }
+
     // handle creation or update
-    console.log("updating...");
+    mutateUpdate(id, user);
   }
 
   function handleShowDeletePrompt() {
@@ -178,6 +210,7 @@ const Upsert = () => {
           mode="contained"
           style={{ marginVertical: 10 }}
           onPress={handleSubmit}
+          loading={isPendingUpdate}
         >
           Save
         </CustomButton>
