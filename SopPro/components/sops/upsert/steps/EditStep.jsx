@@ -61,6 +61,7 @@ const EditStep = ({
 
   function deleteStep() {
     handleDeleteStep(step.key);
+    handleClose();
     setShowDeleteWarning(false);
   }
 
@@ -73,27 +74,9 @@ const EditStep = ({
         title="Delete step"
         subtitle="Are you sure you want to delete this?"
       />
-      {/* <Portal>
-        <PaperModal
-          visible={showDeleteWarning}
-          onDismiss={() => setShowDeleteWarning(false)}
-          contentContainerStyle={styles.modalPaperContainer}
-          dismissable={false}
-          dismissableBackButton={false}
-        >
-          <Text style={styles.warningText}>
-            Are you sure you want to delete this?
-          </Text>
-          <View style={styles.deleteButtonsContainer}>
-            <Button onPress={() => setShowDeleteWarning(false)}>No</Button>
-            <Button onPress={deleteStep}>Yes</Button>
-          </View>
-        </PaperModal>
-      </Portal> */}
 
       <Modal
         visible={visible && !showDeleteWarning}
-        onDismiss={handleClose}
         contentContainerStyle={styles.modalContainer}
         onRequestClose={handleClose}
         animationType="slide"
