@@ -10,6 +10,7 @@ import Toast from "react-native-toast-message";
 import MultiSelectPicker from "../../../UI/MultiSelectPicker";
 import CustomTextInput from "../../../UI/form/CustomTextInput";
 import CustomButton from "../../../UI/form/CustomButton";
+import ConfirmationModal from "../../../UI/ConfirmationModal";
 
 const EditStep = ({
   visible,
@@ -65,7 +66,14 @@ const EditStep = ({
 
   return (
     <>
-      <Portal>
+      <ConfirmationModal
+        visible={showDeleteWarning}
+        onCancel={() => setShowDeleteWarning(false)}
+        onConfirm={deleteStep}
+        title="Delete step"
+        subtitle="Are you sure you want to delete this?"
+      />
+      {/* <Portal>
         <PaperModal
           visible={showDeleteWarning}
           onDismiss={() => setShowDeleteWarning(false)}
@@ -81,7 +89,7 @@ const EditStep = ({
             <Button onPress={deleteStep}>Yes</Button>
           </View>
         </PaperModal>
-      </Portal>
+      </Portal> */}
 
       <Modal
         visible={visible && !showDeleteWarning}
