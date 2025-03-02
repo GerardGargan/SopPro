@@ -46,7 +46,6 @@ const Upsert = () => {
         visibilityTime: 5000,
       });
       queryClient.invalidateQueries("departments");
-      router.back();
     },
     onError: (error) => {
       Toast.show({

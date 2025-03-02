@@ -19,7 +19,6 @@ import SelectPicker from "../../../../components/UI/SelectPicker";
 import { Picker } from "@react-native-picker/picker";
 
 const Upsert = () => {
-  const navigation = useNavigation();
   const { id } = useLocalSearchParams();
   const queryClient = useQueryClient();
   const router = useRouter();
@@ -40,12 +39,7 @@ const Upsert = () => {
 
   const [modalVisible, setModalVisisble] = useState(false);
 
-  const {
-    mutate: mutateUpdate,
-    isPending: isPendingUpdate,
-    isError: isErrorUpdate,
-    error: errorUpdate,
-  } = useMutation({
+  const { mutate: mutateUpdate, isPending: isPendingUpdate } = useMutation({
     mutationFn: () => updateUser(id, user),
     onSuccess: () => {
       Toast.show({
@@ -55,7 +49,6 @@ const Upsert = () => {
         visibilityTime: 5000,
       });
       queryClient.invalidateQueries("users");
-      router.back();
     },
     onError: (error) => {
       Toast.show({
@@ -67,7 +60,7 @@ const Upsert = () => {
     },
   });
 
-  const { data, isFetching, isError, error } = useQuery({
+  const { data, isPending, isError, error } = useQuery({
     queryKey: ["users", id],
     queryFn: () => fetchUser({ id }),
   });
@@ -146,7 +139,7 @@ const Upsert = () => {
     );
   }
 
-  if (isFetching) {
+  if (isPending) {
     return (
       <View style={styles.loader}>
         <ActivityIndicator animating={true} />
