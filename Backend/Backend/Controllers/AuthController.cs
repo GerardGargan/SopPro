@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using Backend.Models;
+using Backend.Models.DatabaseModels;
 using Backend.Models.Dto;
 using Backend.Service.Interface;
 using Backend.Utility;
@@ -111,7 +112,7 @@ namespace Backend.Controllers
         [HttpGet]
         [Route("{id}")]
         [Authorize]
-        [ProducesResponseType(200, Type = typeof(ApiResponse))]
+        [ProducesResponseType(200, Type = typeof(ApiResponse<ApplicationUserDto>))]
         public async Task<IActionResult> GetUser([FromRoute] string id)
         {
             ApplicationUserDto userDto = await _authService.GetById(id);
@@ -126,6 +127,23 @@ namespace Backend.Controllers
             return Ok(apiResponse);
         }
 
+        [HttpPut]
+        [Route("{id}")]
+        [Authorize(Roles = StaticDetails.Role_Admin)]
+        [ProducesResponseType(200, Type = typeof(ApiResponse))]
+        public async Task<IActionResult> UpdateUser([FromRoute] string id, [FromBody] ApplicationUserDto model)
+        {
+            await _authService.UpdateUser(model);
+
+            var apiResponse = new ApiResponse()
+            {
+                IsSuccess = true,
+                StatusCode = HttpStatusCode.OK,
+                SuccessMessage = "User updated"
+            };
+
+            return Ok(apiResponse);
+        }
 
         [HttpGet("roles")]
         [Authorize]

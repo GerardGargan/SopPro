@@ -131,6 +131,7 @@ namespace Backend.Service.Implementation
                     Surname = x.Surname,
                     OrganisationId = x.OrganisationId,
                     RoleId = UserRoleLookup.GetValueOrDefault(x.Id, null),
+                    Email = x.Email
                 }).ToListAsync();
 
             return allUsers;
@@ -164,6 +165,60 @@ namespace Backend.Service.Implementation
             };
 
             return userDto;
+        }
+
+        public async Task UpdateUser(ApplicationUserDto model)
+        {
+            if (string.IsNullOrWhiteSpace(model.Id))
+            {
+                throw new Exception("Id cant be null");
+            }
+
+            if (string.IsNullOrEmpty(model.Forename))
+            {
+                throw new Exception("Forename cant be empty");
+            }
+
+            if (string.IsNullOrEmpty(model.Surname))
+            {
+                throw new Exception("Surname cant be empty");
+            }
+
+            if (string.IsNullOrEmpty(model.RoleName))
+            {
+                throw new Exception("Role cant be empty");
+            }
+
+            if (model.RoleName != StaticDetails.Role_Admin && model.RoleName != StaticDetails.Role_User)
+            {
+                throw new Exception("Invalid role provided");
+            }
+
+            ApplicationUser userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(x => x.Id == model.Id, tracked: true);
+            var currentRoles = await _userManager.GetRolesAsync(userFromDb);
+
+            if (userFromDb == null)
+            {
+                throw new Exception("User not found");
+            }
+
+            await _unitOfWork.ExecuteInTransactionAsync(async () =>
+            {
+
+                // Safe to continue updating
+                userFromDb.Forename = model.Forename;
+                userFromDb.Surname = model.Surname;
+
+                // Remove any current roles before adding the new role
+                if (currentRoles.Any())
+                {
+                    await _userManager.RemoveFromRolesAsync(userFromDb, currentRoles);
+                }
+
+                await _userManager.AddToRoleAsync(userFromDb, model.RoleName.ToLower());
+
+                await _unitOfWork.SaveAsync();
+            });
         }
 
         public async Task<ApiResponse> RegisterInvitedUser(RegisterInviteRequestDTO model, ModelStateDictionary modelState)
