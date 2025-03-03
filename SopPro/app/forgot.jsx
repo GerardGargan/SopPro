@@ -2,12 +2,13 @@ import { StyleSheet, View } from "react-native";
 import React, { useState } from "react";
 import { ScrollView } from "react-native-gesture-handler";
 import Header from "../components/UI/Header";
-import { Button, TextInput } from "react-native-paper";
 import { validateEmail } from "../util/validationHelpers";
 import InputErrorMessage from "../components/UI/InputErrorMessage";
 import { forgotPassword } from "../util/httpRequests";
 import { useMutation } from "@tanstack/react-query";
 import Toast from "react-native-toast-message";
+import CustomTextInput from "../components/UI/form/CustomTextInput";
+import CustomButton from "../components/UI/form/CustomButton";
 
 const forgot = () => {
   const [email, setEmail] = useState("");
@@ -46,7 +47,7 @@ const forgot = () => {
     <ScrollView style={styles.rootContainer}>
       <View style={styles.formContainer}>
         <Header text="Reset password" textStyle={{ color: "black" }} />
-        <TextInput
+        <CustomTextInput
           style={styles.textInput}
           error={emailError !== false}
           label="Email"
@@ -57,16 +58,14 @@ const forgot = () => {
         {emailError !== false && (
           <InputErrorMessage>{emailError}</InputErrorMessage>
         )}
-        <Button
+        <CustomButton
           mode="contained"
           loading={isPending}
-          contentStyle={{ height: 50 }}
-          labelStyle={{ fontSize: 20 }}
-          style={styles.buttonContainer}
+          style={{ marginVertical: 10 }}
           onPress={handlePress}
         >
           Reset Password
-        </Button>
+        </CustomButton>
       </View>
     </ScrollView>
   );
