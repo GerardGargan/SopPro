@@ -48,7 +48,7 @@ namespace Backend.Service.Implementation
 
         public async Task<ApiResponse<LoginResponseDTO>> Login(LoginRequestDTO model, ModelStateDictionary modelState)
         {
-            ApplicationUser userFromDb = await _userManager.FindByEmailAsync(model.Email.ToLower());
+            ApplicationUser userFromDb = await _db.ApplicationUsers.IgnoreQueryFilters().Where(x => x.Email == model.Email.ToLower()).FirstOrDefaultAsync();
 
             if (userFromDb == null)
             {
