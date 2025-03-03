@@ -273,7 +273,7 @@ namespace Backend.Service.Implementation
             }
 
             // Attempt to fetch a user to check if they already exist
-            ApplicationUser userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(u => u.UserName.ToLower() == invitationFromDb.Email.ToLower());
+            ApplicationUser userFromDb = await _db.ApplicationUsers.IgnoreQueryFilters().Where(x => x.UserName.ToLower() == invitationFromDb.Email.ToLower()).FirstOrDefaultAsync();
 
             // User with that email exists
             if (userFromDb != null)
@@ -318,7 +318,8 @@ namespace Backend.Service.Implementation
             model.Role = model.Role.Trim().ToLower();
 
             // Perform validation and error handling
-            ApplicationUser userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(u => u.UserName.ToLower() == model.Email);
+            ApplicationUser userFromDb = await _db.ApplicationUsers.IgnoreQueryFilters().Where(x => x.UserName.ToLower() == model.Email).FirstOrDefaultAsync();
+
             var orgId = _tenancyResolver.GetOrganisationid();
             Organisation orgFromDb = await _unitOfWork.Organisations.GetAsync(o => o.Id == orgId);
 
@@ -415,7 +416,7 @@ namespace Backend.Service.Implementation
                 var apiResponse = new ApiResponse();
 
                 // check is user already exists
-                ApplicationUser userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(user => user.UserName.ToLower() == model.Email);
+                ApplicationUser userFromDb = await _db.ApplicationUsers.IgnoreQueryFilters().Where(x => x.UserName.ToLower() == model.Email).FirstOrDefaultAsync();
 
                 if (userFromDb != null)
                 {
@@ -498,7 +499,8 @@ namespace Backend.Service.Implementation
 
         public async Task ForgotPassword(ForgotPasswordRequest model)
         {
-            var user = await _userManager.FindByEmailAsync(model.Email);
+            // var user = await _userManager.FindByEmailAsync(model.Email);
+            var user = await _db.ApplicationUsers.IgnoreQueryFilters().Where(x => x.UserName == model.Email.ToLower()).FirstOrDefaultAsync();
 
             if (user != null)
             {
@@ -519,7 +521,8 @@ namespace Backend.Service.Implementation
                 throw new Exception("Password does not meet requirements");
             }
 
-            var user = await _userManager.FindByEmailAsync(model.Email);
+            var user = await _db.ApplicationUsers.IgnoreQueryFilters().Where(x => x.UserName == model.Email.ToLower()).FirstOrDefaultAsync();
+
             if (user == null)
             {
                 throw new Exception("User could not be found");
