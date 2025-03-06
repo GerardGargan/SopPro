@@ -1,19 +1,19 @@
 import { FlatList, StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { useQuery } from "@tanstack/react-query";
-import { fetchDepartments } from "../../util/httpRequests";
+import { fetchAllUsers } from "../../util/httpRequests";
 import { ActivityIndicator } from "react-native-paper";
 import ErrorBlock from "../UI/ErrorBlock";
 import EntityCard from "../UI/EntityCard";
-import { Building } from "lucide-react-native";
+import { User } from "lucide-react-native";
 import { useRouter } from "expo-router";
 
-const DepartmentList = () => {
+const UserList = () => {
   const router = useRouter();
 
   const { data, isFetching, isError, error } = useQuery({
-    queryKey: ["departments"],
-    queryFn: fetchDepartments,
+    queryKey: ["users"],
+    queryFn: fetchAllUsers,
   });
 
   if (isFetching) {
@@ -40,18 +40,16 @@ const DepartmentList = () => {
       keyExtractor={(item) => item.id}
       renderItem={({ item }) => (
         <EntityCard
-          name={item.name}
-          Icon={Building}
-          onPress={() =>
-            router.navigate(`(auth)/(admin)/department/${item.id}`)
-          }
+          name={`${item.forename} ${item.surname}`}
+          Icon={User}
+          onPress={() => router.navigate(`(auth)/(admin)/user/${item.id}`)}
         />
       )}
     />
   );
 };
 
-export default DepartmentList;
+export default UserList;
 
 const styles = StyleSheet.create({
   loader: {

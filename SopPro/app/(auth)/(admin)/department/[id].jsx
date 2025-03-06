@@ -36,7 +36,7 @@ const Upsert = () => {
 
   const mutationFunction = isCreate ? createDepartment : updateDepartment;
 
-  const { mutate } = useMutation({
+  const { mutate, isPending: isPendingMutate } = useMutation({
     mutationFn: mutationFunction,
     onSuccess: () => {
       Toast.show({
@@ -46,7 +46,6 @@ const Upsert = () => {
         visibilityTime: 5000,
       });
       queryClient.invalidateQueries("departments");
-      router.back();
     },
     onError: (error) => {
       Toast.show({
@@ -81,7 +80,7 @@ const Upsert = () => {
     },
   });
 
-  const { data, isFetching, isError, error } = useQuery({
+  const { data, isPending, isError, error } = useQuery({
     enabled: id != -1,
     queryKey: ["departments", id],
     queryFn: () => fetchDepartment(id),
@@ -121,7 +120,7 @@ const Upsert = () => {
     setModalVisisble(false);
   }
 
-  if (isFetching) {
+  if (isPending) {
     return (
       <View style={styles.loader}>
         <ActivityIndicator animating={true} />
@@ -169,6 +168,7 @@ const Upsert = () => {
           mode="contained"
           style={{ marginVertical: 10 }}
           onPress={handleSubmit}
+          loading={isPendingMutate}
         >
           Save
         </CustomButton>

@@ -1,12 +1,14 @@
 import { StyleSheet, Text, View } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
-import { Button, TextInput } from "react-native-paper";
+import { TextInput } from "react-native-paper";
 import { useMutation } from "@tanstack/react-query";
 import { resetPassword } from "../util/httpRequests";
 import { validatePassword } from "../util/validationHelpers";
 import InputErrorMessage from "../components/UI/InputErrorMessage";
 import Toast from "react-native-toast-message";
+import CustomTextInput from "../components/UI/form/CustomTextInput";
+import CustomButton from "../components/UI/form/CustomButton";
 
 const reset = () => {
   const { token, email } = useLocalSearchParams();
@@ -47,7 +49,7 @@ const reset = () => {
 
   return (
     <View style={styles.rootContainer}>
-      <TextInput
+      <CustomTextInput
         label="New Password"
         error={passwordError !== false}
         value={password}
@@ -63,16 +65,14 @@ const reset = () => {
       {passwordError !== false && (
         <InputErrorMessage>{passwordError}</InputErrorMessage>
       )}
-      <Button
+      <CustomButton
         mode="contained"
         loading={isPending}
-        contentStyle={{ height: 50 }}
-        labelStyle={{ fontSize: 20 }}
-        style={styles.buttonContainer}
+        style={{ marginVertical: 10 }}
         onPress={handlePress}
       >
         Reset Password
-      </Button>
+      </CustomButton>
     </View>
   );
 };

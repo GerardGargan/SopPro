@@ -910,6 +910,25 @@ namespace Backend.Service.Implementation
             };
         }
 
+        public async Task RemoveAllUserFavourites(string userId, bool isSave)
+        {
+            if (userId == null)
+            {
+                throw new Exception("User id cant be null");
+            }
+
+            var favouritesFromDb = await _unitOfWork.SopUserFavourites.GetAll(x => x.ApplicationUserId == userId).ToListAsync();
+            if (favouritesFromDb.Count > 0)
+            {
+                _unitOfWork.SopUserFavourites.RemoveRange(favouritesFromDb);
+
+                if (isSave)
+                {
+                    await _unitOfWork.SaveAsync();
+                }
+            }
+        }
+
         public async Task<ApiResponse> ApproveSop(int id)
         {
             var updatedSop = await UpdateLatestVersionStatus(id, SopStatus.Approved);

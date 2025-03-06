@@ -1,24 +1,24 @@
 import { StyleSheet, View } from "react-native";
 import React from "react";
-import DepartmentList from "../../../../components/departments/DepartmentList";
 import { useRouter } from "expo-router";
 import { FAB, Portal } from "react-native-paper";
 import { useIsFocused } from "@react-navigation/native";
+import UserList from "../../../../components/users/UserList";
 
-const departments = () => {
+const users = () => {
   const router = useRouter();
   const isFocused = useIsFocused();
 
   return (
     <View style={styles.container}>
-      <DepartmentList />
+      <UserList />
       <Portal>
         {isFocused && (
           <FAB
             icon="plus"
             style={styles.fab}
             onPress={() => {
-              router.navigate("(auth)/(admin)/department/-1");
+              router.navigate("(auth)/(admin)/invite");
             }}
           />
         )}
@@ -27,7 +27,7 @@ const departments = () => {
   );
 };
 
-export default departments;
+export default users;
 
 const styles = StyleSheet.create({
   container: {

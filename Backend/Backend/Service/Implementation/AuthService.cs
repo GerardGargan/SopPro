@@ -10,6 +10,7 @@ using Backend.Utility;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.Data;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using System.Net;
 using System.Security.Claims;
@@ -29,8 +30,9 @@ namespace Backend.Service.Implementation
         private readonly ITenancyResolver _tenancyResolver;
         private readonly IEmailService _emailService;
         private readonly ITemplateService _templateService;
+        private readonly ISopService _sopService;
 
-        public AuthService(ApplicationDbContext db, IConfiguration configuration, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IJwtService jwtService, IOptions<IdentityOptions> identityOptions, IUnitOfWork unitOfWork, IOptions<ApplicationSettings> appSettings, ITenancyResolver tenancyResolver, IEmailService emailService, ITemplateService templateService, SignInManager<ApplicationUser> signInManager)
+        public AuthService(ApplicationDbContext db, IConfiguration configuration, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IJwtService jwtService, IOptions<IdentityOptions> identityOptions, IUnitOfWork unitOfWork, IOptions<ApplicationSettings> appSettings, ITenancyResolver tenancyResolver, IEmailService emailService, ITemplateService templateService, SignInManager<ApplicationUser> signInManager, ISopService sopService)
         {
             _db = db;
             _userManager = userManager;
@@ -43,11 +45,12 @@ namespace Backend.Service.Implementation
             _tenancyResolver = tenancyResolver;
             _emailService = emailService;
             _templateService = templateService;
+            _sopService = sopService;
         }
 
         public async Task<ApiResponse<LoginResponseDTO>> Login(LoginRequestDTO model, ModelStateDictionary modelState)
         {
-            ApplicationUser userFromDb = await _userManager.FindByEmailAsync(model.Email.ToLower());
+            ApplicationUser userFromDb = await _db.ApplicationUsers.IgnoreQueryFilters().Where(x => x.Email == model.Email.ToLower()).FirstOrDefaultAsync();
 
             if (userFromDb == null)
             {
@@ -116,6 +119,144 @@ namespace Backend.Service.Implementation
             };
 
         }
+
+        public async Task<List<ApplicationUserDto>> GetAll()
+        {
+            Dictionary<string, string> UserRoleLookup = await _db.UserRoles.ToDictionaryAsync(x => x.UserId, x => x.RoleId);
+
+            List<ApplicationUserDto> allUsers = await _unitOfWork.ApplicationUsers
+                .GetAll()
+                .Select(x => new ApplicationUserDto()
+                {
+                    Id = x.Id,
+                    Forename = x.Forename,
+                    Surname = x.Surname,
+                    OrganisationId = x.OrganisationId,
+                    RoleId = UserRoleLookup.GetValueOrDefault(x.Id, null),
+                    Email = x.Email
+                }).ToListAsync();
+
+            return allUsers;
+
+        }
+
+        public async Task<ApplicationUserDto> GetById(string id)
+        {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                throw new Exception("Id cant be empty");
+            }
+
+            var userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(x => x.Id == id);
+            if (userFromDb == null)
+            {
+                throw new Exception("User not found");
+            }
+
+            string userRoleId = await _db.UserRoles.Where(x => x.UserId == userFromDb.Id).Select(x => x.RoleId).FirstOrDefaultAsync();
+            string roleName = await _db.Roles.Where(x => x.Id == userRoleId).Select(x => x.Name).FirstOrDefaultAsync();
+
+            ApplicationUserDto userDto = new ApplicationUserDto()
+            {
+                Forename = userFromDb.Forename,
+                Surname = userFromDb.Surname,
+                Email = userFromDb.Email,
+                Id = userFromDb.Id,
+                RoleId = userRoleId,
+                RoleName = roleName
+            };
+
+            return userDto;
+        }
+
+        public async Task UpdateUser(ApplicationUserDto model)
+        {
+            if (string.IsNullOrWhiteSpace(model.Id))
+            {
+                throw new Exception("Id cant be null");
+            }
+
+            if (string.IsNullOrEmpty(model.Forename))
+            {
+                throw new Exception("Forename cant be empty");
+            }
+
+            if (string.IsNullOrEmpty(model.Surname))
+            {
+                throw new Exception("Surname cant be empty");
+            }
+
+            if (string.IsNullOrEmpty(model.RoleName))
+            {
+                throw new Exception("Role cant be empty");
+            }
+
+            if (model.RoleName != StaticDetails.Role_Admin && model.RoleName != StaticDetails.Role_User)
+            {
+                throw new Exception("Invalid role provided");
+            }
+
+            ApplicationUser userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(x => x.Id == model.Id, tracked: true);
+            var currentRoles = await _userManager.GetRolesAsync(userFromDb);
+
+            if (userFromDb == null)
+            {
+                throw new Exception("User not found");
+            }
+
+            await _unitOfWork.ExecuteInTransactionAsync(async () =>
+            {
+
+                // Safe to continue updating
+                userFromDb.Forename = model.Forename;
+                userFromDb.Surname = model.Surname;
+
+                // Remove any current roles before adding the new role
+                if (currentRoles.Any())
+                {
+                    await _userManager.RemoveFromRolesAsync(userFromDb, currentRoles);
+                }
+
+                await _userManager.AddToRoleAsync(userFromDb, model.RoleName.ToLower());
+
+                await _unitOfWork.SaveAsync();
+            });
+        }
+
+        public async Task DeleteUser(string id)
+        {
+            ApplicationUser userFromDb = await _userManager.FindByIdAsync(id);
+
+            if (string.IsNullOrEmpty(id))
+            {
+                throw new Exception("User id cant be null");
+            }
+
+            if (userFromDb == null)
+            {
+                throw new Exception("User not found");
+            }
+
+            if (id == _tenancyResolver.GetUserId())
+            {
+                throw new Exception("You can't delete your own account while logged in");
+            }
+
+            await _unitOfWork.ExecuteInTransactionAsync(async () =>
+            {
+                // Delete User Sop Favourites
+                await _sopService.RemoveAllUserFavourites(id, false);
+
+                // Set Author and ApprovedBy to null on sopVersions for this user (FK References)
+                await _unitOfWork.SopVersions.GetAll(x => x.AuthorId == id).ExecuteUpdateAsync(x => x.SetProperty(x => x.AuthorId, (string)null));
+                await _unitOfWork.SopVersions.GetAll(x => x.ApprovedById == id).ExecuteUpdateAsync(x => x.SetProperty(x => x.ApprovedById, (string)null));
+
+                // Delete the user
+                await _userManager.DeleteAsync(userFromDb);
+                await _unitOfWork.SaveAsync();
+            });
+        }
+
         public async Task<ApiResponse> RegisterInvitedUser(RegisterInviteRequestDTO model, ModelStateDictionary modelState)
         {
             // Sanitise inputs
@@ -168,7 +309,7 @@ namespace Backend.Service.Implementation
             }
 
             // Attempt to fetch a user to check if they already exist
-            ApplicationUser userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(u => u.UserName.ToLower() == invitationFromDb.Email.ToLower());
+            ApplicationUser userFromDb = await _db.ApplicationUsers.IgnoreQueryFilters().Where(x => x.UserName.ToLower() == invitationFromDb.Email.ToLower()).FirstOrDefaultAsync();
 
             // User with that email exists
             if (userFromDb != null)
@@ -213,7 +354,8 @@ namespace Backend.Service.Implementation
             model.Role = model.Role.Trim().ToLower();
 
             // Perform validation and error handling
-            ApplicationUser userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(u => u.UserName.ToLower() == model.Email);
+            ApplicationUser userFromDb = await _db.ApplicationUsers.IgnoreQueryFilters().Where(x => x.UserName.ToLower() == model.Email).FirstOrDefaultAsync();
+
             var orgId = _tenancyResolver.GetOrganisationid();
             Organisation orgFromDb = await _unitOfWork.Organisations.GetAsync(o => o.Id == orgId);
 
@@ -310,7 +452,7 @@ namespace Backend.Service.Implementation
                 var apiResponse = new ApiResponse();
 
                 // check is user already exists
-                ApplicationUser userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(user => user.UserName.ToLower() == model.Email);
+                ApplicationUser userFromDb = await _db.ApplicationUsers.IgnoreQueryFilters().Where(x => x.UserName.ToLower() == model.Email).FirstOrDefaultAsync();
 
                 if (userFromDb != null)
                 {
@@ -393,7 +535,8 @@ namespace Backend.Service.Implementation
 
         public async Task ForgotPassword(ForgotPasswordRequest model)
         {
-            var user = await _userManager.FindByEmailAsync(model.Email);
+            // var user = await _userManager.FindByEmailAsync(model.Email);
+            var user = await _db.ApplicationUsers.IgnoreQueryFilters().Where(x => x.UserName == model.Email.ToLower()).FirstOrDefaultAsync();
 
             if (user != null)
             {
@@ -414,7 +557,8 @@ namespace Backend.Service.Implementation
                 throw new Exception("Password does not meet requirements");
             }
 
-            var user = await _userManager.FindByEmailAsync(model.Email);
+            var user = await _db.ApplicationUsers.IgnoreQueryFilters().Where(x => x.UserName == model.Email.ToLower()).FirstOrDefaultAsync();
+
             if (user == null)
             {
                 throw new Exception("User could not be found");
@@ -432,6 +576,17 @@ namespace Backend.Service.Implementation
                 SuccessMessage = "Password reset successfully",
                 StatusCode = HttpStatusCode.OK
             };
+        }
+
+        public async Task<List<RoleDto>> GetRoles()
+        {
+            List<RoleDto> allRoles = await _db.Roles.Select(x => new RoleDto()
+            {
+                Id = x.Id,
+                Name = x.Name
+            }).ToListAsync();
+
+            return allRoles;
         }
 
         public bool ValidatePassword(string password)

@@ -21,6 +21,8 @@ namespace Backend.Service.Interface
         public Task<SopDto> GenerateAiSop(AiRequestDto model);
         public Task<AnalyticsResponseDto> GetAnalytics();
         public Task RevertSop(RevertRequestDto model);
+        public Task RemoveAllUserFavourites(string userId, bool isSave);
+
 
     };
 }

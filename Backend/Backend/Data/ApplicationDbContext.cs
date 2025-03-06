@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Backend.Models.DatabaseModels;
+using Backend.Models.Tenancy;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,9 +9,11 @@ namespace Backend.Data
     public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
-        public ApplicationDbContext(DbContextOptions options, IHttpContextAccessor httpContextAccessor) : base(options)
+        private readonly ITenancyResolver _tenancyResolver;
+        public ApplicationDbContext(DbContextOptions options, IHttpContextAccessor httpContextAccessor, ITenancyResolver tenancyResolver) : base(options)
         {
             _httpContextAccessor = httpContextAccessor;
+            _tenancyResolver = tenancyResolver;
         }
 
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
@@ -40,6 +43,9 @@ namespace Backend.Data
                     method.Invoke(null, new object[] { modelBuilder, this });
                 }
             }
+
+            modelBuilder.Entity<ApplicationUser>()
+                .HasQueryFilter(u => u.OrganisationId == _tenancyResolver.GetOrganisationid());
 
             // Relationships for ApplicationUser
             modelBuilder.Entity<ApplicationUser>()

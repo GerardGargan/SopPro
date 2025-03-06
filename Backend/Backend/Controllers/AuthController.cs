@@ -1,5 +1,6 @@
 ﻿using System.Net;
 using Backend.Models;
+using Backend.Models.DatabaseModels;
 using Backend.Models.Dto;
 using Backend.Service.Interface;
 using Backend.Utility;
@@ -89,6 +90,94 @@ namespace Backend.Controllers
                 return StatusCode((int)apiResponse.StatusCode, apiResponse);
             }
 
+        }
+
+        [HttpGet]
+        [Authorize]
+        [ProducesResponseType(200, Type = typeof(ApiResponse))]
+        public async Task<IActionResult> GetAll()
+        {
+            List<ApplicationUserDto> allUsers = await _authService.GetAll();
+
+            ApiResponse<List<ApplicationUserDto>> apiResponse = new ApiResponse<List<ApplicationUserDto>>()
+            {
+                IsSuccess = true,
+                StatusCode = HttpStatusCode.OK,
+                Result = allUsers
+            };
+
+            return Ok(apiResponse);
+        }
+
+        [HttpGet]
+        [Route("{id}")]
+        [Authorize]
+        [ProducesResponseType(200, Type = typeof(ApiResponse<ApplicationUserDto>))]
+        public async Task<IActionResult> GetUser([FromRoute] string id)
+        {
+            ApplicationUserDto userDto = await _authService.GetById(id);
+
+            var apiResponse = new ApiResponse<ApplicationUserDto>()
+            {
+                IsSuccess = true,
+                StatusCode = HttpStatusCode.OK,
+                Result = userDto
+            };
+
+            return Ok(apiResponse);
+        }
+
+        [HttpPut]
+        [Route("{id}")]
+        [Authorize(Roles = StaticDetails.Role_Admin)]
+        [ProducesResponseType(200, Type = typeof(ApiResponse))]
+        public async Task<IActionResult> UpdateUser([FromRoute] string id, [FromBody] ApplicationUserDto model)
+        {
+            await _authService.UpdateUser(model);
+
+            var apiResponse = new ApiResponse()
+            {
+                IsSuccess = true,
+                StatusCode = HttpStatusCode.OK,
+                SuccessMessage = "User updated"
+            };
+
+            return Ok(apiResponse);
+        }
+
+        [HttpGet("roles")]
+        [Authorize]
+        [ProducesResponseType(200, Type = typeof(ApiResponse))]
+        public async Task<IActionResult> GetRoles()
+        {
+            var allRoles = await _authService.GetRoles();
+
+            ApiResponse<List<RoleDto>> apiResponse = new ApiResponse<List<RoleDto>>()
+            {
+                IsSuccess = true,
+                StatusCode = HttpStatusCode.OK,
+                Result = allRoles
+            };
+
+            return Ok(apiResponse);
+        }
+
+        [HttpDelete]
+        [Authorize(Roles = StaticDetails.Role_Admin)]
+        [Route("{id}")]
+        [ProducesResponseType(200, Type = typeof(ApiResponse))]
+        public async Task<IActionResult> DeleteUser([FromRoute] string id)
+        {
+            await _authService.DeleteUser(id);
+
+            var apiResponse = new ApiResponse()
+            {
+                IsSuccess = true,
+                StatusCode = HttpStatusCode.OK,
+                SuccessMessage = "User deleted"
+            };
+
+            return Ok(apiResponse);
         }
 
         [Authorize]

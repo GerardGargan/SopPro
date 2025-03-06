@@ -328,6 +328,55 @@ export async function inviteUser({ email, role }) {
   }
 }
 
+export async function fetchAllUsers() {
+  try {
+    const response = await api.get("/auth");
+    return response.data.result;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error fetching users"
+    );
+    throw error;
+  }
+}
+
+export async function fetchUser({ id }) {
+  try {
+    const response = await api.get(`/auth/${id}`);
+    return response.data.result;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error fetching users"
+    );
+    throw error;
+  }
+}
+
+export async function updateUser(id, { forename, surname, roleName }) {
+  const data = { id, forename, surname, roleName };
+  try {
+    const response = await api.put(`/auth/${id}`, data);
+    return response.data;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error updating user"
+    );
+    throw error;
+  }
+}
+
+export async function deleteUser({ id }) {
+  try {
+    const response = await api.delete(`/auth/${id}`);
+    return response.data;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error updating user"
+    );
+    throw error;
+  }
+}
+
 export async function completeRegistration({
   forename,
   surname,
