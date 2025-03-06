@@ -30,8 +30,9 @@ namespace Backend.Service.Implementation
         private readonly ITenancyResolver _tenancyResolver;
         private readonly IEmailService _emailService;
         private readonly ITemplateService _templateService;
+        private readonly ISopService _sopService;
 
-        public AuthService(ApplicationDbContext db, IConfiguration configuration, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IJwtService jwtService, IOptions<IdentityOptions> identityOptions, IUnitOfWork unitOfWork, IOptions<ApplicationSettings> appSettings, ITenancyResolver tenancyResolver, IEmailService emailService, ITemplateService templateService, SignInManager<ApplicationUser> signInManager)
+        public AuthService(ApplicationDbContext db, IConfiguration configuration, RoleManager<IdentityRole> roleManager, UserManager<ApplicationUser> userManager, IJwtService jwtService, IOptions<IdentityOptions> identityOptions, IUnitOfWork unitOfWork, IOptions<ApplicationSettings> appSettings, ITenancyResolver tenancyResolver, IEmailService emailService, ITemplateService templateService, SignInManager<ApplicationUser> signInManager, ISopService sopService)
         {
             _db = db;
             _userManager = userManager;
@@ -44,6 +45,7 @@ namespace Backend.Service.Implementation
             _tenancyResolver = tenancyResolver;
             _emailService = emailService;
             _templateService = templateService;
+            _sopService = sopService;
         }
 
         public async Task<ApiResponse<LoginResponseDTO>> Login(LoginRequestDTO model, ModelStateDictionary modelState)
@@ -217,6 +219,40 @@ namespace Backend.Service.Implementation
 
                 await _userManager.AddToRoleAsync(userFromDb, model.RoleName.ToLower());
 
+                await _unitOfWork.SaveAsync();
+            });
+        }
+
+        public async Task DeleteUser(string id)
+        {
+            ApplicationUser userFromDb = await _userManager.FindByIdAsync(id);
+
+            if (string.IsNullOrEmpty(id))
+            {
+                throw new Exception("User id cant be null");
+            }
+
+            if (userFromDb == null)
+            {
+                throw new Exception("User not found");
+            }
+
+            if (id == _tenancyResolver.GetUserId())
+            {
+                throw new Exception("You can't delete your own account while logged in");
+            }
+
+            await _unitOfWork.ExecuteInTransactionAsync(async () =>
+            {
+                // Delete User Sop Favourites
+                await _sopService.RemoveAllUserFavourites(id, false);
+
+                // Set Author and ApprovedBy to null on sopVersions for this user (FK References)
+                await _unitOfWork.SopVersions.GetAll(x => x.AuthorId == id).ExecuteUpdateAsync(x => x.SetProperty(x => x.AuthorId, (string)null));
+                await _unitOfWork.SopVersions.GetAll(x => x.ApprovedById == id).ExecuteUpdateAsync(x => x.SetProperty(x => x.ApprovedById, (string)null));
+
+                // Delete the user
+                await _userManager.DeleteAsync(userFromDb);
                 await _unitOfWork.SaveAsync();
             });
         }

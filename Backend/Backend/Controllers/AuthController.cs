@@ -162,6 +162,24 @@ namespace Backend.Controllers
             return Ok(apiResponse);
         }
 
+        [HttpDelete]
+        [Authorize(Roles = StaticDetails.Role_Admin)]
+        [Route("{id}")]
+        [ProducesResponseType(200, Type = typeof(ApiResponse))]
+        public async Task<IActionResult> DeleteUser([FromRoute] string id)
+        {
+            await _authService.DeleteUser(id);
+
+            var apiResponse = new ApiResponse()
+            {
+                IsSuccess = true,
+                StatusCode = HttpStatusCode.OK,
+                SuccessMessage = "User deleted"
+            };
+
+            return Ok(apiResponse);
+        }
+
         [Authorize]
         [HttpPost("password")]
         [ProducesResponseType(200, Type = typeof(ApiResponse))]

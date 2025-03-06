@@ -19,5 +19,6 @@ namespace Backend.Service.Interface
         Task<ApplicationUserDto> GetById(string id);
         Task<List<RoleDto>> GetRoles();
         Task UpdateUser(ApplicationUserDto model);
+        Task DeleteUser(string id);
     }
 }
