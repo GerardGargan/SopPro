@@ -365,6 +365,18 @@ export async function updateUser(id, { forename, surname, roleName }) {
   }
 }
 
+export async function deleteUser({ id }) {
+  try {
+    const response = await api.delete(`/auth/${id}`);
+    return response.data;
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error updating user"
+    );
+    throw error;
+  }
+}
+
 export async function completeRegistration({
   forename,
   surname,

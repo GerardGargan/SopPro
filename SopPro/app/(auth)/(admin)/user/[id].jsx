@@ -2,7 +2,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React, { useEffect, useLayoutEffect, useState } from "react";
 import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import {
-  fetchDepartment,
+  deleteUser,
   fetchUser,
   updateUser,
 } from "../../../../util/httpRequests";
@@ -55,6 +55,29 @@ const Upsert = () => {
         type: "error",
         text1: "Oops something went wrong!",
         text2: error.message || "The user was not updated",
+        visibilityTime: 5000,
+      });
+    },
+  });
+
+  const { mutate: mutateDelete, isPending: isDeleting } = useMutation({
+    mutationFn: deleteUser,
+    onSuccess: () => {
+      Toast.show({
+        type: "success",
+        text1: "Success",
+        text2: `User Deleted`,
+        visibilityTime: 5000,
+      });
+      queryClient.removeQueries({ queryKey: ["users", id] });
+      queryClient.invalidateQueries("users");
+      router.back();
+    },
+    onError: (error) => {
+      Toast.show({
+        type: "error",
+        text1: "Oops something went wrong!",
+        text2: error.message || "The user was not deleted",
         visibilityTime: 5000,
       });
     },
@@ -122,6 +145,7 @@ const Upsert = () => {
   }
 
   function handleDeletion() {
+    mutateDelete({ id });
     dismissModal();
   }
 
@@ -148,7 +172,7 @@ const Upsert = () => {
   }
 
   const deleteButton = (
-    <TouchableOpacity onPress={handleShowDeletePrompt} disabled={false}>
+    <TouchableOpacity onPress={handleShowDeletePrompt} disabled={isDeleting}>
       <Trash2 size={24} color={false ? "#999" : "#ff4444"} />
     </TouchableOpacity>
   );
