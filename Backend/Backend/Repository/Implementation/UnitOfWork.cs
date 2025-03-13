@@ -16,6 +16,7 @@ namespace Backend.Repository.Implementation
         public ISopStepRepository SopSteps { get; private set; }
         public ISopVersionRepository SopVersions { get; private set; }
         public ISopUserFavouriteRepository SopUserFavourites { get; private set; }
+        public ISettingRepository Settings { get; private set; }
 
         public UnitOfWork(ApplicationDbContext db)
         {
@@ -30,6 +31,7 @@ namespace Backend.Repository.Implementation
             SopSteps = new SopStepRepository(_db);
             SopVersions = new SopVersionRepository(_db);
             SopUserFavourites = new SopUserFavouriteRepository(_db);
+            Settings = new SettingRepository(_db);
         }
 
         public async Task ExecuteInTransactionAsync(Func<Task> action)
