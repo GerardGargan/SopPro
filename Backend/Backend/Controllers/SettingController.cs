@@ -34,5 +34,20 @@ namespace Backend.Controllers
 
             return Ok(apiResponse);
         }
+
+        [HttpPost]
+        [ProducesResponseType(200, Type = typeof(ApiResponse))]
+        public async Task<IActionResult> Create([FromBody] SettingDto model)
+        {
+            await _settingService.Create(model);
+            ApiResponse apiResponse = new ApiResponse()
+            {
+                IsSuccess = true,
+                StatusCode = HttpStatusCode.OK,
+                SuccessMessage = "Setting Created"
+            };
+
+            return Ok(apiResponse);
+        }
     }
 }
