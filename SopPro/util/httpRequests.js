@@ -89,8 +89,6 @@ export async function fetchSops({
 
 export async function uploadImage(formData) {
   try {
-    console.log("sending");
-
     const response = await api.post("/sop/upload", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
@@ -415,6 +413,46 @@ export async function getAnalytics() {
   } catch (e) {
     const error = new Error(
       e.response?.data?.errorMessage || "Error loading analytics"
+    );
+    throw error;
+  }
+}
+
+export async function getSettingByKey(key) {
+  try {
+    const response = await api.get(`/setting/${key}`);
+    return response.data;
+  } catch (e) {
+    if (e.response?.status === 404) {
+      return null;
+    }
+
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error fetching setting"
+    );
+    throw error;
+  }
+}
+
+export async function createSetting({ type, key, value }) {
+  const data = { type, key, value };
+  try {
+    const response = await api.post(`/setting`, data);
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error creating setting"
+    );
+    throw error;
+  }
+}
+
+export async function updateSetting({ type, key, value }) {
+  const data = { type, key, value };
+  try {
+    const response = await api.put(`/setting/${key}`, data);
+  } catch (e) {
+    const error = new Error(
+      e.response?.data?.errorMessage || "Error updating setting"
     );
     throw error;
   }

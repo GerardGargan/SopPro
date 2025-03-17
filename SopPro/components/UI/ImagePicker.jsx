@@ -7,6 +7,10 @@ export default function ImagePickerComponent({ imageUrl, onSelect }) {
   const theme = useTheme();
   const [image, setImage] = useState(imageUrl);
 
+  useEffect(() => {
+    setImage(imageUrl);
+  }, [imageUrl]);
+
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],

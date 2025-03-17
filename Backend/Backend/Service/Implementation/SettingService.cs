@@ -77,7 +77,7 @@ namespace Backend.Service.Implementation
 
             if (setting == null)
             {
-                throw new KeyNotFoundException("Setting not found");
+                return new SettingDto() { };
             }
 
             SettingDto settingDto = new SettingDto()
