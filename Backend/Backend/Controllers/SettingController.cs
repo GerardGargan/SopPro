@@ -49,5 +49,38 @@ namespace Backend.Controllers
 
             return Ok(apiResponse);
         }
+
+        [HttpDelete]
+        [Route("{id:int}")]
+        [ProducesResponseType(200, Type = typeof(ApiResponse))]
+        public async Task<IActionResult> Delete(int id)
+        {
+            await _settingService.Delete(id);
+            ApiResponse apiResponse = new ApiResponse()
+            {
+                IsSuccess = true,
+                StatusCode = HttpStatusCode.OK,
+                SuccessMessage = "Setting deleted"
+            };
+
+            return Ok(apiResponse);
+        }
+
+        [HttpPut]
+        [Route("{id:int}")]
+        [ProducesResponseType(200, Type = typeof(ApiResponse))]
+        public async Task<IActionResult> Update([FromBody] SettingDto model)
+        {
+            await _settingService.Update(model);
+            ApiResponse apiResponse = new ApiResponse()
+            {
+                IsSuccess = true,
+                StatusCode = HttpStatusCode.OK,
+                SuccessMessage = "Setting updated"
+            };
+
+            return Ok(apiResponse);
+        }
     }
+
 }
