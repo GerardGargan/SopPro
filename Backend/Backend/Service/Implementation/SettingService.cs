@@ -45,6 +45,7 @@ namespace Backend.Service.Implementation
             {
                 Key = model.Key,
                 Type = model.Type,
+                Value = model.Value,
                 ApplicationUserId = model.ApplicationUserId,
                 OrganisationId = _tenancyResolver.GetOrganisationid().Value
             };

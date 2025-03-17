@@ -67,7 +67,7 @@ namespace Backend.Controllers
         }
 
         [HttpPut]
-        [Route("{id:int}")]
+        [Route("{key}")]
         [ProducesResponseType(200, Type = typeof(ApiResponse))]
         public async Task<IActionResult> Update([FromBody] SettingDto model)
         {
