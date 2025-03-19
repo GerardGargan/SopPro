@@ -200,7 +200,7 @@ namespace Backend.Tests
 
             var applicationUser = new ApplicationUser()
             {
-                UserName = request.Email
+                UserName = request.Email,
             };
 
             _dbContext.ApplicationUsers.Add(applicationUser);
@@ -273,7 +273,10 @@ namespace Backend.Tests
                 Surname = "Doe"
             };
 
+            var applicationUser = new ApplicationUser()
+            {
 
+            };
             // Act & Assert
             var exception = Assert.ThrowsAsync<Exception>(async () => await _authService.SignupOrganisation(request, _modelState));
             Assert.That(exception.Message, Is.EqualTo("Password does not meet minimum requirements"));
@@ -297,6 +300,9 @@ namespace Backend.Tests
                 UserName = loginRequest.Email
             };
 
+            _dbContext.ApplicationUsers.Add(applicationUser);
+            await _dbContext.SaveChangesAsync();
+
             var roles = new List<string> { StaticDetails.Role_Admin };
             var expectedToken = "test-jwt-token";
 
@@ -311,6 +317,9 @@ namespace Backend.Tests
 
             _jwtServiceMock.Setup(jwt => jwt.GenerateAuthToken(applicationUser, roles, It.IsAny<string>(), It.IsAny<int>()))
                 .Returns(expectedToken);
+
+            _signInManager.Setup(x => x.PasswordSignInAsync(applicationUser, It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
+                .Returns(Task.FromResult(SignInResult.Success));
 
             // Act
             var result = await _authService.Login(loginRequest, _modelState);
