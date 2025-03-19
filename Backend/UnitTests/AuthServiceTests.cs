@@ -15,6 +15,9 @@ using Microsoft.Extensions.Configuration;
 using Backend.Models.Dto;
 using Backend.Utility;
 using System.Net;
+using Backend.Models.Tenancy;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Authentication;
 
 namespace Backend.Tests
 {
@@ -26,6 +29,11 @@ namespace Backend.Tests
         private Mock<RoleManager<IdentityRole>> _roleManagerMock;
         private Mock<IJwtService> _jwtServiceMock;
         private Mock<IHttpContextAccessor> _httpContextAccessorMock;
+        private Mock<ITenancyResolver> _tenancyResolver;
+        private Mock<IEmailService> _emailService;
+        private Mock<ITemplateService> _templateService;
+        private Mock<SignInManager<ApplicationUser>> _signInManager;
+        private Mock<ISopService> _sopService;
         private ApplicationDbContext _dbContext;
         private AuthService _authService;
         private ModelStateDictionary _modelState;
@@ -37,11 +45,14 @@ namespace Backend.Tests
             _httpContextAccessorMock = new Mock<IHttpContextAccessor>();
             _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(new DefaultHttpContext());
 
+            // Setup TenancyResolver Mock
+            _tenancyResolver = new Mock<ITenancyResolver>();
+
             // Setup in-memory database for ApplicationDbContext
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .UseInMemoryDatabase(databaseName: "TestDb_" + Guid.NewGuid().ToString())
                 .Options;
-            _dbContext = new ApplicationDbContext(options, _httpContextAccessorMock.Object);
+            _dbContext = new ApplicationDbContext(options, _httpContextAccessorMock.Object, _tenancyResolver.Object);
 
             // Setup UserManager mock
             var userStoreMock = new Mock<IUserStore<ApplicationUser>>();
@@ -56,6 +67,26 @@ namespace Backend.Tests
             _unitOfWorkMock = new Mock<IUnitOfWork>();
             _jwtServiceMock = new Mock<IJwtService>();
             _modelState = new ModelStateDictionary();
+            _emailService = new Mock<IEmailService>();
+            _templateService = new Mock<ITemplateService>();
+            _sopService = new Mock<ISopService>();
+
+            var userManager = _userManagerMock.Object;
+            var contextAccessor = _httpContextAccessorMock.Object;
+            var claimsFactory = new Mock<IUserClaimsPrincipalFactory<ApplicationUser>>().Object;
+            var options2 = new Mock<IOptions<IdentityOptions>>().Object;
+            var logger = new Mock<ILogger<SignInManager<ApplicationUser>>>().Object;
+            var schemes = new Mock<IAuthenticationSchemeProvider>().Object;
+            var confirmation = new Mock<IUserConfirmation<ApplicationUser>>().Object;
+
+            _signInManager = new Mock<SignInManager<ApplicationUser>>(
+                userManager,
+                contextAccessor,
+                claimsFactory,
+                options2,
+                logger,
+                schemes,
+                confirmation);
 
             // Setup identity options
             var identityOptions = Options.Create(new IdentityOptions());
@@ -69,7 +100,12 @@ namespace Backend.Tests
                 _jwtServiceMock.Object,
                 identityOptions,
                 _unitOfWorkMock.Object,
-                appSettings
+                appSettings,
+                _tenancyResolver.Object,
+                _emailService.Object,
+                _templateService.Object,
+                _signInManager.Object,
+                _sopService.Object
             );
 
             // Setup transaction mock
@@ -86,6 +122,7 @@ namespace Backend.Tests
         [TearDown]
         public void TearDown()
         {
+            _dbContext.Database.EnsureDeleted();
             _dbContext.Dispose();
         }
 
@@ -161,9 +198,13 @@ namespace Backend.Tests
                 Surname = "Doe"
             };
 
-            _unitOfWorkMock
-                .Setup(uow => uow.ApplicationUsers.GetAsync(It.IsAny<Expression<Func<ApplicationUser, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
-                .ReturnsAsync(new ApplicationUser { Email = request.Email });
+            var applicationUser = new ApplicationUser()
+            {
+                UserName = request.Email
+            };
+
+            _dbContext.ApplicationUsers.Add(applicationUser);
+            await _dbContext.SaveChangesAsync();
 
             // Act & Assert
             var exception = Assert.ThrowsAsync<Exception>(async () =>
@@ -326,5 +367,7 @@ namespace Backend.Tests
             Assert.That(exception.Message, Is.EqualTo("Email or password is incorrect"));
 
         }
+
+
     }
 }
