@@ -3,7 +3,12 @@ import { Image, View, StyleSheet } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Icon, Button, useTheme } from "react-native-paper";
 
-export default function ImagePickerComponent({ imageUrl, onSelect }) {
+export default function ImagePickerComponent({
+  imageUrl,
+  onSelect,
+  allowsEditing = true,
+  aspect = [4, 3],
+}) {
   const theme = useTheme();
   const [image, setImage] = useState(imageUrl);
 
@@ -14,8 +19,8 @@ export default function ImagePickerComponent({ imageUrl, onSelect }) {
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
-      allowsEditing: true,
-      aspect: [4, 3],
+      allowsEditing,
+      aspect,
       quality: 1,
     });
 
