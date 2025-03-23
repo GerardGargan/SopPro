@@ -28,6 +28,9 @@ namespace Backend.Service.Implementation
 
         public async Task<byte[]> GeneratePdf(string templateName, SopVersionDto model)
         {
+            var settingLogo = await _unitOfWork.Settings.GetAsync(x => x.Key == "logo");
+            var customLogoUrl = settingLogo == null ? null : settingLogo.Value;
+
             QuestPDF.Settings.License = LicenseType.Community;
 
             byte[] template = null;
@@ -35,7 +38,7 @@ namespace Backend.Service.Implementation
             switch (templateName.ToLower())
             {
                 case "template1":
-                    template = Template1(model);
+                    template = Template1(model, customLogoUrl);
                     break;
                 default:
                     throw new Exception("Invalid template name");
@@ -67,7 +70,7 @@ namespace Backend.Service.Implementation
             return template;
         }
 
-        private byte[] Template1(SopVersionDto model)
+        private byte[] Template1(SopVersionDto model, string customLogoUrl)
         {
             return Document.Create(container =>
             {
@@ -77,7 +80,7 @@ namespace Backend.Service.Implementation
                     page.Margin(2, Unit.Centimetre);
 
                     // Header
-                    page.Header().Element(container => ComposeHeader(container, model));
+                    page.Header().Element(container => ComposeHeader(container, model, customLogoUrl));
 
                     // Content
                     page.Content().Element(container => ComposeContent(container, model).GetAwaiter().GetResult());
@@ -88,27 +91,49 @@ namespace Backend.Service.Implementation
             }).GeneratePdf();
         }
 
-        private void ComposeHeader(IContainer container, SopVersionDto model)
+        private void ComposeHeader(IContainer container, SopVersionDto model, string customLogoUrl)
         {
-            container.Row(row =>
+            container.Column(column =>
             {
-                row.RelativeItem().Column(column =>
+                // Render logo if available
+                if (!string.IsNullOrWhiteSpace(customLogoUrl))
                 {
-                    column.Item().Text(model.Title)
-                        .FontSize(24)
-                        .Bold();
+                    try
+                    {
+                        var imageBytes = DownloadImageAsync(customLogoUrl).GetAwaiter().GetResult();
+                        if (imageBytes != null && imageBytes.Length > 0)
+                        {
+                            column.Item().Height(40).Image(imageBytes)
+                                .WithCompressionQuality(ImageCompressionQuality.Medium);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"Error loading image: {ex.Message}");
+                    }
+                }
 
-                    column.Item().Text($"SOP Version: {model.Version}")
-                        .FontSize(12)
-                        .FontColor(Colors.Grey.Medium);
-                });
-
-                row.ConstantItem(100).Column(column =>
+                // Render row below the logo
+                column.Item().Row(row =>
                 {
-                    column.Item().Text(model.Status.ToString())
-                        .FontSize(12)
-                        .Bold()
-                        .FontColor(GetStatusColor(model.Status));
+                    row.RelativeItem().Column(column =>
+                    {
+                        column.Item().Text(model.Title)
+                            .FontSize(24)
+                            .Bold();
+
+                        column.Item().Text($"SOP Version: {model.Version}")
+                            .FontSize(12)
+                            .FontColor(Colors.Grey.Medium);
+                    });
+
+                    row.ConstantItem(100).Column(column =>
+                    {
+                        column.Item().Text(model.Status.ToString())
+                            .FontSize(12)
+                            .Bold()
+                            .FontColor(GetStatusColor(model.Status));
+                    });
                 });
             });
         }
