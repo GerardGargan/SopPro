@@ -27,6 +27,7 @@ namespace Backend.Data
         public DbSet<SopStepPpe> SopStepPpe { get; set; }
         public DbSet<SopHazard> SopHazards { get; set; }
         public DbSet<SopUserFavourite> SopUserFavourites { get; set; }
+        public DbSet<Setting> Settings { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -185,7 +186,21 @@ namespace Backend.Data
                 .HasForeignKey(s => s.ApplicationUserId)
                 .OnDelete(DeleteBehavior.Restrict)
                 .IsRequired();
+
+            modelBuilder.Entity<Setting>()
+                .HasOne(s => s.Organisation)
+                .WithMany(s => s.Settings)
+                .HasForeignKey(s => s.OrganisationId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
+
+            modelBuilder.Entity<Setting>()
+                .HasOne(s => s.ApplicationUser)
+                .WithMany(s => s.Settings)
+                .HasForeignKey(s => s.ApplicationUserId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
+
 
         public int CurrentOrganisationId
         {

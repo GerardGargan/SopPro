@@ -5,7 +5,6 @@ using Backend.Models.Settings;
 using Backend.Models.Tenancy;
 using Backend.Repository.Implementation;
 using Backend.Repository.Interface;
-using Backend.Serivce.Implementation;
 using Backend.Service.Implementation;
 using Backend.Service.Interface;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -85,6 +84,7 @@ builder.Services.AddScoped<ITenancyResolver, TenancyResolver>();
 builder.Services.AddSingleton<IBlobService, BlobService>();
 builder.Services.AddScoped<IPdfService, PdfService>();
 builder.Services.AddScoped<IDbInitializer, DbInitializer>();
+builder.Services.AddScoped<ISettingService, SettingService>();
 
 
 var templateFolder = Path.Combine(Directory.GetCurrentDirectory(), "Templates");

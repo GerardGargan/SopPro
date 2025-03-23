@@ -13,5 +13,6 @@ namespace Backend.Models.DatabaseModels
         public List<SopVersion> AuthoredSopVersions { get; set; }
         public List<SopVersion> ApprovedSopVersions { get; set; }
         public List<SopUserFavourite> SopUserFavourites { get; set; }
+        public List<Setting> Settings { get; set; }
     }
 }

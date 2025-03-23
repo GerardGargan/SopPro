@@ -17,5 +17,6 @@ namespace Backend.Models.DatabaseModels
         public List<SopStepPpe> SopStepPpe { get; set; }
         public List<SopHazard> SopHazards { get; set; }
         public List<SopUserFavourite> SopUserFavourites { get; set; }
+        public List<Setting> Settings { get; set; }
     }
 }

@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSelector } from "react-redux";
 import {
+  Brush,
   Building,
   KeyRound,
   LogOut,
@@ -33,6 +34,12 @@ const More = () => {
       icon: Building,
       title: "Manage departments",
       onPress: () => router.push("(auth)/(admin)/department/departments"),
+    },
+    {
+      key: 4,
+      icon: Brush,
+      title: "Custom logo",
+      onPress: () => router.push("(auth)/(admin)/logo"),
     },
   ];
 

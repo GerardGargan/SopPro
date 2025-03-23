@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using Backend.Service.Interface;
 using HandlebarsDotNet;
 
-namespace Backend.Serivce.Implementation
+namespace Backend.Service.Implementation
 {
     public class TemplateService : ITemplateService
     {
