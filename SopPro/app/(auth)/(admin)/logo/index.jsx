@@ -1,4 +1,4 @@
-import { StyleSheet, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
@@ -85,9 +85,11 @@ const index = () => {
 
   return (
     <View style={styles.rootContainer}>
+      <Text style={styles.title}>Upload a custom logo</Text>
       <ImagePickerComponent
         imageUrl={imageUrl}
         onSelect={(image) => handleImageUpload(image)}
+        allowsEditing={false}
       />
     </View>
   );
@@ -100,5 +102,10 @@ const styles = StyleSheet.create({
     flex: 1,
     margin: 30,
     paddingTop: 50,
+  },
+  title: {
+    textAlign: "center",
+    fontSize: 20,
+    marginBottom: 6,
   },
 });
