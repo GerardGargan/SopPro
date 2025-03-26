@@ -79,9 +79,8 @@ const Upsert = () => {
       });
     },
   });
-
   const { data, isPending, isError, error } = useQuery({
-    enabled: id != -1,
+    enabled: isCreate == false,
     queryKey: ["departments", id],
     queryFn: () => fetchDepartment(id),
   });
@@ -120,7 +119,7 @@ const Upsert = () => {
     setModalVisisble(false);
   }
 
-  if (isPending) {
+  if (!isCreate && isPending) {
     return (
       <View style={styles.loader}>
         <ActivityIndicator animating={true} />
