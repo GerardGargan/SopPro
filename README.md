@@ -5,7 +5,7 @@
 SopPro is a mobile application designed to streamline the creation and management of Standard Operating Procedures (SOPs). This app allows users to create, edit, review, and approve SOPs with step-by-step instructions, including text and images. The app supports version history, AI-based SOP generation, and offline functionality, making it a comprehensive solution for organisations to ensure standardisation and compliance across their operations.
 
 ### Features
-- **SOP Generation and Management**: Add, update, and delete SOPs and SOP steps steps with text and images.
+- **SOP Generation and Management**: Add, update, and delete SOPs and SOP steps with text and images.
 - **Add important safety information**: Add hazards, risks and required Personal Protective Equipment to SOPs.
 - **Custom Templates and export**: Choose specific layouts and export SOPs to PDF in a template format with custom branding options.
 - **AI-Based SOP Generation**: Automatically generate SOPs based on task description.
