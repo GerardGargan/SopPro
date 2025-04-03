@@ -1,6 +1,6 @@
 import { View, StyleSheet, Text } from "react-native";
 import React from "react";
-import { useRouter } from "expo-router";
+import { useRouter, useSegments } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { LinearGradient } from "expo-linear-gradient";
 import { StatusBar } from "expo-status-bar";
