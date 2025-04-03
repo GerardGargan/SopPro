@@ -1,4 +1,4 @@
-import { ScrollView, StyleSheet } from "react-native";
+import { BackHandler, ScrollView, StyleSheet } from "react-native";
 import Fab from "../../../components/sops/fab";
 import { useIsFocused } from "@react-navigation/native";
 import { useSelector } from "react-redux";
@@ -7,17 +7,43 @@ import { capitiliseFirstLetter } from "../../../util/validationHelpers";
 import { fetchSops } from "../../../util/httpRequests";
 import { useQuery } from "@tanstack/react-query";
 import CustomBottomSheetModal from "../../../components/sops/bottomSheet/CustomBottomSheetModal";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import LargeNoDataCard from "../../../components/favourites/LargeNoDataCard";
 import SopHorizontalList from "../../../components/sops/SopHorizontalList";
 import { Bookmark, Clock } from "lucide-react-native";
+import { useRouter, useSegments } from "expo-router";
 
 const index = () => {
   const isFocused = useIsFocused();
   const name = useSelector((state) => state.auth.forename);
   const bottomSheetModalRef = useRef();
+  const segments = useSegments();
 
   const [bottomSheetSelectedSop, setBottomSheetSelectedSop] = useState(null);
+
+  useEffect(() => {
+    // Only prevent back button when this screen is focused
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      () => {
+        // Check if we're at the main tabs index screen
+        if (
+          segments.length == 2 &&
+          segments[0] === "(auth)" &&
+          segments[1] === "(tabs)"
+        ) {
+          // Prevent back navigation
+          return true;
+        }
+
+        // Allow back button to be used for all other screens
+        return false;
+      }
+    );
+
+    // clean up event listener on unmount
+    return () => backHandler.remove();
+  }, [segments]);
 
   const {
     data: favouritesData,
