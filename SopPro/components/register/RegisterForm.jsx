@@ -152,6 +152,7 @@ const RegisterForm = ({ onSubmit, isPendingRegistration, isPendingLogin }) => {
       <View style={styles.inputContainer}>
         <CustomTextInput
           label="Password"
+          autoCorrect={false}
           error={!isValid.password}
           value={formData.password}
           onBlur={() => validateField("password", validatePassword)}

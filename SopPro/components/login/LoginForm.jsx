@@ -41,6 +41,7 @@ const LoginForm = ({ onSubmit, isPending, isError, error }) => {
         <CustomTextInput
           label="Password"
           value={password}
+          autoCorrect={false}
           onChangeText={(value) => setPassword(value)}
           secureTextEntry={!isPasswordVisible}
           right={
