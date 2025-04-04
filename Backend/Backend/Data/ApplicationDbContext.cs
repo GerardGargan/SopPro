@@ -28,6 +28,7 @@ namespace Backend.Data
         public DbSet<SopHazard> SopHazards { get; set; }
         public DbSet<SopUserFavourite> SopUserFavourites { get; set; }
         public DbSet<Setting> Settings { get; set; }
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

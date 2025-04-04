@@ -5,6 +5,7 @@ const authSlice = createSlice({
   name: "authSlice",
   initialState: {
     token: null,
+    refreshToken: null,
     forename: null,
     surname: null,
     role: null,
@@ -12,9 +13,11 @@ const authSlice = createSlice({
   },
   reducers: {
     setToken(state, action) {
-      state.token = action.payload;
-      state.isLoggedIn = !!action.payload;
-      AsyncStorage.setItem("authToken", action.payload);
+      state.token = action.payload.token;
+      state.refreshToken = action.payload.refreshToken;
+      state.isLoggedIn = !!action.payload.token;
+      AsyncStorage.setItem("authToken", action.payload.token);
+      AsyncStorage.setItem("refreshToken", action.payload.refreshToken);
     },
     setUserInfo(state, action) {
       state.forename = action.payload.forename;
@@ -25,6 +28,7 @@ const authSlice = createSlice({
     },
     logout(state) {
       state.token = null;
+      state.refreshToken = null;
       state.isLoggedIn = false;
       state.forename = null;
       state.surname = null;
@@ -32,9 +36,11 @@ const authSlice = createSlice({
 
       AsyncStorage.removeItem("userInfo");
       AsyncStorage.removeItem("authToken");
+      AsyncStorage.removeItem("refreshToken");
     },
     initialiseAuth(state, action) {
       state.token = action.payload.token;
+      state.refreshToken = action.payload.refreshToken;
       state.isLoggedIn = !!action.payload.token;
       state.forename = action.payload.userInfo?.forename || null;
       state.surname = action.payload.userInfo?.surname || null;

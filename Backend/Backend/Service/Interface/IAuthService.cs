@@ -20,5 +20,6 @@ namespace Backend.Service.Interface
         Task<List<RoleDto>> GetRoles();
         Task UpdateUser(ApplicationUserDto model);
         Task DeleteUser(string id);
+        Task<AuthenticationResult> RefreshTokenAsync(RefreshTokenRequest model);
     }
 }

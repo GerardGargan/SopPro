@@ -30,6 +30,27 @@ namespace Backend.Controllers
             return StatusCode((int)apiResponse.StatusCode, apiResponse);
         }
 
+        [HttpPost("refresh")]
+        public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequest model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(new AuthenticationResult
+                {
+                    Errors = ModelState.Values.SelectMany(x => x.Errors.Select(error => error.ErrorMessage))
+                });
+            }
+
+            var result = await _authService.RefreshTokenAsync(model);
+
+            if (!result.Success)
+            {
+                return BadRequest(result);
+            }
+
+            return Ok(result);
+        }
+
         [HttpPost("signuporganisation")]
         [ProducesResponseType(200, Type = typeof(ApiResponse))]
         public async Task<IActionResult> SignupOrganisation([FromBody] OrganisationSignupRequest model)

@@ -12,6 +12,7 @@ import { Stack, Redirect } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import { StyleSheet, View } from "react-native";
 import { ActivityIndicator } from "react-native-paper";
+import { useQueryClient } from "@tanstack/react-query";
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -31,6 +32,8 @@ export default function RootLayout() {
     ...FontAwesome.font,
   });
 
+  const query = useQueryClient();
+
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.
   useEffect(() => {
     if (error) throw error;
@@ -45,9 +48,11 @@ export default function RootLayout() {
   useEffect(() => {
     const checkAuth = async () => {
       const token = await AsyncStorage.getItem("authToken");
+      const refreshToken = await AsyncStorage.getItem("refreshToken");
       const userInfo = await AsyncStorage.getItem("userInfo");
       const payload = {
         token,
+        refreshToken,
         userInfo: JSON.parse(userInfo),
       };
       dispatch(authActions.initialiseAuth(payload));
@@ -65,6 +70,7 @@ export default function RootLayout() {
   }
 
   if (!isLoggedIn) {
+    query.clear();
     return <Redirect href="/home" />;
   }
 
