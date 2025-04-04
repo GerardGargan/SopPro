@@ -1,27 +1,35 @@
 ﻿using Backend.Data;
 using Backend.Models.DatabaseModels;
+using Backend.Models.Dto;
 using Backend.Models.Settings;
 using Backend.Service.Interface;
-using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Backend.Service.Implementation
 {
     public class JwtService : IJwtService
     {
+        private readonly ApplicationDbContext _dbContext;
         private readonly ApplicationSettings _appSettings;
-        public JwtService()
+        private readonly UserManager<ApplicationUser> _userManager;
+        public JwtService(ApplicationDbContext dbContext, IOptions<ApplicationSettings> appSettings, UserManager<ApplicationUser> userManager)
         {
+            _dbContext = dbContext;
+            _appSettings = appSettings.Value;
+            _userManager = userManager;
         }
 
-        public string GenerateAuthToken(ApplicationUser userFromDb, IList<string> roles, string jwtSecret, int jwtAuthExpireDays)
+        public async Task<AuthenticationResult> GenerateAuthToken(ApplicationUser userFromDb, IList<string> roles)
         {
             JwtSecurityTokenHandler tokenHandler = new();
-            byte[] key = System.Text.Encoding.ASCII.GetBytes(jwtSecret);
+            byte[] key = System.Text.Encoding.ASCII.GetBytes(_appSettings.JwtSecret);
 
             SecurityTokenDescriptor tokenDescriptor = new()
             {
@@ -33,15 +41,142 @@ namespace Backend.Service.Implementation
                     new Claim("id", userFromDb.Id.ToString()),
                     new Claim("organisationId", userFromDb.OrganisationId.ToString()),
                     new Claim(ClaimTypes.Email, userFromDb.UserName),
-                    new Claim(ClaimTypes.Role, roles.FirstOrDefault())
+                    new Claim(ClaimTypes.Role, roles.FirstOrDefault()),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
                 }),
-                Expires = DateTime.UtcNow.AddDays(jwtAuthExpireDays),
+                Audience = _appSettings.JwtAudience,
+                Issuer = _appSettings.JwtIssuer,
+                Expires = DateTime.UtcNow.AddDays(_appSettings.JwtAuthExpireDays),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
             SecurityToken token = tokenHandler.CreateToken(tokenDescriptor);
 
-            return tokenHandler.WriteToken(token);
+
+            var jwtToken = tokenHandler.WriteToken(token);
+
+            var refreshToken = new RefreshToken()
+            {
+                JwtId = token.Id,
+                UserId = userFromDb.Id,
+                CreationDate = DateTime.UtcNow,
+                ExpiryDate = DateTime.UtcNow.AddDays(_appSettings.JwtAuthRefreshEpireDays),
+                Token = GenerateRefreshToken()
+            };
+
+            await _dbContext.RefreshTokens.AddAsync(refreshToken);
+            await _dbContext.SaveChangesAsync();
+
+            return new AuthenticationResult
+            {
+                Success = true,
+                Token = jwtToken,
+                RefreshToken = refreshToken.Token
+            };
+
+        }
+
+        public async Task<AuthenticationResult> RefreshTokenAsync(string token, string refreshToken)
+        {
+            var validatedToken = GetPrincipalFromToken(token);
+
+            if (validatedToken == null)
+            {
+                throw new UnauthorizedAccessException("Invalid token");
+            }
+
+            var expiryDateUnix = long.Parse(validatedToken.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Exp).Value);
+            var expiryDateTimeUtc = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+                .AddSeconds(expiryDateUnix);
+
+            if (expiryDateTimeUtc > DateTime.UtcNow)
+            {
+                throw new UnauthorizedAccessException("This token hasn't expired yet");
+            }
+
+            var jti = validatedToken.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
+            var storedRefreshToken = await _dbContext.RefreshTokens.SingleOrDefaultAsync(x => x.Token == refreshToken);
+
+            if (storedRefreshToken == null)
+            {
+                throw new UnauthorizedAccessException("This refresh token doesn't exist");
+            }
+
+            if (DateTime.UtcNow > storedRefreshToken.ExpiryDate)
+            {
+                throw new UnauthorizedAccessException("This refresh token has expired");
+            }
+
+            if (storedRefreshToken.Invalidated)
+            {
+                throw new UnauthorizedAccessException("This refresh token has been invalidated");
+            }
+
+            if (storedRefreshToken.Used)
+            {
+                throw new UnauthorizedAccessException("This refresh token has been used");
+            }
+
+            if (storedRefreshToken.JwtId != jti)
+            {
+                throw new UnauthorizedAccessException("This refresh token doesn't match this JWT");
+            }
+
+            storedRefreshToken.Used = true;
+            _dbContext.RefreshTokens.Update(storedRefreshToken);
+            await _dbContext.SaveChangesAsync();
+
+            var userId = validatedToken.Claims.Single(x => x.Type == "id").Value;
+
+            var user = await _userManager.Users
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(x => x.Id == userId); var roles = await _userManager.GetRolesAsync(user);
+            return await GenerateAuthToken(user, roles);
+        }
+
+        private ClaimsPrincipal GetPrincipalFromToken(string token)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+
+            try
+            {
+                var tokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(_appSettings.JwtSecret)),
+                    ValidateIssuer = true,
+                    ValidIssuer = _appSettings.JwtIssuer,
+                    ValidateAudience = true,
+                    ValidAudience = _appSettings.JwtAudience,
+                    ValidateLifetime = false
+                };
+
+                var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out var validatedToken);
+                if (!IsJwtWithValidSecurityAlgorithm(validatedToken))
+                {
+                    return null;
+                }
+
+                return principal;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private bool IsJwtWithValidSecurityAlgorithm(SecurityToken validatedToken)
+        {
+            return (validatedToken is JwtSecurityToken jwtSecurityToken) &&
+                   jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase);
+        }
+
+        private string GenerateRefreshToken()
+        {
+            var randomNumber = new byte[32];
+            using var rng = RandomNumberGenerator.Create();
+            rng.GetBytes(randomNumber);
+            return Convert.ToBase64String(randomNumber);
         }
 
         public string GenerateInviteToken(string email, string role, int organisationId, string issuer, string audience, int expiryHours, string secret)
@@ -98,7 +233,6 @@ namespace Backend.Service.Implementation
             }
             catch (SecurityTokenException ex)
             {
-                // Log exception if needed
                 throw new SecurityTokenException("Invalid token.", ex);
             }
             catch (Exception ex)

@@ -95,7 +95,7 @@ namespace Backend.Service.Implementation
             var roles = await _userManager.GetRolesAsync(userFromDb);
 
             // Generate JWT Token
-            string token = _jwtService.GenerateAuthToken(userFromDb, roles, _appSettings.JwtSecret, _appSettings.JwtAuthExpireDays);
+            AuthenticationResult authResult = await _jwtService.GenerateAuthToken(userFromDb, roles);
 
             LoginResponseDTO loginResponse = new()
             {
@@ -103,7 +103,8 @@ namespace Backend.Service.Implementation
                 Forename = userFromDb.Forename,
                 Surname = userFromDb.Surname,
                 Role = roles.FirstOrDefault(),
-                Token = token,
+                Token = authResult.Token,
+                RefreshToken = authResult.RefreshToken
             };
 
             if (loginResponse.Email == null || string.IsNullOrWhiteSpace(loginResponse.Token))
@@ -118,6 +119,12 @@ namespace Backend.Service.Implementation
                 Result = loginResponse
             };
 
+        }
+
+        public async Task<AuthenticationResult> RefreshTokenAsync(RefreshTokenRequest model)
+        {
+            var result = await _jwtService.RefreshTokenAsync(model.Token, model.RefreshToken);
+            return result;
         }
 
         public async Task<List<ApplicationUserDto>> GetAll()

@@ -12,6 +12,7 @@ const useLogin = () => {
     mutationFn: login,
     onSuccess: (data) => {
       const token = data?.result?.token;
+      const refreshToken = data?.result?.refreshToken;
       const userInfo = {
         forename: data?.result?.forename,
         surname: data?.result?.surname,
@@ -19,7 +20,11 @@ const useLogin = () => {
       };
 
       if (token) {
-        dispatch(authActions.setToken(token));
+        const payload = {
+          token,
+          refreshToken,
+        };
+        dispatch(authActions.setToken(payload));
         dispatch(authActions.setUserInfo(userInfo));
 
         router.replace("/(auth)");
