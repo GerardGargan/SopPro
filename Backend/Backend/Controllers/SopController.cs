@@ -27,6 +27,11 @@ namespace Backend.Controllers
             _chatService = chatService;
         }
 
+        /// <summary>
+        /// Creates a SOP
+        /// </summary>
+        /// <param name="sopDto"></param>
+        /// <returns></returns>
         [HttpPost]
         public async Task<IActionResult> CreateSop([FromBody] SopDto sopDto)
         {
@@ -34,6 +39,17 @@ namespace Backend.Controllers
             return Ok(apiResponse);
         }
 
+        /// <summary>
+        /// Gets all SOPs
+        /// </summary>
+        /// <param name="search"></param>
+        /// <param name="status"></param>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="isFavourite"></param>
+        /// <param name="sortBy"></param>
+        /// <param name="sortOrder"></param>
+        /// <returns></returns>
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] string search, [FromQuery] int? status, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] bool isFavourite = false, [FromQuery] string sortBy = "recent", [FromQuery] string sortOrder = "desc")
         {
@@ -41,6 +57,11 @@ namespace Backend.Controllers
             return Ok(apiResponse);
         }
 
+        /// <summary>
+        /// Retrieves the latest version of a SOP by its id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("{id:int}")]
         public async Task<IActionResult> GetSopLatestVersion(int id)
@@ -49,6 +70,12 @@ namespace Backend.Controllers
             return Ok(apiResponse);
         }
 
+        /// <summary>
+        /// Updates a SOP. A new SOP version will be created if the SOP is approved. Otherwise the existing SOP version will be updated.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="sopDto"></param>
+        /// <returns></returns>
         [HttpPut]
         [Route("{id:int}")]
         public async Task<IActionResult> UpdateSop(int id, [FromBody] SopDto sopDto)
@@ -57,6 +84,11 @@ namespace Backend.Controllers
             return Ok(apiResponse);
         }
 
+        /// <summary>
+        /// Deletes a range of SOP's, and associated versions, steps, hazards and images in blob storage.
+        /// </summary>
+        /// <param name="ids"></param>
+        /// <returns></returns>
         [HttpDelete]
         [Route("delete")]
         public async Task<IActionResult> DeleteSops([FromBody] List<int> ids)
@@ -65,6 +97,11 @@ namespace Backend.Controllers
             return Ok(apiResponse);
         }
 
+        /// <summary>
+        /// Deletes a SOP by its id, and all associates versions, hazards, steps and images in blob storage.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete]
         [Route("{id:int}")]
         public async Task<IActionResult> DeleteSop(int id)
@@ -77,6 +114,11 @@ namespace Backend.Controllers
             return Ok(apiResponse);
         }
 
+        /// <summary>
+        /// Uploads a file to blob storage
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("upload")]
         public async Task<IActionResult> UploadImage([FromForm] FileDto file)
@@ -85,6 +127,11 @@ namespace Backend.Controllers
             return Ok(apiResponse);
         }
 
+        /// <summary>
+        /// Adds a SOP to the users favourites
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("{id:int}/favourite")]
         public async Task<IActionResult> FavouriteSop(int id)
@@ -93,6 +140,11 @@ namespace Backend.Controllers
             return Ok(apiResponse);
         }
 
+        /// <summary>
+        /// Removes a SOP from a users favourites
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete]
         [Route("{id:int}/favourite")]
         public async Task<IActionResult> UnfavouriteSop(int id)
@@ -101,6 +153,11 @@ namespace Backend.Controllers
             return Ok(apiResponse);
         }
 
+        /// <summary>
+        /// Updates an SOPs status to Approved (Admin only).
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [Authorize(Roles = StaticDetails.Role_Admin)]
         [HttpGet]
         [Route("{id:int}/approve")]
@@ -110,6 +167,11 @@ namespace Backend.Controllers
             return Ok(apiResponse);
         }
 
+        /// <summary>
+        /// Updates an SOPs status from In Review to Rejected
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [Authorize(Roles = StaticDetails.Role_Admin)]
         [HttpGet]
         [Route("{id:int}/reject")]
@@ -119,6 +181,11 @@ namespace Backend.Controllers
             return Ok(apiResponse);
         }
 
+        /// <summary>
+        /// Updates a SOPs status to In Review and notifies administrators
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("{id:int}/requestapproval")]
         public async Task<IActionResult> RequestApproval(int id)
@@ -127,6 +194,11 @@ namespace Backend.Controllers
             return Ok(apiResponse);
         }
 
+        /// <summary>
+        /// Generates a PDF of a SOP version
+        /// </summary>
+        /// <param name="sopVersionId"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("{sopVersionId:int}/pdf")]
         public async Task<IActionResult> GeneratePdf(int sopVersionId)
@@ -139,6 +211,11 @@ namespace Backend.Controllers
 
         }
 
+        /// <summary>
+        /// Generates a SOP via Artificatal Intelligence
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("aigenerator")]
         public async Task<IActionResult> GenerateAiSop([FromBody] AiRequestDto model)
@@ -147,6 +224,10 @@ namespace Backend.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Provides analytics on SOPs
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         [Route("analytics")]
         public async Task<IActionResult> GetAnalytics()
@@ -155,6 +236,11 @@ namespace Backend.Controllers
             return Ok(analyticsDto);
         }
 
+        /// <summary>
+        /// Reverts a SOP to a previous version. All latter versions are deleted permenantly.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost]
         [Route("revert")]
         [Authorize(Roles = StaticDetails.Role_Admin)]
