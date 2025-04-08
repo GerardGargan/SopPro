@@ -3,6 +3,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Backend.Models.DatabaseModels
 {
+    /// <summary>
+    /// Database model for Application Users. Extends the default IdentityUser with additional properties and relationships.
+    /// </summary>
     public class ApplicationUser : IdentityUser
     {
         public string Forename { get; set; }

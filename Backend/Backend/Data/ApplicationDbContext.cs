@@ -34,6 +34,7 @@ namespace Backend.Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // Loop through each entity type that inherits from BaseClass and apply a global query filter for organisation, this helps to avoid tenancy leaks
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
                 if (typeof(BaseClass).IsAssignableFrom(entityType.ClrType) && entityType.ClrType != typeof(BaseClass))
@@ -46,6 +47,7 @@ namespace Backend.Data
                 }
             }
 
+            // Set up global query filter for users/organisation. Users don't inherit from BaseClass so needs to be handled separately to the above.
             modelBuilder.Entity<ApplicationUser>()
                 .HasQueryFilter(u => u.OrganisationId == _tenancyResolver.GetOrganisationid());
 
@@ -202,7 +204,9 @@ namespace Backend.Data
                 .OnDelete(DeleteBehavior.Restrict);
         }
 
-
+        /// <summary>
+        /// Returns the users organisation id, if none exists (e.g. if user is not logged in) -1 is returns
+        /// </summary>
         public int CurrentOrganisationId
         {
             get

@@ -6,6 +6,11 @@ using Backend.Models;
 
 namespace Backend.Filters
 {
+    /// <summary>
+    /// General exception filter is used to handle exceptions in controllers. 
+    /// This allows exceptions to be thrown in controllers that inherit from the BaseApiController which applies this filter.
+    /// When exceptions are thrown, they will be caught by this filter, which will format the exception into an ApiResponse object with an appropriate status code.
+    /// </summary>
     public class GeneralExceptionFilter : ExceptionFilterAttribute
     {
         private static readonly Dictionary<Type, HttpStatusCode> _exceptionStatusCodes = new Dictionary<Type, HttpStatusCode>(8)
