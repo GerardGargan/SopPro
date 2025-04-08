@@ -959,8 +959,7 @@ namespace Backend.Service.Implementation
 
                     string emailBody = await _templateService.RenderTemplateAsync("SopApproved", model);
 
-                    // Commented out during testing to prevent going over free postmark limit temporarily
-                    // _emailService.SendEmailAsync(author.Email, "Sop approved", emailBody);
+                    _emailService.SendEmailAsync(author.Email, "Sop approved", emailBody);
                 }
             }
 
@@ -1005,7 +1004,7 @@ namespace Backend.Service.Implementation
                     string emailBody = await _templateService.RenderTemplateAsync("SopRejected", model);
 
                     // Commented out during testing to prevent going over free postmark limit temporarily
-                    // _emailService.SendEmailAsync(author.Email, "Sop rejected", emailBody);
+                    _emailService.SendEmailAsync(author.Email, "Sop rejected", emailBody);
                 }
             }
 
@@ -1048,7 +1047,7 @@ namespace Backend.Service.Implementation
                 string emailBody = await _templateService.RenderTemplateAsync("SopApprovalRequest", model);
 
                 // Commented out during testing to prevent going over free postmark limit temporarily
-                // _emailService.SendEmailAsync(adminEmails, null, "Sop approval request", emailBody);
+                _emailService.SendEmailAsync(adminEmails, null, "Sop approval request", emailBody);
 
             }
 
