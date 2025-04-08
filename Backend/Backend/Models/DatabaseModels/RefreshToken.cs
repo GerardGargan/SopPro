@@ -2,6 +2,9 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Backend.Models.DatabaseModels
 {
+    /// <summary>
+    /// Refresh Token Model
+    /// </summary>
     public class RefreshToken
     {
         [Key]

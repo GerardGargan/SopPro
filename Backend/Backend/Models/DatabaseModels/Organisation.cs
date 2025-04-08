@@ -2,6 +2,9 @@
 
 namespace Backend.Models.DatabaseModels
 {
+    /// <summary>
+    /// Organisation model
+    /// </summary>
     public class Organisation
     {
         [Key]

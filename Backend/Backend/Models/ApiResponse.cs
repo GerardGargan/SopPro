@@ -2,6 +2,9 @@
 
 namespace Backend.Models
 {
+    /// <summary>
+    /// ApiResponse object, for returning a structured response from API requests
+    /// </summary>
     public class ApiResponse
     {
         public HttpStatusCode StatusCode { get; set; }

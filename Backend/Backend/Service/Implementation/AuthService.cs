@@ -48,14 +48,24 @@ namespace Backend.Service.Implementation
             _sopService = sopService;
         }
 
+        /// <summary>
+        /// Attempts to log in a user with the provided credentials.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="modelState"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task<ApiResponse<LoginResponseDTO>> Login(LoginRequestDTO model, ModelStateDictionary modelState)
         {
+            // Check if the user exists
             ApplicationUser userFromDb = await _db.ApplicationUsers.IgnoreQueryFilters().Where(x => x.Email == model.Email.ToLower()).FirstOrDefaultAsync();
 
             if (userFromDb == null)
             {
                 throw new Exception("Email or password is incorrect");
             }
+
+            // Check if user is locked out
 
             if (await _userManager.IsLockedOutAsync(userFromDb))
             {
@@ -66,6 +76,8 @@ namespace Backend.Service.Implementation
                     ErrorMessage = "Your account is locked due to multiple failed attempts. Try again later."
                 };
             }
+
+            // Attempt to sign in the user with their password
 
             var result = await _signInManager.PasswordSignInAsync(userFromDb, model.Password, false, lockoutOnFailure: true);
 
@@ -121,14 +133,24 @@ namespace Backend.Service.Implementation
 
         }
 
+        /// <summary>
+        /// Refreshes a users token on expiry of their JWT
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         public async Task<AuthenticationResult> RefreshTokenAsync(RefreshTokenRequest model)
         {
             var result = await _jwtService.RefreshTokenAsync(model.Token, model.RefreshToken);
             return result;
         }
 
+        /// <summary>
+        /// Retrieves all users
+        /// </summary>
+        /// <returns></returns>
         public async Task<List<ApplicationUserDto>> GetAll()
         {
+            // Get a dictionary of user roles
             Dictionary<string, string> UserRoleLookup = await _db.UserRoles.ToDictionaryAsync(x => x.UserId, x => x.RoleId);
 
             List<ApplicationUserDto> allUsers = await _unitOfWork.ApplicationUsers
@@ -147,8 +169,15 @@ namespace Backend.Service.Implementation
 
         }
 
+        /// <summary>
+        /// Retrieves a single user by their id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task<ApplicationUserDto> GetById(string id)
         {
+            // Validate model
             if (string.IsNullOrWhiteSpace(id))
             {
                 throw new Exception("Id cant be empty");
@@ -160,6 +189,7 @@ namespace Backend.Service.Implementation
                 throw new Exception("User not found");
             }
 
+            // Get the users role
             string userRoleId = await _db.UserRoles.Where(x => x.UserId == userFromDb.Id).Select(x => x.RoleId).FirstOrDefaultAsync();
             string roleName = await _db.Roles.Where(x => x.Id == userRoleId).Select(x => x.Name).FirstOrDefaultAsync();
 
@@ -176,8 +206,16 @@ namespace Backend.Service.Implementation
             return userDto;
         }
 
+        /// <summary>
+        /// Updates a user
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task UpdateUser(ApplicationUserDto model)
         {
+            // Validate model
+
             if (string.IsNullOrWhiteSpace(model.Id))
             {
                 throw new Exception("Id cant be null");
@@ -203,6 +241,7 @@ namespace Backend.Service.Implementation
                 throw new Exception("Invalid role provided");
             }
 
+            // Fetch the user from the database
             ApplicationUser userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(x => x.Id == model.Id, tracked: true);
             var currentRoles = await _userManager.GetRolesAsync(userFromDb);
 
@@ -211,6 +250,7 @@ namespace Backend.Service.Implementation
                 throw new Exception("User not found");
             }
 
+            // Perform updates inside a transaction, if one execution fails all changes will be discarded
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
 
@@ -230,10 +270,18 @@ namespace Backend.Service.Implementation
             });
         }
 
+        /// <summary>
+        /// Deletes a user
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task DeleteUser(string id)
         {
+            // Fetch the user
             ApplicationUser userFromDb = await _userManager.FindByIdAsync(id);
 
+            // Validate the model
             if (string.IsNullOrEmpty(id))
             {
                 throw new Exception("User id cant be null");
@@ -244,11 +292,13 @@ namespace Backend.Service.Implementation
                 throw new Exception("User not found");
             }
 
+            // Dont allow users to delete themselves, could leave the application with no users or admins in a tenancy/organisation
             if (id == _tenancyResolver.GetUserId())
             {
                 throw new Exception("You can't delete your own account while logged in");
             }
 
+            // Execute in a transacton, so that all changes either persist or none if something fails
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
                 // Delete User Sop Favourites
@@ -264,6 +314,13 @@ namespace Backend.Service.Implementation
             });
         }
 
+        /// <summary>
+        /// Registers a user with a valid invitation and token
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="modelState"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task<ApiResponse> RegisterInvitedUser(RegisterInviteRequestDTO model, ModelStateDictionary modelState)
         {
             // Sanitise inputs
@@ -354,6 +411,13 @@ namespace Backend.Service.Implementation
             };
         }
 
+        /// <summary>
+        /// Invites a user to an organisation with a valid jwt token
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="modelState"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task<ApiResponse> InviteUser(InviteRequestDTO model, ModelStateDictionary modelState)
         {
             // Sanitise inputs
@@ -434,6 +498,13 @@ namespace Backend.Service.Implementation
 
         }
 
+        /// <summary>
+        /// Creates an organisation and admin user associated with that organisation
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="modelState"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task<ApiResponse> SignupOrganisation(OrganisationSignupRequest model, ModelStateDictionary modelState)
         {
             // Sanitise inputs
@@ -454,6 +525,7 @@ namespace Backend.Service.Implementation
                 throw new Exception("Password does not meet minimum requirements");
             }
 
+            // Execute database queries in a transaction so it rolls back if one fails
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
                 var apiResponse = new ApiResponse();
@@ -504,8 +576,15 @@ namespace Backend.Service.Implementation
             };
         }
 
+        /// <summary>
+        /// Changes a users password
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task<ApiResponse> ChangePassword(ChangePasswordDto model)
         {
+            // Validate password meets minimum requirements
             if (!ValidatePassword(model.NewPassword))
             {
                 throw new Exception("Password does not meet the minimum criteria");
@@ -516,16 +595,18 @@ namespace Backend.Service.Implementation
                 throw new Exception("New password and confirm password do not match");
             }
 
+            // Fetch the user by their id
             var userId = _tenancyResolver.GetUserId();
             var user = await _userManager.FindByIdAsync(userId);
 
-            // check old password matches
+            // check if the existing password is correct for the user
             var isPasswordCorrect = await _userManager.CheckPasswordAsync(user, model.OldPassword);
             if (!isPasswordCorrect)
             {
                 throw new Exception("Old Passowrd is incorrect");
             }
 
+            // Change the users password
             var changePassword = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
             if (!changePassword.Succeeded)
             {
@@ -540,11 +621,17 @@ namespace Backend.Service.Implementation
             };
         }
 
+        /// <summary>
+        /// Initiates the password reset process by generating a reset token and sending a reset link to the user's email.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         public async Task ForgotPassword(ForgotPasswordRequest model)
         {
-            // var user = await _userManager.FindByEmailAsync(model.Email);
+            // Fetch user
             var user = await _db.ApplicationUsers.IgnoreQueryFilters().Where(x => x.UserName == model.Email.ToLower()).FirstOrDefaultAsync();
 
+            // If the user exists, send a reset token, otherwise dont send anything
             if (user != null)
             {
                 var token = await _userManager.GeneratePasswordResetTokenAsync(user);
@@ -557,6 +644,12 @@ namespace Backend.Service.Implementation
             }
         }
 
+        /// <summary>
+        /// Resets a users password with a valid reset token
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task<ApiResponse> ResetPassword(ResetPasswordRequest model)
         {
             if (!ValidatePassword(model.NewPassword))
@@ -585,6 +678,10 @@ namespace Backend.Service.Implementation
             };
         }
 
+        /// <summary>
+        /// Retrieves a list of user roles
+        /// </summary>
+        /// <returns></returns>
         public async Task<List<RoleDto>> GetRoles()
         {
             List<RoleDto> allRoles = await _db.Roles.Select(x => new RoleDto()
@@ -596,6 +693,11 @@ namespace Backend.Service.Implementation
             return allRoles;
         }
 
+        /// <summary>
+        /// Function that validates if a password meets minimum requirements
+        /// </summary>
+        /// <param name="password"></param>
+        /// <returns>True if valid, false if invalid</returns>
         public bool ValidatePassword(string password)
         {
             // Check if the password length is sufficient
@@ -637,6 +739,11 @@ namespace Backend.Service.Implementation
             return true;
         }
 
+        /// <summary>
+        /// Checks if a role exists, if it does not exist is creates it
+        /// </summary>
+        /// <param name="roleName"></param>
+        /// <returns></returns>
         private async Task EnsureRoleExists(string roleName)
         {
             if (!await _roleManager.RoleExistsAsync(roleName))
@@ -658,6 +765,13 @@ namespace Backend.Service.Implementation
             };
         }
 
+        /// <summary>
+        /// Creates a user and assigns them a role
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="password"></param>
+        /// <param name="role"></param>
+        /// <returns></returns>
         private async Task<IdentityResult> CreateUserWithRole(ApplicationUser user, string password, string role)
         {
             await EnsureRoleExists(role);

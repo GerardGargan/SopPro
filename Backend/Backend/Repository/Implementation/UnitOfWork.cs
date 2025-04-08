@@ -34,6 +34,11 @@ namespace Backend.Repository.Implementation
             Settings = new SettingRepository(_db);
         }
 
+        /// <summary>
+        /// Executes the provided asynchronous action within a database transaction.
+        /// </summary>
+        /// <param name="action"></param>
+        /// <returns></returns>
         public async Task ExecuteInTransactionAsync(Func<Task> action)
         {
             await using var transaction = await _db.Database.BeginTransactionAsync();
@@ -49,6 +54,12 @@ namespace Backend.Repository.Implementation
             }
         }
 
+        /// <summary>
+        /// Executes the provided asynchronous action within a database transaction.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="action"></param>
+        /// <returns></returns>
         public async Task<T> ExecuteInTransactionAsync<T>(Func<Task<T>> action)
         {
             await using var transaction = await _db.Database.BeginTransactionAsync();

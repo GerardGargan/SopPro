@@ -2,6 +2,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Backend.Models.DatabaseModels
 {
+    /// <summary>
+    /// Sop Step Model
+    /// </summary>
     public class SopStep : BaseClass
     {
         public int SopVersionId { get; set; }

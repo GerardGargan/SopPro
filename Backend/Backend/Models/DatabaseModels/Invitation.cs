@@ -3,6 +3,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Backend.Models.DatabaseModels
 {
+    /// <summary>
+    /// Invitation model
+    /// </summary>
     public class Invitation
     {
         [Key]

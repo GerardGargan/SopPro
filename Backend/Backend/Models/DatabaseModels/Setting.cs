@@ -2,6 +2,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Backend.Models.DatabaseModels
 {
+    /// <summary>
+    /// Setting model
+    /// </summary>
     public class Setting : BaseClass
     {
         public string Type { get; set; }

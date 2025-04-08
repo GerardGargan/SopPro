@@ -2,6 +2,9 @@ using System.Security.Claims;
 
 namespace Backend.Models.Tenancy
 {
+    /// <summary>
+    /// Helper class used to obtain a users organisationId, or userId based on JWT claims
+    /// </summary>
     public class TenancyResolver : ITenancyResolver
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
