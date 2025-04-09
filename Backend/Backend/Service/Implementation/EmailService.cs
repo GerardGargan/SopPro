@@ -50,7 +50,7 @@ namespace Backend.Service.Implementation
         /// <param name="bccRecipients">The id's of the bcc recipients</param>
         /// <param name="subject">The email subject</param>
         /// <param name="body">The email body</param>
-        /// <returns></returns>
+        /// <returns>True if the email is sent successfuly, false if sending fails</returns>
         public async Task<bool> SendEmailAsync(List<string> recipients, List<string> bccRecipients, string subject, string body)
         {
 
@@ -91,6 +91,16 @@ namespace Backend.Service.Implementation
 
         }
 
+        /// <summary>
+        /// Sends an email with a PDF attachment
+        /// </summary>
+        /// <param name="recipients"></param>
+        /// <param name="bccRecipients"></param>
+        /// <param name="subject"></param>
+        /// <param name="body"></param>
+        /// <param name="pdfData"></param>
+        /// <param name="pdfName"></param>
+        /// <returns>True if the email is sent successfuly, false if sending fails</returns>
         public async Task<bool> SendEmailWithPdfAttachmentAsync(List<string> recipients, List<string> bccRecipients, string subject, string body, byte[] pdfData, string pdfName)
         {
             // return false if there are no recipients

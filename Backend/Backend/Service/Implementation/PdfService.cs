@@ -26,8 +26,16 @@ namespace Backend.Service.Implementation
             _templateService = templateService;
         }
 
+        /// <summary>
+        /// Generates a pdf for a specified SOP Version
+        /// </summary>
+        /// <param name="templateName"></param>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task<byte[]> GeneratePdf(string templateName, SopVersionDto model)
         {
+            // Check if the organisation has a custom logo uploaded
             var settingLogo = await _unitOfWork.Settings.GetAsync(x => x.Key == "logo");
             var customLogoUrl = settingLogo == null ? null : settingLogo.Value;
 
@@ -35,6 +43,7 @@ namespace Backend.Service.Implementation
 
             byte[] template = null;
 
+            // Determine which template to use and create the pdf
             switch (templateName.ToLower())
             {
                 case "template1":
@@ -45,6 +54,7 @@ namespace Backend.Service.Implementation
             }
 
             // send email attachment
+            // Fetch the detils of the user logged in for sending the email
             var userId = _tenancyResolver.GetUserId();
             var user = await _unitOfWork.ApplicationUsers.GetAsync(x => x.Id == userId);
             List<string> recipients = new List<string>(1);
@@ -52,6 +62,7 @@ namespace Backend.Service.Implementation
 
             var sop = await _unitOfWork.Sops.GetAsync(x => x.Id == model.SopId);
 
+            // Create model for handlebars email template
             var emailTemplateModel = new
             {
                 Username = user.Forename,
@@ -63,13 +74,22 @@ namespace Backend.Service.Implementation
                 DateGenerated = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm") ?? "N/A",
             };
 
+            // Generate html email body content using the handlebars template
             string emailBody = await _templateService.RenderTemplateAsync("PdfExport", emailTemplateModel);
             string pdfName = "SOP" + "-" + sop.Reference + "-V" + model.Version + "-" + DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm");
+
+            // Send the email with attachment
             _emailService.SendEmailWithPdfAttachmentAsync(recipients, null, "Exported sop is ready", emailBody, template, pdfName);
 
             return template;
         }
 
+        /// <summary>
+        /// Creates a specific pdf template (template 1)
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="customLogoUrl"></param>
+        /// <returns></returns>
         private byte[] Template1(SopVersionDto model, string customLogoUrl)
         {
             return Document.Create(container =>
@@ -91,6 +111,12 @@ namespace Backend.Service.Implementation
             }).GeneratePdf();
         }
 
+        /// <summary>
+        /// Generates the content for the header
+        /// </summary>
+        /// <param name="container"></param>
+        /// <param name="model"></param>
+        /// <param name="customLogoUrl"></param>
         private void ComposeHeader(IContainer container, SopVersionDto model, string customLogoUrl)
         {
             container.Column(column =>
@@ -142,6 +168,12 @@ namespace Backend.Service.Implementation
             return container.Padding(5).BorderBottom(0);
         }
 
+        /// <summary>
+        /// Generates the main content for the pdf template (sop details and steps)
+        /// </summary>
+        /// <param name="container"></param>
+        /// <param name="model"></param>
+        /// <returns></returns>
         private async Task ComposeContent(IContainer container, SopVersionDto model)
         {
             Dictionary<int, string> PpeDict = await _unitOfWork.Ppe.GetAll().ToDictionaryAsync(x => x.Id, x => x.Name);
@@ -301,6 +333,10 @@ namespace Backend.Service.Implementation
             });
         }
 
+        /// <summary>
+        /// Generates a placeholder for an image
+        /// </summary>
+        /// <param name="container"></param>
         private void ComposeImagePlaceholder(IContainer container)
         {
             container.Border(1)
@@ -313,6 +349,10 @@ namespace Backend.Service.Implementation
                 .FontColor(Colors.Grey.Medium);
         }
 
+        /// <summary>
+        /// Generates the content for the footer
+        /// </summary>
+        /// <param name="container"></param>
         private void ComposeFooter(IContainer container)
         {
             container.Row(row =>
@@ -333,6 +373,11 @@ namespace Backend.Service.Implementation
             });
         }
 
+        /// <summary>
+        /// Helper method for retrieving sop status colours
+        /// </summary>
+        /// <param name="status"></param>
+        /// <returns></returns>
         private Color GetStatusColor(SopStatus status)
         {
             return status switch
@@ -346,6 +391,11 @@ namespace Backend.Service.Implementation
             };
         }
 
+        /// <summary>
+        /// Downloads an image
+        /// </summary>
+        /// <param name="imageUrl"></param>
+        /// <returns></returns>
         public async Task<byte[]> DownloadImageAsync(string imageUrl)
         {
             using (HttpClient client = new HttpClient())

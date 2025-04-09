@@ -752,6 +752,14 @@ namespace Backend.Service.Implementation
             }
         }
 
+        /// <summary>
+        /// Creates an application user
+        /// </summary>
+        /// <param name="forename"></param>
+        /// <param name="surname"></param>
+        /// <param name="email"></param>
+        /// <param name="organisationId"></param>
+        /// <returns></returns>
         private ApplicationUser CreateApplicationUser(string forename, string surname, string email, int organisationId)
         {
             return new ApplicationUser
@@ -766,7 +774,7 @@ namespace Backend.Service.Implementation
         }
 
         /// <summary>
-        /// Creates a user and assigns them a role
+        /// Creates a user and assigns them a specified role
         /// </summary>
         /// <param name="user"></param>
         /// <param name="password"></param>

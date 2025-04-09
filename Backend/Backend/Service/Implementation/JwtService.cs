@@ -26,6 +26,12 @@ namespace Backend.Service.Implementation
             _userManager = userManager;
         }
 
+        /// <summary>
+        /// Generates a JWT token and Refresh Token for the user to authenticate with
+        /// </summary>
+        /// <param name="userFromDb"></param>
+        /// <param name="roles"></param>
+        /// <returns>An AuthenticationResult object containing the token and refresh token</returns>
         public async Task<AuthenticationResult> GenerateAuthToken(ApplicationUser userFromDb, IList<string> roles)
         {
             JwtSecurityTokenHandler tokenHandler = new();
@@ -55,6 +61,7 @@ namespace Backend.Service.Implementation
 
             var jwtToken = tokenHandler.WriteToken(token);
 
+            // Generate the refresh token
             var refreshToken = new RefreshToken()
             {
                 JwtId = token.Id,
@@ -64,6 +71,7 @@ namespace Backend.Service.Implementation
                 Token = GenerateRefreshToken()
             };
 
+            // Save refresh token in the database
             await _dbContext.RefreshTokens.AddAsync(refreshToken);
             await _dbContext.SaveChangesAsync();
 
@@ -76,6 +84,13 @@ namespace Backend.Service.Implementation
 
         }
 
+        /// <summary>
+        /// Refreshes a users JWT token when it has expired
+        /// </summary>
+        /// <param name="token"></param>
+        /// <param name="refreshToken"></param>
+        /// <returns></returns>
+        /// <exception cref="UnauthorizedAccessException"></exception>
         public async Task<AuthenticationResult> RefreshTokenAsync(string token, string refreshToken)
         {
             var validatedToken = GetPrincipalFromToken(token);
@@ -171,6 +186,10 @@ namespace Backend.Service.Implementation
                    jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase);
         }
 
+        /// <summary>
+        /// Generates a refresh token
+        /// </summary>
+        /// <returns></returns>
         private string GenerateRefreshToken()
         {
             var randomNumber = new byte[32];
@@ -179,6 +198,17 @@ namespace Backend.Service.Implementation
             return Convert.ToBase64String(randomNumber);
         }
 
+        /// <summary>
+        /// Generates a JWT used for inviting a user to join an organisation and sign up
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="role"></param>
+        /// <param name="organisationId"></param>
+        /// <param name="issuer"></param>
+        /// <param name="audience"></param>
+        /// <param name="expiryHours"></param>
+        /// <param name="secret"></param>
+        /// <returns></returns>
         public string GenerateInviteToken(string email, string role, int organisationId, string issuer, string audience, int expiryHours, string secret)
         {
             var securityKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(secret));
@@ -203,6 +233,16 @@ namespace Backend.Service.Implementation
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
+        /// <summary>
+        /// Validaes that an invitation token is valid
+        /// </summary>
+        /// <param name="token"></param>
+        /// <param name="secret"></param>
+        /// <param name="issuer"></param>
+        /// <param name="audiece"></param>
+        /// <returns></returns>
+        /// <exception cref="SecurityTokenException"></exception>
+        /// <exception cref="Exception"></exception>
         public ClaimsPrincipal ValidateInviteToken(string token, string secret, string issuer, string audiece)
         {
             var securityKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(secret));

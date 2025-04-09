@@ -17,6 +17,13 @@ namespace Backend.Service.Implementation
             _unitOfWork = unitOfWork;
         }
 
+        /// <summary>
+        /// Creates a department
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="orgId"></param>
+        /// <returns>A Department DTO object for the department that was created</returns>
+        /// <exception cref="Exception"></exception>
         public async Task<ApiResponse<Department>> Create(DepartmentDto model, int orgId)
         {
             validateModel(model);
@@ -28,6 +35,7 @@ namespace Backend.Service.Implementation
                 throw new Exception("This department already exists");
             }
 
+            // Create department
             Department newDepartment = new Department()
             {
                 Name = model.Name,
@@ -44,6 +52,12 @@ namespace Backend.Service.Implementation
             };
         }
 
+        /// <summary>
+        /// Updates a department
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task<ApiResponse<Department>> Update(DepartmentDto model)
         {
             if (model.Id == null)
@@ -61,6 +75,7 @@ namespace Backend.Service.Implementation
 
             validateModel(model);
 
+            // Update properties
             deptToUpdate.Name = model.Name;
             await _unitOfWork.SaveAsync();
 
@@ -73,8 +88,13 @@ namespace Backend.Service.Implementation
             };
         }
 
+        /// <summary>
+        /// Returns a list of all departments
+        /// </summary>
+        /// <returns></returns>
         public async Task<ApiResponse<List<DepartmentDto>>> GetAll()
         {
+            // Get all departments
             List<DepartmentDto> departments = await _unitOfWork.Departments.GetAll().Select(dept => new DepartmentDto
             {
                 Id = dept.Id,
@@ -91,6 +111,12 @@ namespace Backend.Service.Implementation
             return result;
         }
 
+        /// <summary>
+        /// Gets a department by its id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task<ApiResponse<Department>> GetById(int id)
         {
             if (id <= 0)
@@ -98,6 +124,7 @@ namespace Backend.Service.Implementation
                 throw new Exception("Invalid id");
             }
 
+            // Fetch department
             Department deptFromDb = await _unitOfWork.Departments.GetAsync(d => d.Id == id);
 
             if (deptFromDb == null)
@@ -113,6 +140,12 @@ namespace Backend.Service.Implementation
             };
         }
 
+        /// <summary>
+        /// Deletes a department by its id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task<ApiResponse> Delete(int id)
         {
             // obtain department record from db
@@ -134,6 +167,11 @@ namespace Backend.Service.Implementation
             };
         }
 
+        /// <summary>
+        /// Validates the department dto model for business rules
+        /// </summary>
+        /// <param name="model"></param>
+        /// <exception cref="Exception"></exception>
         public void validateModel(DepartmentDto model)
         {
             if (string.IsNullOrWhiteSpace(model.Name))
