@@ -367,7 +367,7 @@ namespace Backend.Service.Implementation
             {
                 claimsPrincipal = _jwtService.ValidateInviteToken(model.Token, _appSettings.JwtSecret, _appSettings.JwtIssuer, _appSettings.JwtAudience);
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 throw new Exception("Error processing token");
             }
@@ -486,7 +486,7 @@ namespace Backend.Service.Implementation
             string emailSubject = $"{emailModel.InvitedBy} has invited you to join {orgFromDb.Name} on SopPro";
             string emailBody = await _templateService.RenderTemplateAsync("UserInvitation", emailModel);
 
-            _emailService.SendEmailAsync(model.Email, emailSubject, emailBody);
+            _ = _emailService.SendEmailAsync(model.Email, emailSubject, emailBody);
 
             // return an api response with a success
             return new ApiResponse()
@@ -640,7 +640,7 @@ namespace Backend.Service.Implementation
                 var resetUrl = $"soppro://reset?email={model.Email}&token={encodedToken}";
                 var redirectUrl = $"{_appSettings.BaseUrl}/api/auth/redirect?redirect={Uri.EscapeDataString(resetUrl)}";
 
-                _emailService.SendEmailAsync(model.Email, "Password Reset", $@"<a href=""{redirectUrl}"">Click here to reset your password</a>");
+                _ = _emailService.SendEmailAsync(model.Email, "Password Reset", $@"<a href=""{redirectUrl}"">Click here to reset your password</a>");
             }
         }
 
