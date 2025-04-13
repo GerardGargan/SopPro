@@ -305,6 +305,12 @@ namespace Backend.Tests
 
             var roles = new List<string> { StaticDetails.Role_Admin };
             var expectedToken = "test-jwt-token";
+            var expectedRefreshToken = "test-refresh-token";
+            AuthenticationResult authResult = new AuthenticationResult()
+            {
+                RefreshToken = expectedRefreshToken,
+                Token = expectedToken
+            };
 
             _unitOfWorkMock.Setup(uow => uow.ApplicationUsers.GetAsync(It.IsAny<Expression<Func<ApplicationUser, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .ReturnsAsync(applicationUser);
@@ -315,8 +321,8 @@ namespace Backend.Tests
             _userManagerMock.Setup(um => um.GetRolesAsync(applicationUser))
                 .ReturnsAsync(roles);
 
-            _jwtServiceMock.Setup(jwt => jwt.GenerateAuthToken(applicationUser, roles, It.IsAny<string>(), It.IsAny<int>()))
-                .Returns(expectedToken);
+            _jwtServiceMock.Setup(jwt => jwt.GenerateAuthToken(applicationUser, roles))
+                .Returns(Task.FromResult(authResult));
 
             _signInManager.Setup(x => x.PasswordSignInAsync(applicationUser, It.IsAny<string>(), It.IsAny<bool>(), It.IsAny<bool>()))
                 .Returns(Task.FromResult(SignInResult.Success));
