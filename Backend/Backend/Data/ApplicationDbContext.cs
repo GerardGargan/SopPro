@@ -34,15 +34,18 @@ namespace Backend.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Loop through each entity type that inherits from BaseClass and apply a global query filter for organisation, this helps to avoid tenancy leaks
+            // Loop through each entity type that inherits from BaseClass and apply a global query filter for organisation
             foreach (var entityType in modelBuilder.Model.GetEntityTypes())
             {
+                // Check if the entity inherits from BaseClass but is not the BaseClass itself
                 if (typeof(BaseClass).IsAssignableFrom(entityType.ClrType) && entityType.ClrType != typeof(BaseClass))
                 {
+                    // Get the generic method definition for applying the organisation-level query filter
                     var method = typeof(ModelBuilderExtensions)
                         .GetMethod(nameof(ModelBuilderExtensions.ApplyOrganisationQueryFilter), BindingFlags.Static | BindingFlags.Public)
                         .MakeGenericMethod(entityType.ClrType);
 
+                    // Invoke the method to apply the query filter for the current entity type
                     method.Invoke(null, new object[] { modelBuilder, this });
                 }
             }
