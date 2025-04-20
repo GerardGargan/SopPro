@@ -33,10 +33,11 @@ namespace Backend.Controllers
         /// <param name="sopDto"></param>
         /// <returns></returns>
         [HttpPost]
+        [ProducesResponseType(201, Type = typeof(ApiResponse))]
         public async Task<IActionResult> CreateSop([FromBody] SopDto sopDto)
         {
             var apiResponse = await _sopService.CreateSop(sopDto);
-            return Ok(apiResponse);
+            return Created(string.Empty, apiResponse);
         }
 
         /// <summary>
@@ -51,6 +52,7 @@ namespace Backend.Controllers
         /// <param name="sortOrder"></param>
         /// <returns></returns>
         [HttpGet]
+        [ProducesResponseType(200, Type = typeof(ApiResponse<List<SopDto>>))]
         public async Task<IActionResult> GetAll([FromQuery] string search, [FromQuery] int? status, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] bool isFavourite = false, [FromQuery] string sortBy = "recent", [FromQuery] string sortOrder = "desc")
         {
             var apiResponse = await _sopService.GetAllSops(search, status, page, pageSize, isFavourite, sortBy, sortOrder);
@@ -63,6 +65,7 @@ namespace Backend.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet]
+        [ProducesResponseType(200, Type = typeof(ApiResponse<SopDto>))]
         [Route("{id:int}")]
         public async Task<IActionResult> GetSopLatestVersion(int id)
         {
@@ -77,6 +80,7 @@ namespace Backend.Controllers
         /// <param name="sopDto"></param>
         /// <returns></returns>
         [HttpPut]
+        [ProducesResponseType(200, Type = typeof(ApiResponse<SopDto>))]
         [Route("{id:int}")]
         public async Task<IActionResult> UpdateSop(int id, [FromBody] SopDto sopDto)
         {
@@ -90,6 +94,7 @@ namespace Backend.Controllers
         /// <param name="ids"></param>
         /// <returns></returns>
         [HttpDelete]
+        [ProducesResponseType(200, Type = typeof(ApiResponse))]
         [Route("delete")]
         public async Task<IActionResult> DeleteSops([FromBody] List<int> ids)
         {
@@ -103,6 +108,7 @@ namespace Backend.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpDelete]
+        [ProducesResponseType(200, Type = typeof(ApiResponse))]
         [Route("{id:int}")]
         public async Task<IActionResult> DeleteSop(int id)
         {
@@ -120,6 +126,7 @@ namespace Backend.Controllers
         /// <param name="file"></param>
         /// <returns></returns>
         [HttpPost]
+        [ProducesResponseType(200, Type = typeof(ApiResponse))]
         [Route("upload")]
         public async Task<IActionResult> UploadImage([FromForm] FileDto file)
         {
@@ -133,6 +140,7 @@ namespace Backend.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet]
+        [ProducesResponseType(200, Type = typeof(ApiResponse))]
         [Route("{id:int}/favourite")]
         public async Task<IActionResult> FavouriteSop(int id)
         {
@@ -146,6 +154,7 @@ namespace Backend.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpDelete]
+        [ProducesResponseType(200, Type = typeof(ApiResponse))]
         [Route("{id:int}/favourite")]
         public async Task<IActionResult> UnfavouriteSop(int id)
         {
@@ -160,6 +169,7 @@ namespace Backend.Controllers
         /// <returns></returns>
         [Authorize(Roles = StaticDetails.Role_Admin)]
         [HttpGet]
+        [ProducesResponseType(200, Type = typeof(ApiResponse))]
         [Route("{id:int}/approve")]
         public async Task<IActionResult> ApproveSop(int id)
         {
@@ -174,6 +184,7 @@ namespace Backend.Controllers
         /// <returns></returns>
         [Authorize(Roles = StaticDetails.Role_Admin)]
         [HttpGet]
+        [ProducesResponseType(200, Type = typeof(ApiResponse))]
         [Route("{id:int}/reject")]
         public async Task<IActionResult> RejectSop(int id)
         {
@@ -187,6 +198,7 @@ namespace Backend.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [HttpGet]
+        [ProducesResponseType(200, Type = typeof(ApiResponse))]
         [Route("{id:int}/requestapproval")]
         public async Task<IActionResult> RequestApproval(int id)
         {
@@ -200,6 +212,7 @@ namespace Backend.Controllers
         /// <param name="sopVersionId"></param>
         /// <returns></returns>
         [HttpGet]
+        [ProducesResponseType(200, Type = typeof(FileContentResult))]
         [Route("{sopVersionId:int}/pdf")]
         public async Task<IActionResult> GeneratePdf(int sopVersionId)
         {
@@ -217,11 +230,12 @@ namespace Backend.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost]
+        [ProducesResponseType(201, Type = typeof(SopDto))]
         [Route("aigenerator")]
         public async Task<IActionResult> GenerateAiSop([FromBody] AiRequestDto model)
         {
             var result = await _sopService.GenerateAiSop(model);
-            return Ok(result);
+            return Created(string.Empty, result);
         }
 
         /// <summary>
@@ -229,6 +243,7 @@ namespace Backend.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
+        [ProducesResponseType(200, Type = typeof(ApiResponse<AnalyticsResponseDto>))]
         [Route("analytics")]
         public async Task<IActionResult> GetAnalytics()
         {

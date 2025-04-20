@@ -114,6 +114,7 @@ namespace Backend.Service.Implementation
 
             return new ApiResponse
             {
+                StatusCode = HttpStatusCode.Created,
                 IsSuccess = true,
                 SuccessMessage = "Sop created successfully"
             };
