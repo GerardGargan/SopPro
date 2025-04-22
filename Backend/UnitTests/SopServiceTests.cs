@@ -235,7 +235,7 @@ namespace Backend.Tests
         }
 
         [Test]
-        public async Task ApproveSop_WithDraftStatus_ShouldSucceed()
+        public async Task ApproveSop_WithInReviewStatus_ShouldSucceed()
         {
             // Arrange
             var sopId = 1;
@@ -248,7 +248,7 @@ namespace Backend.Tests
                     new SopVersion
                     {
                         Version = 1,
-                        Status = SopStatus.Draft,
+                        Status = SopStatus.InReview,
                         Title = "SOP Title",
                         AuthorId = "author-id",
                         ApprovedById = "approver-id",
@@ -330,7 +330,11 @@ namespace Backend.Tests
         }
 
         [Test]
-        public async Task ApproveSop_WithApprovedStatus_ShouldThrowException()
+        [TestCase(SopStatus.Approved, "Invalid status for approval")]
+        [TestCase(SopStatus.Archived, "Invalid status for approval")]
+        [TestCase(SopStatus.Draft, "Invalid status for approval")]
+        [TestCase(SopStatus.Rejected, "Invalid status for approval")]
+        public async Task ApproveSop_WithInvalidStatus_ShouldThrowException(SopStatus status, string errorMessage)
         {
             // Arrange
             var sopId = 1;
@@ -343,7 +347,7 @@ namespace Backend.Tests
                     new SopVersion
                     {
                         Version = 1,
-                        Status = SopStatus.Approved,
+                        Status = status,
                         Title = "SOP Title",
                         AuthorId = "author-id",
                         ApprovedById = "approver-id",
@@ -415,7 +419,196 @@ namespace Backend.Tests
             var exception = Assert.ThrowsAsync<ArgumentException>(async () => await sopService.ApproveSop(sopId));
 
             // Assert
-            Assert.That(exception.Message, Is.EqualTo("Invalid status for approval"));
+            Assert.That(exception.Message, Is.EqualTo(errorMessage));
+
+        }
+
+        [Test]
+        public async Task RejectSop_WithInReviewStatus_ShouldSucceed()
+        {
+            // Arrange
+            var sopId = 1;
+            var sop = new Sop
+            {
+                Id = sopId,
+                Reference = "SOP-1234",
+                SopVersions = new List<SopVersion>
+                {
+                    new SopVersion
+                    {
+                        Version = 1,
+                        Status = SopStatus.InReview,
+                        Title = "SOP Title",
+                        AuthorId = "author-id",
+                        ApprovedById = "approver-id",
+                        ApprovalDate = DateTime.UtcNow
+                    }
+                }
+            };
+
+            var author = new ApplicationUser
+            {
+                Id = "author-id",
+                Forename = "Author",
+                Surname = "Test",
+                Email = "author@example.com"
+            };
+
+            var approver = new ApplicationUser
+            {
+                Id = "approver-id",
+                Forename = "Approver",
+                Surname = "Test"
+            };
+
+            // Mocking unit of work methods
+            _unitOfWorkMock.Setup(uow => uow.Sops.GetAsync(It.IsAny<Expression<Func<Sop, bool>>>(), It.IsAny<string>(), It.IsAny<bool>())).ReturnsAsync(sop);
+            _unitOfWorkMock.Setup(uow => uow.SopVersions.GetAsync(It.IsAny<Expression<Func<SopVersion, bool>>>(), It.IsAny<string>(), It.IsAny<bool>())).ReturnsAsync(sop.SopVersions.First());
+            _unitOfWorkMock.Setup(uow => uow.ApplicationUsers.GetAsync(
+                It.IsAny<Expression<Func<ApplicationUser, bool>>>(),
+                It.IsAny<string>(),
+                It.IsAny<bool>())
+            )
+            .ReturnsAsync((Expression<Func<ApplicationUser, bool>> predicate, string includeProperties, bool asNoTracking) =>
+            {
+                var author = new ApplicationUser
+                {
+                    Id = "author-id",
+                    Forename = "Author",
+                    Surname = "Test",
+                    Email = "author@example.com"
+                };
+
+                var approver = new ApplicationUser
+                {
+                    Id = "approver-id",
+                    Forename = "Approver",
+                    Surname = "Test"
+                };
+
+                var userId = predicate.Compile().ToString();
+
+                if (userId == author.Id)
+                {
+                    return author;
+                }
+
+                return approver;
+            });
+
+
+            // Mocking template rendering
+            _templateService.Setup(ts => ts.RenderTemplateAsync(It.IsAny<string>(), It.IsAny<object>()))
+                .ReturnsAsync("Email body");
+
+            // Mocking email sending
+            _emailService.Setup(es => es.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(true));
+
+            // Act
+            var result = await sopService.RejectSop(sopId);
+
+            // Assert
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(result.SuccessMessage, Is.EqualTo("Sop rejected"));
+
+            // Verify that the status of the sop is updated to Approved
+            Assert.That(sop.SopVersions.First().Status, Is.EqualTo(SopStatus.Rejected));
+
+        }
+
+        [Test]
+        [TestCase(SopStatus.Approved, "Invalid status for rejection")]
+        [TestCase(SopStatus.Archived, "Invalid status for rejection")]
+        [TestCase(SopStatus.Draft, "Invalid status for rejection")]
+        [TestCase(SopStatus.Rejected, "Invalid status for rejection")]
+        public async Task RejectSop_WithInvalidStatus_ShouldThrowException(SopStatus status, string errorMessage)
+        {
+            // Arrange
+            var sopId = 1;
+            var sop = new Sop
+            {
+                Id = sopId,
+                Reference = "SOP-1234",
+                SopVersions = new List<SopVersion>
+                {
+                    new SopVersion
+                    {
+                        Version = 1,
+                        Status = status,
+                        Title = "SOP Title",
+                        AuthorId = "author-id",
+                        ApprovedById = "approver-id",
+                        ApprovalDate = DateTime.UtcNow
+                    }
+                }
+            };
+
+            var author = new ApplicationUser
+            {
+                Id = "author-id",
+                Forename = "Author",
+                Surname = "Test",
+                Email = "author@example.com"
+            };
+
+            var approver = new ApplicationUser
+            {
+                Id = "approver-id",
+                Forename = "Approver",
+                Surname = "Test"
+            };
+
+            // Mocking unit of work methods
+            _unitOfWorkMock.Setup(uow => uow.Sops.GetAsync(It.IsAny<Expression<Func<Sop, bool>>>(), It.IsAny<string>(), It.IsAny<bool>())).ReturnsAsync(sop);
+            _unitOfWorkMock.Setup(uow => uow.SopVersions.GetAsync(It.IsAny<Expression<Func<SopVersion, bool>>>(), It.IsAny<string>(), It.IsAny<bool>())).ReturnsAsync(sop.SopVersions.First());
+            _unitOfWorkMock.Setup(uow => uow.ApplicationUsers.GetAsync(
+                It.IsAny<Expression<Func<ApplicationUser, bool>>>(),
+                It.IsAny<string>(),
+                It.IsAny<bool>())
+            )
+            .ReturnsAsync((Expression<Func<ApplicationUser, bool>> predicate, string includeProperties, bool asNoTracking) =>
+            {
+                var author = new ApplicationUser
+                {
+                    Id = "author-id",
+                    Forename = "Author",
+                    Surname = "Test",
+                    Email = "author@example.com"
+                };
+
+                var approver = new ApplicationUser
+                {
+                    Id = "approver-id",
+                    Forename = "Approver",
+                    Surname = "Test"
+                };
+
+                var userId = predicate.Compile().ToString();
+
+                if (userId == author.Id)
+                {
+                    return author;
+                }
+
+                return approver;
+            });
+
+
+            // Mocking template rendering
+            _templateService.Setup(ts => ts.RenderTemplateAsync(It.IsAny<string>(), It.IsAny<object>()))
+                .ReturnsAsync("Email body");
+
+            // Mocking email sending
+            _emailService.Setup(es => es.SendEmailAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .Returns(Task.FromResult(true));
+
+            // Act
+            var exception = Assert.ThrowsAsync<ArgumentException>(async () => await sopService.RejectSop(sopId));
+
+            // Assert
+            Assert.That(exception.Message, Is.EqualTo(errorMessage));
 
         }
 
