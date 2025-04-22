@@ -142,6 +142,49 @@ namespace Backend.Tests
             Assert.That("Sop created successfully", Is.EqualTo(response.SuccessMessage));
         }
 
+        [Test]
+        public async Task CreateSop_WithInvalidTitle_ShouldThrowException()
+        {
+            var model = new SopDto
+            {
+                Title = " ",
+                Description = "This is a test description",
+                Reference = "Ref123",
+                isAiGenerated = false,
+                DepartmentId = 1,
+            };
+
+            _unitOfWorkMock.Setup(uow => uow.Sops.GetAsync(It.IsAny<Expression<Func<Sop, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .ReturnsAsync((Sop)null);
+
+            var exception = Assert.ThrowsAsync<ArgumentException>(async () =>
+                await sopService.CreateSop(model));
+
+            Assert.That(exception.Message, Is.EqualTo("Title cant be empty"));
+
+        }
+
+        [Test]
+        public async Task CreateSop_WithInvalidDescription_ShouldThrowException()
+        {
+            var model = new SopDto
+            {
+                Title = "Test title",
+                Description = " ",
+                Reference = "Ref123",
+                isAiGenerated = false,
+                DepartmentId = 1,
+            };
+
+            _unitOfWorkMock.Setup(uow => uow.Sops.GetAsync(It.IsAny<Expression<Func<Sop, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .ReturnsAsync((Sop)null);
+
+            var exception = Assert.ThrowsAsync<ArgumentException>(async () =>
+                await sopService.CreateSop(model));
+
+            Assert.That(exception.Message, Is.EqualTo("Description cant be empty"));
+
+        }
 
     }
 }
