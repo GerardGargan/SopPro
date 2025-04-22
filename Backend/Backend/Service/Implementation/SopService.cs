@@ -1086,6 +1086,11 @@ namespace Backend.Service.Implementation
                 throw new Exception("No SopVersion found");
             }
 
+            if (status == SopStatus.Approved && latestSopVersion.Status != SopStatus.Draft && latestSopVersion.Status != SopStatus.Rejected)
+            {
+                throw new ArgumentException("Invalid status for approval");
+            }
+
             latestSopVersion.Status = status;
 
             if (status == SopStatus.Approved)
