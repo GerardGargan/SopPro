@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using System.Net;
+using System.Security.Claims;
 using Azure.Storage.Blobs;
 using Backend.Data;
 using Backend.Models.DatabaseModels;
@@ -184,6 +185,47 @@ namespace Backend.Tests
 
             Assert.That(exception.Message, Is.EqualTo("Description cant be empty"));
 
+        }
+
+        [Test]
+        public async Task GetSops_ShouldBeFiltered_ByOrganisationId()
+        {
+            // Arrange
+            int orgId = 1;
+            int nonMatchingOrgId = 2;
+
+            // Create HttpContext with authentication and claims
+            var httpContext = new DefaultHttpContext();
+            var claims = new List<Claim>
+            {
+                new Claim("organisationId", orgId.ToString()),
+                new Claim("id", "test-user-id")
+            };
+            var identity = new ClaimsIdentity(claims, "TestAuth");
+            var principal = new ClaimsPrincipal(identity);
+
+            httpContext.User = principal;
+
+            // Setup HttpContextAccessor to return our context with claims
+            _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(httpContext);
+
+            // Now the tenancy resolver should be able to get the organisation ID from claims
+            // No need to mock the GetOrganisationid method as it will use the real implementation
+
+            // Add test data to the existing context
+            _dbContext.Sops.Add(new Sop { Id = 1, OrganisationId = orgId, Reference = "sop-a" });
+            _dbContext.Sops.Add(new Sop { Id = 2, OrganisationId = nonMatchingOrgId, Reference = "sop-b" });
+            await _dbContext.SaveChangesAsync();
+
+            // Clear the change tracker to ensure fresh queries
+            _dbContext.ChangeTracker.Clear();
+
+            // Act - query should be filtered by the orgId from tenancy resolver
+            var result = await _dbContext.Sops.ToListAsync();
+
+            // Assert
+            Assert.That(result.Count, Is.EqualTo(1));
+            Assert.That(result[0].Reference, Is.EqualTo("sop-a"));
         }
 
     }
