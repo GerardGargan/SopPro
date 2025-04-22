@@ -84,10 +84,10 @@ namespace Backend.Tests
         [Test]
         public async Task CreateSop_WithValidData_ShouldSucceed()
         {
+            // Arrange
             var organisationId = 1;
             var userId = Guid.NewGuid().ToString();
 
-            // Arrange
             var model = new SopDto
             {
                 Title = "Test SOP",
@@ -96,13 +96,13 @@ namespace Backend.Tests
                 isAiGenerated = false,
                 DepartmentId = 1,
                 SopHazards = new List<SopHazardDto>
-        {
-            new SopHazardDto { Name = "Hazard 1", ControlMeasure = "Measure 1", RiskLevel = RiskLevel.Medium }
-        },
+                {
+                    new SopHazardDto { Name = "Hazard 1", ControlMeasure = "Measure 1", RiskLevel = RiskLevel.Medium }
+                },
                 SopSteps = new List<SopStepDto>
-        {
-            new SopStepDto { Title = "Step 1", Text = "Do something", Position = 1 }
-        }
+                {
+                    new SopStepDto { Title = "Step 1", Text = "Do something", Position = 1 }
+                }
             };
 
             // Mock GetAsync to return null (no existing SOP)
@@ -146,6 +146,7 @@ namespace Backend.Tests
         [Test]
         public async Task CreateSop_WithInvalidTitle_ShouldThrowException()
         {
+            // Arrange
             var model = new SopDto
             {
                 Title = " ",
@@ -158,9 +159,11 @@ namespace Backend.Tests
             _unitOfWorkMock.Setup(uow => uow.Sops.GetAsync(It.IsAny<Expression<Func<Sop, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .ReturnsAsync((Sop)null);
 
+            // Act
             var exception = Assert.ThrowsAsync<ArgumentException>(async () =>
                 await sopService.CreateSop(model));
 
+            // Assert
             Assert.That(exception.Message, Is.EqualTo("Title cant be empty"));
 
         }
@@ -168,6 +171,7 @@ namespace Backend.Tests
         [Test]
         public async Task CreateSop_WithInvalidDescription_ShouldThrowException()
         {
+            //Arrange
             var model = new SopDto
             {
                 Title = "Test title",
@@ -180,9 +184,11 @@ namespace Backend.Tests
             _unitOfWorkMock.Setup(uow => uow.Sops.GetAsync(It.IsAny<Expression<Func<Sop, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
                 .ReturnsAsync((Sop)null);
 
+            // Act
             var exception = Assert.ThrowsAsync<ArgumentException>(async () =>
                 await sopService.CreateSop(model));
 
+            // Assert
             Assert.That(exception.Message, Is.EqualTo("Description cant be empty"));
 
         }
@@ -212,7 +218,7 @@ namespace Backend.Tests
             // Now the tenancy resolver should be able to get the organisation ID from claims
             // No need to mock the GetOrganisationid method as it will use the real implementation
 
-            // Add test data to the existing context
+            // Add test data to the in memory database
             _dbContext.Sops.Add(new Sop { Id = 1, OrganisationId = orgId, Reference = "sop-a" });
             _dbContext.Sops.Add(new Sop { Id = 2, OrganisationId = nonMatchingOrgId, Reference = "sop-b" });
             await _dbContext.SaveChangesAsync();
