@@ -55,6 +55,16 @@ namespace Backend.Service.Implementation
                 throw new Exception("Sop with this reference already exists");
             }
 
+            if (string.IsNullOrWhiteSpace(model.Title))
+            {
+                throw new ArgumentException("Title cant be empty");
+            }
+
+            if (string.IsNullOrWhiteSpace(model.Description))
+            {
+                throw new ArgumentException("Description cant be empty");
+            }
+
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
                 // Create sop record

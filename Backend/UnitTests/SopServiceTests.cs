@@ -1,9 +1,13 @@
+using System.Linq.Expressions;
+using System.Net;
 using Azure.Storage.Blobs;
 using Backend.Data;
 using Backend.Models.DatabaseModels;
+using Backend.Models.Dto;
 using Backend.Models.Settings;
 using Backend.Models.Tenancy;
 using Backend.Repository.Interface;
+using Backend.Service.Implementation;
 using Backend.Service.Interface;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -26,6 +30,7 @@ namespace Backend.Tests
         private Mock<UserManager<ApplicationUser>> _userManagerMock;
         private Mock<IChatCompletionService> _chatService;
         private Mock<IHttpContextAccessor> _httpContextAccessorMock;
+        private SopService sopService;
 
         [SetUp]
         public void Setup()
@@ -64,6 +69,8 @@ namespace Backend.Tests
 
             // Chat service mock
             _chatService = new Mock<IChatCompletionService>();
+
+            sopService = new SopService(_unitOfWorkMock.Object, _tenancyResolver.Object, _dbContext, _blobService.Object, appSettings, _emailService.Object, _templateService.Object, _userManagerMock.Object, _chatService.Object);
         }
 
         [TearDown]
@@ -72,6 +79,69 @@ namespace Backend.Tests
             _dbContext.Database.EnsureDeleted();
             _dbContext.Dispose();
         }
+
+        [Test]
+        public async Task CreateSop_WithValidData_ShouldSucceed()
+        {
+            var organisationId = 1;
+            var userId = Guid.NewGuid().ToString();
+
+            // Arrange
+            var model = new SopDto
+            {
+                Title = "Test SOP",
+                Description = "This is a test description",
+                Reference = "Ref123",
+                isAiGenerated = false,
+                DepartmentId = 1,
+                SopHazards = new List<SopHazardDto>
+        {
+            new SopHazardDto { Name = "Hazard 1", ControlMeasure = "Measure 1", RiskLevel = RiskLevel.Medium }
+        },
+                SopSteps = new List<SopStepDto>
+        {
+            new SopStepDto { Title = "Step 1", Text = "Do something", Position = 1 }
+        }
+            };
+
+            // Mock GetAsync to return null (no existing SOP)
+            _unitOfWorkMock.Setup(uow => uow.Sops.GetAsync(It.IsAny<Expression<Func<Sop, bool>>>(), It.IsAny<string>(), It.IsAny<bool>()))
+                .ReturnsAsync((Sop)null);
+
+            // Mock tenancy
+            _tenancyResolver.Setup(t => t.GetOrganisationid()).Returns(organisationId);
+            _tenancyResolver.Setup(t => t.GetUserId()).Returns(userId);
+
+            // Setup transaction method to just run the action
+            _unitOfWorkMock.Setup(u => u.ExecuteInTransactionAsync(It.IsAny<Func<Task>>()))
+                .Returns<Func<Task>>(func => func());
+
+            // Setup mocks for AddAsync and SaveAsync
+            _unitOfWorkMock.Setup(u => u.Sops.AddAsync(It.IsAny<Sop>()))
+                .Callback<Sop>(s => s.Id = 1) // Simulate DB setting the Id
+                .Returns(Task.CompletedTask);
+
+            _unitOfWorkMock.Setup(u => u.SopVersions.AddAsync(It.IsAny<SopVersion>()))
+                .Callback<SopVersion>(v => v.Id = 1)
+                .Returns(Task.CompletedTask);
+
+            _unitOfWorkMock.Setup(u => u.SopHazards.AddRangeAsync(It.IsAny<IEnumerable<SopHazard>>()))
+                .Returns(Task.CompletedTask);
+
+            _unitOfWorkMock.Setup(u => u.SopSteps.AddRangeAsync(It.IsAny<IEnumerable<SopStep>>()))
+                .Returns(Task.CompletedTask);
+
+            _unitOfWorkMock.Setup(u => u.SaveAsync()).Returns(Task.CompletedTask);
+
+            // Act
+            var response = await sopService.CreateSop(model);
+
+            // Assert
+            Assert.That(response.IsSuccess, Is.True);
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Created));
+            Assert.That("Sop created successfully", Is.EqualTo(response.SuccessMessage));
+        }
+
 
     }
 }
