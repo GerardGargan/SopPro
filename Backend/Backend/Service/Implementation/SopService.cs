@@ -1098,6 +1098,12 @@ namespace Backend.Service.Implementation
                 throw new ArgumentException("Invalid status for rejection");
             }
 
+            // Only allow draft or rejected SOPs to request approval
+            if (status == SopStatus.InReview && latestSopVersion.Status != SopStatus.Draft && latestSopVersion.Status != SopStatus.Rejected)
+            {
+                throw new ArgumentException("Invalid status for requesting approval");
+            }
+
             latestSopVersion.Status = status;
 
             if (status == SopStatus.Approved)
