@@ -273,10 +273,6 @@ namespace Backend.Tests
                 Surname = "Doe"
             };
 
-            var applicationUser = new ApplicationUser()
-            {
-
-            };
             // Act & Assert
             var exception = Assert.ThrowsAsync<Exception>(async () => await _authService.SignupOrganisation(request, _modelState));
             Assert.That(exception.Message, Is.EqualTo("Password does not meet minimum requirements"));

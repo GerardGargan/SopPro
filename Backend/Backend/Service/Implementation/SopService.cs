@@ -15,8 +15,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using OpenAI.Chat;
-using Newtonsoft.Json;
-using System.IO.Compression;
 
 namespace Backend.Service.Implementation
 {
@@ -1014,7 +1012,6 @@ namespace Backend.Service.Implementation
 
                     string emailBody = await _templateService.RenderTemplateAsync("SopRejected", model);
 
-                    // Commented out during testing to prevent going over free postmark limit temporarily
                     _ = _emailService.SendEmailAsync(author.Email, "Sop rejected", emailBody);
                 }
             }

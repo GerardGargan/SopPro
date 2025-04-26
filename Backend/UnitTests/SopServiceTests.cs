@@ -825,8 +825,6 @@ namespace Backend.Tests
 
             // Assert
             Assert.That(exception.Message, Is.EqualTo("Invalid status for requesting approval"));
-
-
         }
 
     }
