@@ -104,6 +104,7 @@ namespace Backend.Service.Implementation
             var expiryDateTimeUtc = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc)
                 .AddSeconds(expiryDateUnix);
 
+            // Check if the JWT has expired
             if (expiryDateTimeUtc > DateTime.UtcNow)
             {
                 throw new UnauthorizedAccessException("This token hasn't expired yet");
@@ -112,31 +113,37 @@ namespace Backend.Service.Implementation
             var jti = validatedToken.Claims.Single(x => x.Type == JwtRegisteredClaimNames.Jti).Value;
             var storedRefreshToken = await _dbContext.RefreshTokens.SingleOrDefaultAsync(x => x.Token == refreshToken);
 
+            // Check if the refresh token exists in the database
             if (storedRefreshToken == null)
             {
                 throw new UnauthorizedAccessException("This refresh token doesn't exist");
             }
 
+            // Check if the refresh token has expired
             if (DateTime.UtcNow > storedRefreshToken.ExpiryDate)
             {
                 throw new UnauthorizedAccessException("This refresh token has expired");
             }
 
+            // Check if the refresh token is invalidated
             if (storedRefreshToken.Invalidated)
             {
                 throw new UnauthorizedAccessException("This refresh token has been invalidated");
             }
 
+            // Check if the refresh token has already been used
             if (storedRefreshToken.Used)
             {
                 throw new UnauthorizedAccessException("This refresh token has been used");
             }
 
+            // Check if the JWT matches the refresh token
             if (storedRefreshToken.JwtId != jti)
             {
                 throw new UnauthorizedAccessException("This refresh token doesn't match this JWT");
             }
 
+            // Update the refresh token to flag it has been used
             storedRefreshToken.Used = true;
             _dbContext.RefreshTokens.Update(storedRefreshToken);
             await _dbContext.SaveChangesAsync();

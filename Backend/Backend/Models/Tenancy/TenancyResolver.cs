@@ -13,6 +13,11 @@ namespace Backend.Models.Tenancy
             _httpContextAccessor = httpContextAccessor;
         }
 
+        /// <summary>
+        /// Returns the organisation id from the users JWT claim
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public int? GetOrganisationid()
         {
             var user = _httpContextAccessor.HttpContext?.User;
@@ -32,6 +37,10 @@ namespace Backend.Models.Tenancy
             throw new InvalidOperationException("Organisation ID is missing or invalid in the token.");
         }
 
+        /// <summary>
+        /// Returns the users id
+        /// </summary>
+        /// <returns></returns>
         public string GetUserId()
         {
             var userId = _httpContextAccessor.HttpContext?.User?.FindFirst("id")?.Value;

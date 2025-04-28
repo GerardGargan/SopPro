@@ -156,6 +156,7 @@ namespace Backend.Service.Implementation
                 throw new Exception("Department does not exist");
             }
 
+            // Delete department
             _unitOfWork.Departments.Remove(deptFromDb);
             await _unitOfWork.SaveAsync();
 
