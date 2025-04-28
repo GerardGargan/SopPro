@@ -69,8 +69,8 @@ The app uses **Azure Blob Storage** for storing and retrieving images associated
    For security reasons, the actual values used for appsettings in this project have been git ignored.
 7. In the root of the Backend folder, run the following command to generate the database in SQL server
    ```bash
-      cd Backend
-      dotnet ef database update
+   cd Backend
+   dotnet ef database update
    ```
 8. Run the .NET API
    ```bash
