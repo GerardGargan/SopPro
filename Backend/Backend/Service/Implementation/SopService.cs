@@ -58,7 +58,7 @@ namespace Backend.Service.Implementation
             var isSopExisting = await _unitOfWork.Sops.GetAsync(s => s.Reference == model.Reference.ToLower().Trim());
             if (isSopExisting != null)
             {
-                throw new Exception("Sop with this reference already exists");
+                throw new ArgumentException("Sop with this reference already exists");
             }
 
             if (string.IsNullOrWhiteSpace(model.Title))
@@ -256,7 +256,7 @@ namespace Backend.Service.Implementation
             var sopEntity = await _unitOfWork.Sops.GetAsync(s => s.Id == id, includeProperties: "SopVersions,SopVersions.SopHazards,SopVersions.SopSteps,SopVersions.SopSteps.SopStepPpe");
             if (sopEntity == null)
             {
-                throw new Exception("Sop not found");
+                throw new KeyNotFoundException("Sop not found");
             }
 
             var latestSopVersion = sopEntity.SopVersions
@@ -265,7 +265,7 @@ namespace Backend.Service.Implementation
 
             if (latestSopVersion == null)
             {
-                throw new Exception("No SopVersion found");
+                throw new KeyNotFoundException("No SopVersion found");
             }
 
             // Map to a DTO object
@@ -342,7 +342,7 @@ namespace Backend.Service.Implementation
 
             if (sopVersion == null)
             {
-                throw new Exception("Sop version not found");
+                throw new KeyNotFoundException("Sop version not found");
             }
 
             SopVersionDto sopVersionDto = SopVersionDto.FromSopVersion(sopVersion);
@@ -364,13 +364,13 @@ namespace Backend.Service.Implementation
             // check if sop id exists
             if (id == 0 || model == null || model.Id == null)
             {
-                throw new Exception("Invalid id");
+                throw new ArgumentException("Invalid id");
             }
 
             var sopFromDb = await _unitOfWork.Sops.GetAsync(s => s.Id == model.Id, tracked: true);
             if (sopFromDb == null)
             {
-                throw new Exception("Sop not found");
+                throw new KeyNotFoundException("Sop not found");
             }
 
             // get latest sop version from db
@@ -378,7 +378,7 @@ namespace Backend.Service.Implementation
 
             if (latestVersion == null)
             {
-                throw new Exception("No sop version found");
+                throw new KeyNotFoundException("No sop version found");
             }
 
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
@@ -741,7 +741,7 @@ namespace Backend.Service.Implementation
 
             if (sops == null || sops.Count == 0)
             {
-                throw new Exception("No sops found");
+                throw new KeyNotFoundException("No sops found");
             }
 
             // Get all sopVersions and Ids
@@ -829,7 +829,7 @@ namespace Backend.Service.Implementation
 
             if (sopVersionFromDb == null)
             {
-                throw new Exception("Version not found");
+                throw new KeyNotFoundException("Version not found");
             }
 
             int sopId = sopVersionFromDb.SopId;
@@ -839,13 +839,13 @@ namespace Backend.Service.Implementation
 
             if (!allVersions.Any())
             {
-                throw new Exception("No versions found for the specified SOP");
+                throw new KeyNotFoundException("No versions found for the specified SOP");
             }
 
             // check if the version chosen is the current version
             if (allVersions.FirstOrDefault().Id == sopVersionFromDb.Id)
             {
-                throw new Exception("Error - Version selected is the current version");
+                throw new ArgumentException("Error - Version selected is the current version");
             }
 
             // Delete versions, and associated ppe, steps, hazards in the correct order for FK relationships
@@ -899,7 +899,7 @@ namespace Backend.Service.Implementation
             var sop = await _unitOfWork.Sops.GetAsync(s => s.Id == id);
             if (sop == null)
             {
-                throw new Exception("Sop not found");
+                throw new KeyNotFoundException("Sop not found");
             }
 
             // Get the user id
@@ -916,7 +916,7 @@ namespace Backend.Service.Implementation
             var duplicateLookup = await _unitOfWork.SopUserFavourites.GetAsync(f => f.SopId == id && f.ApplicationUserId == userId);
             if (duplicateLookup != null)
             {
-                throw new Exception("Sop is already favourited");
+                throw new ArgumentException("Sop is already favourited");
             }
 
             // Add the sop to favourites
@@ -947,7 +947,7 @@ namespace Backend.Service.Implementation
 
             if (sopFavourite == null)
             {
-                throw new Exception("Sop favourite not found");
+                throw new KeyNotFoundException("Sop favourite not found");
             }
 
             // delete the record
@@ -973,7 +973,7 @@ namespace Backend.Service.Implementation
         {
             if (userId == null)
             {
-                throw new Exception("User id cant be null");
+                throw new ArgumentException("User id cant be null");
             }
 
             var favouritesFromDb = await _unitOfWork.SopUserFavourites.GetAll(x => x.ApplicationUserId == userId).ToListAsync();
@@ -1148,7 +1148,7 @@ namespace Backend.Service.Implementation
             var sopEntity = await _unitOfWork.Sops.GetAsync(s => s.Id == sopId, includeProperties: "SopVersions", tracked: true);
             if (sopEntity == null)
             {
-                throw new Exception("Sop not found");
+                throw new KeyNotFoundException("Sop not found");
             }
 
             var latestSopVersion = sopEntity.SopVersions
@@ -1157,7 +1157,7 @@ namespace Backend.Service.Implementation
 
             if (latestSopVersion == null)
             {
-                throw new Exception("No SopVersion found");
+                throw new KeyNotFoundException("No SopVersion found");
             }
 
             // Only allow InReview SOPs to be approved
@@ -1363,7 +1363,7 @@ namespace Backend.Service.Implementation
         {
             if (file.File == null)
             {
-                throw new Exception("File is required");
+                throw new ArgumentException("File is required");
             }
             var fileName = $"{Guid.NewGuid()}_{file.File.FileName}";
 
