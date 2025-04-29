@@ -62,7 +62,7 @@ namespace Backend.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost("signuporganisation")]
-        [ProducesResponseType(200, Type = typeof(ApiResponse))]
+        [ProducesResponseType(201, Type = typeof(ApiResponse))]
         public async Task<IActionResult> SignupOrganisation([FromBody] OrganisationSignupRequest model)
         {
             var apiResponse = await _authService.SignupOrganisation(model, ModelState);
@@ -83,7 +83,7 @@ namespace Backend.Controllers
         /// <param name="ReguesterRequestDTO">A model representing a user and a token containing the users role and organisation</param>
         /// <returns>A confirmation of the created item.</returns>
         [HttpPost("registerinvite")]
-        [ProducesResponseType(200, Type = typeof(ApiResponse))]
+        [ProducesResponseType(201, Type = typeof(ApiResponse))]
         public async Task<IActionResult> RegisterInvite([FromBody] RegisterInviteRequestDTO model)
         {
             var apiResponse = await _authService.RegisterInvitedUser(model, ModelState);

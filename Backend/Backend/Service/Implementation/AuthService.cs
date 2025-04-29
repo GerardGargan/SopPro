@@ -62,7 +62,7 @@ namespace Backend.Service.Implementation
 
             if (userFromDb == null)
             {
-                throw new Exception("Email or password is incorrect");
+                throw new ArgumentException("Email or password is incorrect");
             }
 
             // Check if user is locked out
@@ -121,7 +121,7 @@ namespace Backend.Service.Implementation
 
             if (loginResponse.Email == null || string.IsNullOrWhiteSpace(loginResponse.Token))
             {
-                throw new Exception("Email or password is incorrect");
+                throw new ArgumentException("Email or password is incorrect");
             }
 
             return new ApiResponse<LoginResponseDTO>
@@ -180,13 +180,13 @@ namespace Backend.Service.Implementation
             // Validate model
             if (string.IsNullOrWhiteSpace(id))
             {
-                throw new Exception("Id cant be empty");
+                throw new ArgumentException("Id cant be empty");
             }
 
             var userFromDb = await _unitOfWork.ApplicationUsers.GetAsync(x => x.Id == id);
             if (userFromDb == null)
             {
-                throw new Exception("User not found");
+                throw new KeyNotFoundException("User not found");
             }
 
             // Get the users role
@@ -218,27 +218,27 @@ namespace Backend.Service.Implementation
 
             if (string.IsNullOrWhiteSpace(model.Id))
             {
-                throw new Exception("Id cant be null");
+                throw new ArgumentException("Id cant be null");
             }
 
             if (string.IsNullOrEmpty(model.Forename))
             {
-                throw new Exception("Forename cant be empty");
+                throw new ArgumentException("Forename cant be empty");
             }
 
             if (string.IsNullOrEmpty(model.Surname))
             {
-                throw new Exception("Surname cant be empty");
+                throw new ArgumentException("Surname cant be empty");
             }
 
             if (string.IsNullOrEmpty(model.RoleName))
             {
-                throw new Exception("Role cant be empty");
+                throw new ArgumentException("Role cant be empty");
             }
 
             if (model.RoleName != StaticDetails.Role_Admin && model.RoleName != StaticDetails.Role_User)
             {
-                throw new Exception("Invalid role provided");
+                throw new ArgumentException("Invalid role provided");
             }
 
             // Fetch the user from the database
@@ -247,7 +247,7 @@ namespace Backend.Service.Implementation
 
             if (userFromDb == null)
             {
-                throw new Exception("User not found");
+                throw new KeyNotFoundException("User not found");
             }
 
             // Perform updates inside a transaction, if one execution fails all changes will be discarded
@@ -284,18 +284,18 @@ namespace Backend.Service.Implementation
             // Validate the model
             if (string.IsNullOrEmpty(id))
             {
-                throw new Exception("User id cant be null");
+                throw new ArgumentException("User id cant be null");
             }
 
             if (userFromDb == null)
             {
-                throw new Exception("User not found");
+                throw new KeyNotFoundException("User not found");
             }
 
             // Dont allow users to delete themselves, could leave the application with no users or admins in a tenancy/organisation
             if (id == _tenancyResolver.GetUserId())
             {
-                throw new Exception("You can't delete your own account while logged in");
+                throw new ArgumentException("You can't delete your own account while logged in");
             }
 
             // Execute in a transacton, so that all changes either persist or none if something fails
@@ -335,13 +335,13 @@ namespace Backend.Service.Implementation
 
             if (!ValidatePassword(model.Password))
             {
-                throw new Exception("Password does not meet requirements");
+                throw new ArgumentException("Password does not meet requirements");
             }
 
             // Validate the token
             if (model.Token == null)
             {
-                throw new Exception("Token is required");
+                throw new ArgumentException("Token is required");
 
             }
 
@@ -350,15 +350,15 @@ namespace Backend.Service.Implementation
 
             if (invitationFromDb == null)
             {
-                throw new Exception("Invitation not found");
+                throw new KeyNotFoundException("Invitation not found");
             }
             else if (invitationFromDb.ExpiryDate < DateTime.UtcNow)
             {
-                throw new Exception("Invitation has expired, please contact an administrator");
+                throw new ArgumentException("Invitation has expired, please contact an administrator");
             }
             else if (invitationFromDb.Status == Status.Accepted)
             {
-                throw new Exception("Invitation has already been accepted");
+                throw new ArgumentException("Invitation has already been accepted");
             }
 
             ClaimsPrincipal claimsPrincipal = null;
@@ -378,13 +378,13 @@ namespace Backend.Service.Implementation
             // User with that email exists
             if (userFromDb != null)
             {
-                throw new Exception("Email is already in use");
+                throw new ArgumentException("Email is already in use");
             }
 
             Organisation organisationFromDb = await _unitOfWork.Organisations.GetAsync(organisation => organisation.Id == invitationFromDb.OrganisationId);
             if (organisationFromDb == null)
             {
-                throw new Exception("Organisation not found");
+                throw new KeyNotFoundException("Organisation not found");
             }
 
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
@@ -405,7 +405,7 @@ namespace Backend.Service.Implementation
 
             return new ApiResponse
             {
-                StatusCode = HttpStatusCode.OK,
+                StatusCode = HttpStatusCode.Created,
                 IsSuccess = true,
                 SuccessMessage = "User registration successful"
             };
@@ -432,23 +432,23 @@ namespace Backend.Service.Implementation
 
             if (userFromDb != null)
             {
-                throw new Exception("User already exists");
+                throw new ArgumentException("User already exists");
             }
 
             if (orgFromDb == null)
             {
-                throw new Exception("Organisation does not exist");
+                throw new KeyNotFoundException("Organisation does not exist");
             }
 
             if (model.Role != StaticDetails.Role_Admin && model.Role != StaticDetails.Role_User)
             {
-                throw new Exception("Invalid role selected");
+                throw new ArgumentException("Invalid role selected");
             }
 
             if (!modelState.IsValid)
             {
                 var errors = modelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                throw new Exception(errors.FirstOrDefault());
+                throw new ArgumentException(errors.FirstOrDefault());
             }
 
             // Data is validated at this point, proceed to generate a token and store it in the database, send the user an invitation email
@@ -517,12 +517,12 @@ namespace Backend.Service.Implementation
             if (!modelState.IsValid)
             {
                 var errors = modelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
-                throw new Exception(errors.FirstOrDefault());
+                throw new ArgumentException(errors.FirstOrDefault());
             }
 
             if (!ValidatePassword(model.Password))
             {
-                throw new Exception("Password does not meet minimum requirements");
+                throw new ArgumentException("Password does not meet minimum requirements");
             }
 
             // Execute database queries in a transaction so it rolls back if one fails
@@ -535,7 +535,7 @@ namespace Backend.Service.Implementation
 
                 if (userFromDb != null)
                 {
-                    throw new Exception("User already exists");
+                    throw new ArgumentException("User already exists");
                 }
 
                 // check if organisation already exists
@@ -543,7 +543,7 @@ namespace Backend.Service.Implementation
                 Organisation organisationFromDb = await _unitOfWork.Organisations.GetAsync(organisation => organisation.Name.ToLower() == model.OrganisationName.Trim().ToLower());
                 if (organisationFromDb != null)
                 {
-                    throw new Exception("Organisation already exists");
+                    throw new ArgumentException("Organisation already exists");
                 }
 
 
@@ -570,7 +570,7 @@ namespace Backend.Service.Implementation
 
             return new ApiResponse
             {
-                StatusCode = HttpStatusCode.OK,
+                StatusCode = HttpStatusCode.Created,
                 IsSuccess = true,
                 SuccessMessage = "Organisation and user created successfully"
             };
@@ -587,12 +587,12 @@ namespace Backend.Service.Implementation
             // Validate password meets minimum requirements
             if (!ValidatePassword(model.NewPassword))
             {
-                throw new Exception("Password does not meet the minimum criteria");
+                throw new ArgumentException("Password does not meet the minimum criteria");
             }
 
             if (model.NewPassword != model.ConfirmNewPassword)
             {
-                throw new Exception("New password and confirm password do not match");
+                throw new ArgumentException("New password and confirm password do not match");
             }
 
             // Fetch the user by their id
@@ -603,7 +603,7 @@ namespace Backend.Service.Implementation
             var isPasswordCorrect = await _userManager.CheckPasswordAsync(user, model.OldPassword);
             if (!isPasswordCorrect)
             {
-                throw new Exception("Old Passowrd is incorrect");
+                throw new ArgumentException("Old Passowrd is incorrect");
             }
 
             // Change the users password
@@ -654,14 +654,14 @@ namespace Backend.Service.Implementation
         {
             if (!ValidatePassword(model.NewPassword))
             {
-                throw new Exception("Password does not meet requirements");
+                throw new ArgumentException("Password does not meet requirements");
             }
 
             var user = await _db.ApplicationUsers.IgnoreQueryFilters().Where(x => x.UserName == model.Email.ToLower()).FirstOrDefaultAsync();
 
             if (user == null)
             {
-                throw new Exception("User could not be found");
+                throw new KeyNotFoundException("User could not be found");
             }
 
             var result = await _userManager.ResetPasswordAsync(user, model.ResetCode, model.NewPassword);
