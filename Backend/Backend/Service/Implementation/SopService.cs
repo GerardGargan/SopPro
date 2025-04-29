@@ -989,7 +989,7 @@ namespace Backend.Service.Implementation
         }
 
         /// <summary>
-        /// Updates an SOPs status to Approved
+        /// Updates an SOPs status to Approved and notifies the author
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -1041,7 +1041,7 @@ namespace Backend.Service.Implementation
         }
 
         /// <summary>
-        /// Updates an SOPs status to Rejected
+        /// Updates an SOPs status to Rejected and notifies the author
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -1088,6 +1088,11 @@ namespace Backend.Service.Implementation
             };
         }
 
+        /// <summary>
+        /// Requests approval for an SOP. Updates its status to In Review and emails administrators to request approval.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<ApiResponse> RequestApproval(int id)
         {
             var updatedSop = await UpdateLatestVersionStatus(id, SopStatus.InReview);
@@ -1130,6 +1135,14 @@ namespace Backend.Service.Implementation
             };
         }
 
+        /// <summary>
+        /// Helper method which takes an SOP's Id, fetches the latest version and updates its status to the specified status provided validation checks are passed.
+        /// </summary>
+        /// <param name="sopId"></param>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        /// <exception cref="ArgumentException"></exception>
         public async Task<Sop> UpdateLatestVersionStatus(int sopId, SopStatus status)
         {
             var sopEntity = await _unitOfWork.Sops.GetAsync(s => s.Id == sopId, includeProperties: "SopVersions", tracked: true);
@@ -1178,6 +1191,10 @@ namespace Backend.Service.Implementation
             return sopEntity;
         }
 
+        /// <summary>
+        /// Gets aggregated statistics for SOP analytics
+        /// </summary>
+        /// <returns></returns>
         public async Task<AnalyticsResponseDto> GetAnalytics()
         {
             List<Sop> sops = await _unitOfWork.Sops.GetAll(includeProperties: "SopVersions,Department").ToListAsync();
@@ -1336,6 +1353,12 @@ namespace Backend.Service.Implementation
         }
 
 
+        /// <summary>
+        /// Uploads an image file to BLOB storage
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task<ApiResponse> UploadImage(FileDto file)
         {
             if (file.File == null)
@@ -1354,6 +1377,12 @@ namespace Backend.Service.Implementation
             };
         }
 
+        /// <summary>
+        /// Helper method to create a list of hazard entities
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="sopVersionId"></param>
+        /// <returns></returns>
         private List<SopHazard> CreateHazards(SopDto model, int sopVersionId)
         {
             return model.SopHazards.Select(hazard => new SopHazard
@@ -1366,6 +1395,12 @@ namespace Backend.Service.Implementation
             }).ToList();
         }
 
+        /// <summary>
+        /// Helper method to create a list of SopSteps from a SopDto object
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="sopVersionId"></param>
+        /// <returns></returns>
         public List<SopStep> CreateSteps(SopDto model, int sopVersionId)
         {
             return model.SopSteps.Select(step => new SopStep
@@ -1397,6 +1432,12 @@ namespace Backend.Service.Implementation
             }).ToList();
         }
 
+        /// <summary>
+        /// Creates duplicate steps from a provided SopVersion model
+        /// </summary>
+        /// <param name="sopVersion"></param>
+        /// <param name="sopVersionId"></param>
+        /// <returns></returns>
         private List<SopStep> DuplicateSteps(SopVersion sopVersion, int sopVersionId)
         {
             return sopVersion.SopSteps.Select(s => new SopStep
