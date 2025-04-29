@@ -46,18 +46,18 @@ namespace Backend.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost]
-        [ProducesResponseType(200, Type = typeof(ApiResponse))]
+        [ProducesResponseType(201, Type = typeof(ApiResponse))]
         public async Task<IActionResult> Create([FromBody] SettingDto model)
         {
             await _settingService.Create(model);
             ApiResponse apiResponse = new ApiResponse()
             {
                 IsSuccess = true,
-                StatusCode = HttpStatusCode.OK,
+                StatusCode = HttpStatusCode.Created,
                 SuccessMessage = "Setting Created"
             };
 
-            return Ok(apiResponse);
+            return Created(string.Empty, apiResponse);
         }
 
         /// <summary>

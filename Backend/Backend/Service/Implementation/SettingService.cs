@@ -46,7 +46,7 @@ namespace Backend.Service.Implementation
             Setting settingFromDb = await _unitOfWork.Settings.GetAsync(x => x.Key.ToLower() == model.Key.ToLower());
             if (settingFromDb != null)
             {
-                throw new Exception("Setting key already exists, unable to create");
+                throw new ArgumentException("Setting key already exists, unable to create");
             }
 
             // Construct setting
@@ -141,7 +141,7 @@ namespace Backend.Service.Implementation
             Setting settingFromDb = await _unitOfWork.Settings.GetAsync(x => x.Key.ToLower() == model.Key.ToLower(), tracked: true);
             if (settingFromDb == null)
             {
-                throw new Exception("Setting doesnt exist");
+                throw new ArgumentException("Setting doesnt exist");
             }
 
             settingFromDb.Key = model.Key;

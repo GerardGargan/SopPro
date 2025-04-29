@@ -50,7 +50,7 @@ namespace Backend.Service.Implementation
                     template = Template1(model, customLogoUrl);
                     break;
                 default:
-                    throw new Exception("Invalid template name");
+                    throw new ArgumentException("Invalid template name");
             }
 
             // send email attachment
