@@ -27,7 +27,7 @@ namespace Backend.Controllers
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
         [HttpPost]
-        [ProducesResponseType(200, Type = typeof(ApiResponse<Department>))]
+        [ProducesResponseType(201, Type = typeof(ApiResponse<Department>))]
         public async Task<IActionResult> CreateDepartment([FromBody] DepartmentDto model)
         {
             var orgIdClaim = User.FindFirst("organisationId")?.Value;
@@ -38,7 +38,7 @@ namespace Backend.Controllers
             }
 
             var apiResponse = await _departmentService.Create(model, orgId);
-            return Ok(apiResponse);
+            return Created(string.Empty, apiResponse);
         }
 
         /// <summary>

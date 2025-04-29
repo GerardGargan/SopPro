@@ -32,7 +32,7 @@ namespace Backend.Service.Implementation
             var duplicateDepartment = await _unitOfWork.Departments.GetAsync(d => d.Name.ToLower().Trim() == model.Name.ToLower().Trim() && d.OrganisationId == orgId);
             if (duplicateDepartment != null)
             {
-                throw new Exception("This department already exists");
+                throw new ArgumentException("This department already exists");
             }
 
             // Create department
@@ -48,7 +48,7 @@ namespace Backend.Service.Implementation
             {
                 IsSuccess = true,
                 Result = newDepartment,
-                StatusCode = HttpStatusCode.OK
+                StatusCode = HttpStatusCode.Created
             };
         }
 
@@ -62,7 +62,7 @@ namespace Backend.Service.Implementation
         {
             if (model.Id == null)
             {
-                throw new Exception("Id is required");
+                throw new ArgumentException("Id is required");
             }
 
             // Check is the department exists
@@ -70,7 +70,7 @@ namespace Backend.Service.Implementation
 
             if (deptToUpdate == null)
             {
-                throw new Exception("Department does not exist");
+                throw new KeyNotFoundException("Department does not exist");
             }
 
             validateModel(model);
@@ -121,7 +121,7 @@ namespace Backend.Service.Implementation
         {
             if (id <= 0)
             {
-                throw new Exception("Invalid id");
+                throw new ArgumentException("Invalid id");
             }
 
             // Fetch department
@@ -129,7 +129,7 @@ namespace Backend.Service.Implementation
 
             if (deptFromDb == null)
             {
-                throw new Exception("Department does not exist");
+                throw new KeyNotFoundException("Department does not exist");
             }
 
             return new ApiResponse<Department>
@@ -153,7 +153,7 @@ namespace Backend.Service.Implementation
 
             if (deptFromDb == null)
             {
-                throw new Exception("Department does not exist");
+                throw new KeyNotFoundException("Department does not exist");
             }
 
             // Delete department
@@ -177,7 +177,7 @@ namespace Backend.Service.Implementation
         {
             if (string.IsNullOrWhiteSpace(model.Name))
             {
-                throw new Exception("Department name must not be empty");
+                throw new ArgumentException("Department name must not be empty");
             }
         }
     }
