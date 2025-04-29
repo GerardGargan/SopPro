@@ -212,11 +212,10 @@ namespace Backend.Tests
 
             httpContext.User = principal;
 
-            // Setup HttpContextAccessor to return our context with claims
+            // Setup HttpContextAccessor to return context with claims
             _httpContextAccessorMock.Setup(x => x.HttpContext).Returns(httpContext);
 
             // Now the tenancy resolver should be able to get the organisation ID from claims
-            // No need to mock the GetOrganisationid method as it will use the real implementation
 
             // Add test data to the in memory database
             _dbContext.Sops.Add(new Sop { Id = 1, OrganisationId = orgId, Reference = "sop-a" });
