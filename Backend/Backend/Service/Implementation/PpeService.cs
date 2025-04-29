@@ -17,6 +17,10 @@ namespace Backend.Service.Implementation
             _unitOfWork = unitOfWork;
         }
 
+        /// <summary>
+        /// Gets a list of all PPE
+        /// </summary>
+        /// <returns></returns>
         public async Task<ApiResponse<List<PpeDto>>> GetAll()
         {
             List<PpeDto> ppeFromDb = await _unitOfWork.Ppe.GetAll().Select(x => PpeDto.FromPpe(x)).ToListAsync();

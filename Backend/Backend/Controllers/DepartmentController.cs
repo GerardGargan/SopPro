@@ -6,34 +6,46 @@ using Backend.Service.Interface;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Backend.Controllers {
+namespace Backend.Controllers
+{
     [Route("api/department")]
     [ApiController]
 
     [Authorize]
-    public class DepartmentController : BaseApiController 
+    public class DepartmentController : BaseApiController
     {
         private readonly IDepartmentService _departmentService;
-        public DepartmentController (IDepartmentService departmentService)
+        public DepartmentController(IDepartmentService departmentService)
         {
             _departmentService = departmentService;
         }
 
+        /// <summary>
+        /// Creates a department
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         [HttpPost]
-        [ProducesResponseType(200, Type = typeof(ApiResponse<Department>))]
+        [ProducesResponseType(201, Type = typeof(ApiResponse<Department>))]
         public async Task<IActionResult> CreateDepartment([FromBody] DepartmentDto model)
         {
             var orgIdClaim = User.FindFirst("organisationId")?.Value;
 
-            if(!int.TryParse(orgIdClaim, out int orgId))
+            if (!int.TryParse(orgIdClaim, out int orgId))
             {
                 throw new Exception("Invalid organisationId.");
             }
 
             var apiResponse = await _departmentService.Create(model, orgId);
-            return Ok(apiResponse);
+            return Created(string.Empty, apiResponse);
         }
 
+        /// <summary>
+        /// Updates a department
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPut]
         [Route("{id:int}")]
         [ProducesResponseType(200, Type = typeof(ApiResponse<Department>))]
@@ -44,6 +56,10 @@ namespace Backend.Controllers {
             return Ok(apiResponse);
         }
 
+        /// <summary>
+        /// Gets all departments
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         [ProducesResponseType(200, Type = typeof(ApiResponse<List<Department>>))]
         public async Task<IActionResult> GetAll()
@@ -53,6 +69,11 @@ namespace Backend.Controllers {
             return Ok(apiResponse);
         }
 
+        /// <summary>
+        /// Gets a department by their id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("{id:int}")]
         [ProducesResponseType(200, Type = typeof(ApiResponse<Department>))]
@@ -62,6 +83,11 @@ namespace Backend.Controllers {
             return Ok(apiResponse);
         }
 
+        /// <summary>
+        /// Delete a department by its id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete]
         [Route("{id:int}")]
         [ProducesResponseType(200, Type = typeof(ApiResponse))]

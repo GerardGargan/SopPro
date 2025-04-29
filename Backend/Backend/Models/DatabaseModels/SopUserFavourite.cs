@@ -2,6 +2,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Backend.Models.DatabaseModels
 {
+    /// <summary>
+    /// SOP User Favourite Model
+    /// </summary>
     public class SopUserFavourite : BaseClass
     {
         public int SopId { get; set; }

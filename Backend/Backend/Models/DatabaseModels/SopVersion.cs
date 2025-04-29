@@ -2,6 +2,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Backend.Models.DatabaseModels
 {
+    /// <summary>
+    /// SOP Version Model
+    /// </summary>
     public class SopVersion : BaseClass
     {
         public int SopId { get; set; }

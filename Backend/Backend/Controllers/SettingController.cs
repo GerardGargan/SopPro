@@ -19,6 +19,11 @@ namespace Backend.Controllers
             _settingService = settingService;
         }
 
+        /// <summary>
+        /// Gets a setting by its key
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("{key}")]
         [ProducesResponseType(200, Type = typeof(ApiResponse<SettingDto>))]
@@ -35,21 +40,31 @@ namespace Backend.Controllers
             return Ok(apiResponse);
         }
 
+        /// <summary>
+        /// Creates a setting
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost]
-        [ProducesResponseType(200, Type = typeof(ApiResponse))]
+        [ProducesResponseType(201, Type = typeof(ApiResponse))]
         public async Task<IActionResult> Create([FromBody] SettingDto model)
         {
             await _settingService.Create(model);
             ApiResponse apiResponse = new ApiResponse()
             {
                 IsSuccess = true,
-                StatusCode = HttpStatusCode.OK,
+                StatusCode = HttpStatusCode.Created,
                 SuccessMessage = "Setting Created"
             };
 
-            return Ok(apiResponse);
+            return Created(string.Empty, apiResponse);
         }
 
+        /// <summary>
+        /// Deletes a setting by its id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete]
         [Route("{id:int}")]
         [ProducesResponseType(200, Type = typeof(ApiResponse))]
@@ -66,6 +81,11 @@ namespace Backend.Controllers
             return Ok(apiResponse);
         }
 
+        /// <summary>
+        /// Updates a setting
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPut]
         [Route("{key}")]
         [ProducesResponseType(200, Type = typeof(ApiResponse))]

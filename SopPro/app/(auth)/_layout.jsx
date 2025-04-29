@@ -26,6 +26,7 @@ export default function RootLayout() {
   const navigator = useNavigation();
   const dispatch = useDispatch();
   const [authChecked, setAuthChecked] = useState(false);
+  // Access the redux store to check if the user is logged in
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const [loaded, error] = useFonts({
     SpaceMono: require("../../assets/fonts/SpaceMono-Regular.ttf"),
@@ -46,6 +47,7 @@ export default function RootLayout() {
   }, [loaded]);
 
   useEffect(() => {
+    // Function to check if the user has a token stored in AsyncStorage
     const checkAuth = async () => {
       const token = await AsyncStorage.getItem("authToken");
       const refreshToken = await AsyncStorage.getItem("refreshToken");
@@ -55,12 +57,15 @@ export default function RootLayout() {
         refreshToken,
         userInfo: JSON.parse(userInfo),
       };
+
+      // Initialise the redux store with the payload
       dispatch(authActions.initialiseAuth(payload));
       setAuthChecked(true);
     };
     checkAuth();
   }, [dispatch]);
 
+  // Load spinner while auth is being checked
   if (!authChecked) {
     return (
       <View style={styles.centered}>
@@ -69,6 +74,7 @@ export default function RootLayout() {
     );
   }
 
+  // User is not logged in, redirect to the home screen
   if (!isLoggedIn) {
     query.clear();
     return <Redirect href="/home" />;

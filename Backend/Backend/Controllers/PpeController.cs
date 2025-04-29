@@ -17,6 +17,10 @@ namespace Backend.Controllers
             _ppeService = ppeService;
         }
 
+        /// <summary>
+        /// Gets all PPE
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         [Route("")]
         public async Task<IActionResult> GetAll()

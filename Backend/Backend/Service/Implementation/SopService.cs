@@ -15,8 +15,6 @@ using Microsoft.Extensions.Options;
 using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using OpenAI.Chat;
-using Newtonsoft.Json;
-using System.IO.Compression;
 
 namespace Backend.Service.Implementation
 {
@@ -46,15 +44,34 @@ namespace Backend.Service.Implementation
             _chatService = chatService;
         }
 
+        /// <summary>
+        /// Creates an SOP with a SOPVersion, associated Steps, Hazards and PPE
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        /// <exception cref="ArgumentException"></exception>
         public async Task<ApiResponse> CreateSop(SopDto model)
         {
 
+            // Check if it already exists (by reference)
             var isSopExisting = await _unitOfWork.Sops.GetAsync(s => s.Reference == model.Reference.ToLower().Trim());
             if (isSopExisting != null)
             {
-                throw new Exception("Sop with this reference already exists");
+                throw new ArgumentException("Sop with this reference already exists");
             }
 
+            if (string.IsNullOrWhiteSpace(model.Title))
+            {
+                throw new ArgumentException("Title cant be empty");
+            }
+
+            if (string.IsNullOrWhiteSpace(model.Description))
+            {
+                throw new ArgumentException("Description cant be empty");
+            }
+
+            // Wrap database operations in a transaction
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
                 // Create sop record
@@ -114,11 +131,23 @@ namespace Backend.Service.Implementation
 
             return new ApiResponse
             {
+                StatusCode = HttpStatusCode.Created,
                 IsSuccess = true,
                 SuccessMessage = "Sop created successfully"
             };
         }
 
+        /// <summary>
+        /// Returns a list of all SOPs
+        /// </summary>
+        /// <param name="search"></param>
+        /// <param name="status"></param>
+        /// <param name="page"></param>
+        /// <param name="pageSize"></param>
+        /// <param name="isFavourite"></param>
+        /// <param name="soryBy"></param>
+        /// <param name="sortOrder"></param>
+        /// <returns></returns>
         public async Task<ApiResponse<List<SopDto>>> GetAllSops(string search, int? status, int page, int pageSize, bool isFavourite = false, string soryBy = "recent", string sortOrder = "desc")
         {
 
@@ -215,12 +244,19 @@ namespace Backend.Service.Implementation
             };
         }
 
+        /// <summary>
+        /// Gets the latest SopVersion for a specified SOP
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task<ApiResponse<SopDto>> GetLatestSopVersion(int id)
         {
+            // Check that the SOP exists
             var sopEntity = await _unitOfWork.Sops.GetAsync(s => s.Id == id, includeProperties: "SopVersions,SopVersions.SopHazards,SopVersions.SopSteps,SopVersions.SopSteps.SopStepPpe");
             if (sopEntity == null)
             {
-                throw new Exception("Sop not found");
+                throw new KeyNotFoundException("Sop not found");
             }
 
             var latestSopVersion = sopEntity.SopVersions
@@ -229,9 +265,10 @@ namespace Backend.Service.Implementation
 
             if (latestSopVersion == null)
             {
-                throw new Exception("No SopVersion found");
+                throw new KeyNotFoundException("No SopVersion found");
             }
 
+            // Map to a DTO object
             var sopDto = new SopDto
             {
                 Id = sopEntity.Id,
@@ -293,13 +330,19 @@ namespace Backend.Service.Implementation
             };
         }
 
+        /// <summary>
+        /// Get a specific SopVersion by its id
+        /// </summary>
+        /// <param name="sopVersionId"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task<SopVersionDto> GetSopVersion(int sopVersionId)
         {
             var sopVersion = await _unitOfWork.SopVersions.GetAsync(x => x.Id == sopVersionId, includeProperties: "Author,ApprovedBy,SopSteps,SopSteps.SopStepPpe,SopHazards");
 
             if (sopVersion == null)
             {
-                throw new Exception("Sop version not found");
+                throw new KeyNotFoundException("Sop version not found");
             }
 
             SopVersionDto sopVersionDto = SopVersionDto.FromSopVersion(sopVersion);
@@ -321,13 +364,13 @@ namespace Backend.Service.Implementation
             // check if sop id exists
             if (id == 0 || model == null || model.Id == null)
             {
-                throw new Exception("Invalid id");
+                throw new ArgumentException("Invalid id");
             }
 
             var sopFromDb = await _unitOfWork.Sops.GetAsync(s => s.Id == model.Id, tracked: true);
             if (sopFromDb == null)
             {
-                throw new Exception("Sop not found");
+                throw new KeyNotFoundException("Sop not found");
             }
 
             // get latest sop version from db
@@ -335,7 +378,7 @@ namespace Backend.Service.Implementation
 
             if (latestVersion == null)
             {
-                throw new Exception("No sop version found");
+                throw new KeyNotFoundException("No sop version found");
             }
 
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
@@ -525,6 +568,11 @@ namespace Backend.Service.Implementation
 
         }
 
+        /// <summary>
+        /// Generates an SOP using an AI Prompt
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         public async Task<SopDto> GenerateAiSop(AiRequestDto model)
         {
             // Create JSON Schema with desired response type from string.
@@ -677,10 +725,6 @@ namespace Backend.Service.Implementation
             return sopDto;
         }
 
-
-
-
-
         /// <summary>
         /// Deletes sops and associated data from the database and blob storage
         /// </summary>
@@ -697,23 +741,25 @@ namespace Backend.Service.Implementation
 
             if (sops == null || sops.Count == 0)
             {
-                throw new Exception("No sops found");
+                throw new KeyNotFoundException("No sops found");
             }
 
-
+            // Get all sopVersions and Ids
             var sopVersions = await _unitOfWork.SopVersions.GetAll(x => sopIds.Contains(x.SopId)).ToListAsync();
             var sopVersionIds = sopVersions.Select(x => x.Id).ToList();
 
+            // Get all associated sopHazards, sopSteps and PPE
             var sopHazards = await _unitOfWork.SopHazards.GetAll(x => sopVersionIds.Contains(x.SopVersionId)).ToListAsync();
             var sopSteps = await _unitOfWork.SopSteps.GetAll(x => sopVersionIds.Contains(x.SopVersionId)).ToListAsync();
             var sopStepIds = sopSteps.Select(x => x.Id).ToList();
 
             var sopStepPpe = _db.SopStepPpe.Where(x => sopStepIds.Contains(x.SopStepId)).ToList();
 
+            // Get a list of images to delete from BLOB storage
             var imageUrisToDelete = sopSteps.Where(x => !string.IsNullOrWhiteSpace(x.ImageUrl)).Select(x => x.ImageUrl).ToList();
             var UserSopFavourites = await _unitOfWork.SopUserFavourites.GetAll(x => sopIds.Contains(x.SopId)).ToListAsync();
-            // perform deletion in order
 
+            // perform deletion in order to avoid FK constraint errors
             await _unitOfWork.ExecuteInTransactionAsync(async () =>
             {
                 // delete user sop favourite records
@@ -770,6 +816,12 @@ namespace Backend.Service.Implementation
         }
 
 
+        /// <summary>
+        /// Reverts an SOP to a previous version
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task RevertSop(RevertRequestDto model)
         {
             // fetch the sopVersion
@@ -777,7 +829,7 @@ namespace Backend.Service.Implementation
 
             if (sopVersionFromDb == null)
             {
-                throw new Exception("Version not found");
+                throw new KeyNotFoundException("Version not found");
             }
 
             int sopId = sopVersionFromDb.SopId;
@@ -787,13 +839,13 @@ namespace Backend.Service.Implementation
 
             if (!allVersions.Any())
             {
-                throw new Exception("No versions found for the specified SOP");
+                throw new KeyNotFoundException("No versions found for the specified SOP");
             }
 
             // check if the version chosen is the current version
             if (allVersions.FirstOrDefault().Id == sopVersionFromDb.Id)
             {
-                throw new Exception("Error - Version selected is the current version");
+                throw new ArgumentException("Error - Version selected is the current version");
             }
 
             // Delete versions, and associated ppe, steps, hazards in the correct order for FK relationships
@@ -847,7 +899,7 @@ namespace Backend.Service.Implementation
             var sop = await _unitOfWork.Sops.GetAsync(s => s.Id == id);
             if (sop == null)
             {
-                throw new Exception("Sop not found");
+                throw new KeyNotFoundException("Sop not found");
             }
 
             // Get the user id
@@ -864,7 +916,7 @@ namespace Backend.Service.Implementation
             var duplicateLookup = await _unitOfWork.SopUserFavourites.GetAsync(f => f.SopId == id && f.ApplicationUserId == userId);
             if (duplicateLookup != null)
             {
-                throw new Exception("Sop is already favourited");
+                throw new ArgumentException("Sop is already favourited");
             }
 
             // Add the sop to favourites
@@ -895,7 +947,7 @@ namespace Backend.Service.Implementation
 
             if (sopFavourite == null)
             {
-                throw new Exception("Sop favourite not found");
+                throw new KeyNotFoundException("Sop favourite not found");
             }
 
             // delete the record
@@ -910,11 +962,18 @@ namespace Backend.Service.Implementation
             };
         }
 
+        /// <summary>
+        /// Remove all Favourited SOPs for a specific user by their id
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <param name="isSave"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task RemoveAllUserFavourites(string userId, bool isSave)
         {
             if (userId == null)
             {
-                throw new Exception("User id cant be null");
+                throw new ArgumentException("User id cant be null");
             }
 
             var favouritesFromDb = await _unitOfWork.SopUserFavourites.GetAll(x => x.ApplicationUserId == userId).ToListAsync();
@@ -929,14 +988,21 @@ namespace Backend.Service.Implementation
             }
         }
 
+        /// <summary>
+        /// Updates an SOPs status to Approved and notifies the author
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<ApiResponse> ApproveSop(int id)
         {
+            // Update the SOP to Approved
             var updatedSop = await UpdateLatestVersionStatus(id, SopStatus.Approved);
 
             var latestVersion = updatedSop.SopVersions
                 .OrderByDescending(sv => sv.Version)
                 .FirstOrDefault();
 
+            // Get relevant data needed for email notification
             var authorId = latestVersion.AuthorId;
             var approverId = latestVersion.ApprovedById;
 
@@ -957,10 +1023,11 @@ namespace Backend.Service.Implementation
                         Reference = updatedSop.Reference
                     };
 
+                    // Render the email template html
                     string emailBody = await _templateService.RenderTemplateAsync("SopApproved", model);
 
-                    // Commented out during testing to prevent going over free postmark limit temporarily
-                    // _emailService.SendEmailAsync(author.Email, "Sop approved", emailBody);
+                    // Send email
+                    _ = _emailService.SendEmailAsync(author.Email, "Sop approved", emailBody);
                 }
             }
 
@@ -973,15 +1040,20 @@ namespace Backend.Service.Implementation
             };
         }
 
+        /// <summary>
+        /// Updates an SOPs status to Rejected and notifies the author
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<ApiResponse> RejectSop(int id)
         {
-
+            // Update status to rejected
             var updatedSop = await UpdateLatestVersionStatus(id, SopStatus.Rejected);
             var latestVersion = updatedSop.SopVersions
                 .OrderByDescending(x => x.Version)
                 .FirstOrDefault();
 
-            // Send email notification
+            // Construct email
             string authorId = latestVersion.AuthorId;
             var rejectedByUserId = _tenancyResolver.GetUserId();
 
@@ -1003,9 +1075,8 @@ namespace Backend.Service.Implementation
                     };
 
                     string emailBody = await _templateService.RenderTemplateAsync("SopRejected", model);
-
-                    // Commented out during testing to prevent going over free postmark limit temporarily
-                    // _emailService.SendEmailAsync(author.Email, "Sop rejected", emailBody);
+                    // Send email
+                    _ = _emailService.SendEmailAsync(author.Email, "Sop rejected", emailBody);
                 }
             }
 
@@ -1017,6 +1088,11 @@ namespace Backend.Service.Implementation
             };
         }
 
+        /// <summary>
+        /// Requests approval for an SOP. Updates its status to In Review and emails administrators to request approval.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         public async Task<ApiResponse> RequestApproval(int id)
         {
             var updatedSop = await UpdateLatestVersionStatus(id, SopStatus.InReview);
@@ -1047,8 +1123,7 @@ namespace Backend.Service.Implementation
 
                 string emailBody = await _templateService.RenderTemplateAsync("SopApprovalRequest", model);
 
-                // Commented out during testing to prevent going over free postmark limit temporarily
-                // _emailService.SendEmailAsync(adminEmails, null, "Sop approval request", emailBody);
+                _ = _emailService.SendEmailAsync(adminEmails, null, "Sop approval request", emailBody);
 
             }
 
@@ -1060,12 +1135,20 @@ namespace Backend.Service.Implementation
             };
         }
 
+        /// <summary>
+        /// Helper method which takes an SOP's Id, fetches the latest version and updates its status to the specified status provided validation checks are passed.
+        /// </summary>
+        /// <param name="sopId"></param>
+        /// <param name="status"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        /// <exception cref="ArgumentException"></exception>
         public async Task<Sop> UpdateLatestVersionStatus(int sopId, SopStatus status)
         {
             var sopEntity = await _unitOfWork.Sops.GetAsync(s => s.Id == sopId, includeProperties: "SopVersions", tracked: true);
             if (sopEntity == null)
             {
-                throw new Exception("Sop not found");
+                throw new KeyNotFoundException("Sop not found");
             }
 
             var latestSopVersion = sopEntity.SopVersions
@@ -1074,7 +1157,25 @@ namespace Backend.Service.Implementation
 
             if (latestSopVersion == null)
             {
-                throw new Exception("No SopVersion found");
+                throw new KeyNotFoundException("No SopVersion found");
+            }
+
+            // Only allow InReview SOPs to be approved
+            if (status == SopStatus.Approved && latestSopVersion.Status != SopStatus.InReview)
+            {
+                throw new ArgumentException("Invalid status for approval");
+            }
+
+            // Only allow InReview SOPs to be rejected
+            if (status == SopStatus.Rejected && latestSopVersion.Status != SopStatus.InReview)
+            {
+                throw new ArgumentException("Invalid status for rejection");
+            }
+
+            // Only allow draft or rejected SOPs to request approval
+            if (status == SopStatus.InReview && latestSopVersion.Status != SopStatus.Draft && latestSopVersion.Status != SopStatus.Rejected)
+            {
+                throw new ArgumentException("Invalid status for requesting approval");
             }
 
             latestSopVersion.Status = status;
@@ -1090,6 +1191,10 @@ namespace Backend.Service.Implementation
             return sopEntity;
         }
 
+        /// <summary>
+        /// Gets aggregated statistics for SOP analytics
+        /// </summary>
+        /// <returns></returns>
         public async Task<AnalyticsResponseDto> GetAnalytics()
         {
             List<Sop> sops = await _unitOfWork.Sops.GetAll(includeProperties: "SopVersions,Department").ToListAsync();
@@ -1248,11 +1353,17 @@ namespace Backend.Service.Implementation
         }
 
 
+        /// <summary>
+        /// Uploads an image file to BLOB storage
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public async Task<ApiResponse> UploadImage(FileDto file)
         {
             if (file.File == null)
             {
-                throw new Exception("File is required");
+                throw new ArgumentException("File is required");
             }
             var fileName = $"{Guid.NewGuid()}_{file.File.FileName}";
 
@@ -1266,6 +1377,12 @@ namespace Backend.Service.Implementation
             };
         }
 
+        /// <summary>
+        /// Helper method to create a list of hazard entities
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="sopVersionId"></param>
+        /// <returns></returns>
         private List<SopHazard> CreateHazards(SopDto model, int sopVersionId)
         {
             return model.SopHazards.Select(hazard => new SopHazard
@@ -1278,6 +1395,12 @@ namespace Backend.Service.Implementation
             }).ToList();
         }
 
+        /// <summary>
+        /// Helper method to create a list of SopSteps from a SopDto object
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="sopVersionId"></param>
+        /// <returns></returns>
         public List<SopStep> CreateSteps(SopDto model, int sopVersionId)
         {
             return model.SopSteps.Select(step => new SopStep
@@ -1309,6 +1432,12 @@ namespace Backend.Service.Implementation
             }).ToList();
         }
 
+        /// <summary>
+        /// Creates duplicate steps from a provided SopVersion model
+        /// </summary>
+        /// <param name="sopVersion"></param>
+        /// <param name="sopVersionId"></param>
+        /// <returns></returns>
         private List<SopStep> DuplicateSteps(SopVersion sopVersion, int sopVersionId)
         {
             return sopVersion.SopSteps.Select(s => new SopStep

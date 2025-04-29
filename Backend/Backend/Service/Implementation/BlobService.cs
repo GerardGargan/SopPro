@@ -12,6 +12,12 @@ namespace Backend.Service.Implementation
         {
             _blobClient = blobClient;
         }
+        /// <summary>
+        /// Deletes a file from blob storage if it exists
+        /// </summary>
+        /// <param name="blobName"></param>
+        /// <param name="containerName"></param>
+        /// <returns>True if it exists and is marked for deletion, false if not</returns>
         public async Task<bool> DeleteBlob(string blobName, string containerName)
         {
             BlobContainerClient containerClient = _blobClient.GetBlobContainerClient(containerName);
@@ -20,6 +26,12 @@ namespace Backend.Service.Implementation
             return await blobClient.DeleteIfExistsAsync();
         }
 
+        /// <summary>
+        /// Fetches the absolute url for a file in blob storage
+        /// </summary>
+        /// <param name="blobName"></param>
+        /// <param name="containerName"></param>
+        /// <returns>A string with the url of the specified blob</returns>
         public async Task<string> GetBlob(string blobName, string containerName)
         {
             BlobContainerClient containerClient = _blobClient.GetBlobContainerClient(containerName);
@@ -27,6 +39,13 @@ namespace Backend.Service.Implementation
             return blobClient.Uri.AbsoluteUri;
         }
 
+        /// <summary>
+        /// Uploads a blob file to blob storage
+        /// </summary>
+        /// <param name="blobName"></param>
+        /// <param name="containerName"></param>
+        /// <param name="file"></param>
+        /// <returns>The url of the file if successful, an empty string if unsuccessful</returns>
         public async Task<string> UploadBlob(string blobName, string containerName, IFormFile file)
         {
             BlobContainerClient containerClient = _blobClient.GetBlobContainerClient(containerName);

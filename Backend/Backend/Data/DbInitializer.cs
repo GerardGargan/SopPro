@@ -5,6 +5,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Data
 {
+    /// <summary>
+    /// DbInitializer is invoked on startup (via program.cs), it will apply any migrations to the database on startup that have not been applied already.
+    /// It also will seed data, such as roles if they do not exist.
+    /// </summary>
     public class DbInitializer : IDbInitializer
     {
         public readonly ApplicationDbContext _db;

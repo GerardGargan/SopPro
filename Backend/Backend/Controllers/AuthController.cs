@@ -21,6 +21,11 @@ namespace Backend.Controllers
             _authService = authService;
         }
 
+        /// <summary>
+        /// Log in for users
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost("login")]
         [ProducesResponseType(200, Type = typeof(ApiResponse<LoginResponseDTO>))]
         public async Task<IActionResult> Login([FromBody] LoginRequestDTO model)
@@ -51,8 +56,13 @@ namespace Backend.Controllers
             return Ok(result);
         }
 
+        /// <summary>
+        /// Creates an organisation and administrator of that organisation
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPost("signuporganisation")]
-        [ProducesResponseType(200, Type = typeof(ApiResponse))]
+        [ProducesResponseType(201, Type = typeof(ApiResponse))]
         public async Task<IActionResult> SignupOrganisation([FromBody] OrganisationSignupRequest model)
         {
             var apiResponse = await _authService.SignupOrganisation(model, ModelState);
@@ -73,7 +83,7 @@ namespace Backend.Controllers
         /// <param name="ReguesterRequestDTO">A model representing a user and a token containing the users role and organisation</param>
         /// <returns>A confirmation of the created item.</returns>
         [HttpPost("registerinvite")]
-        [ProducesResponseType(200, Type = typeof(ApiResponse))]
+        [ProducesResponseType(201, Type = typeof(ApiResponse))]
         public async Task<IActionResult> RegisterInvite([FromBody] RegisterInviteRequestDTO model)
         {
             var apiResponse = await _authService.RegisterInvitedUser(model, ModelState);
@@ -113,6 +123,10 @@ namespace Backend.Controllers
 
         }
 
+        /// <summary>
+        /// Gets all users
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         [Authorize]
         [ProducesResponseType(200, Type = typeof(ApiResponse))]
@@ -130,6 +144,11 @@ namespace Backend.Controllers
             return Ok(apiResponse);
         }
 
+        /// <summary>
+        /// Gets a user by their id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("{id}")]
         [Authorize]
@@ -148,6 +167,12 @@ namespace Backend.Controllers
             return Ok(apiResponse);
         }
 
+        /// <summary>
+        /// Updates a user
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [HttpPut]
         [Route("{id}")]
         [Authorize(Roles = StaticDetails.Role_Admin)]
@@ -166,6 +191,10 @@ namespace Backend.Controllers
             return Ok(apiResponse);
         }
 
+        /// <summary>
+        /// Gets a list of user roles
+        /// </summary>
+        /// <returns></returns>
         [HttpGet("roles")]
         [Authorize]
         [ProducesResponseType(200, Type = typeof(ApiResponse))]
@@ -183,6 +212,11 @@ namespace Backend.Controllers
             return Ok(apiResponse);
         }
 
+        /// <summary>
+        /// Deletes a user
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpDelete]
         [Authorize(Roles = StaticDetails.Role_Admin)]
         [Route("{id}")]
@@ -201,6 +235,11 @@ namespace Backend.Controllers
             return Ok(apiResponse);
         }
 
+        /// <summary>
+        /// Change password request
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [Authorize]
         [HttpPost("password")]
         [ProducesResponseType(200, Type = typeof(ApiResponse))]
@@ -210,6 +249,11 @@ namespace Backend.Controllers
             return StatusCode((int)apiResponse.StatusCode, apiResponse);
         }
 
+        /// <summary>
+        /// Forgot password request
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [AllowAnonymous]
         [HttpPost("forgot")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest model)
@@ -219,6 +263,11 @@ namespace Backend.Controllers
             return Ok("Email sent with a reset link");
         }
 
+        /// <summary>
+        /// Reset password
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
         [AllowAnonymous]
         [ProducesResponseType(200, Type = typeof(ApiResponse))]
         [HttpPost("reset")]
@@ -229,6 +278,11 @@ namespace Backend.Controllers
             return Ok(apiResponse);
         }
 
+        /// <summary>
+        /// Redirect to a url
+        /// </summary>
+        /// <param name="redirect"></param>
+        /// <returns></returns>
         [AllowAnonymous]
         [HttpGet("redirect")]
         public async Task<IActionResult> RedirectToCustomScheme([FromQuery] string redirect)

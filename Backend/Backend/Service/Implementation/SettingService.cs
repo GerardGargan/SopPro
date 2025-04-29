@@ -17,8 +17,16 @@ namespace Backend.Service.Implementation
             _tenancyResolver = tenancyResolver;
         }
 
+        /// <summary>
+        /// Creates a setting
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="Exception"></exception>
         public async Task Create(SettingDto model)
         {
+            // Perform validation
             if (string.IsNullOrWhiteSpace(model.Type))
             {
                 throw new ArgumentException("Type cant be empty");
@@ -38,9 +46,10 @@ namespace Backend.Service.Implementation
             Setting settingFromDb = await _unitOfWork.Settings.GetAsync(x => x.Key.ToLower() == model.Key.ToLower());
             if (settingFromDb != null)
             {
-                throw new Exception("Setting key already exists, unable to create");
+                throw new ArgumentException("Setting key already exists, unable to create");
             }
 
+            // Construct setting
             Setting setting = new Setting()
             {
                 Key = model.Key,
@@ -54,6 +63,12 @@ namespace Backend.Service.Implementation
             await _unitOfWork.SaveAsync();
         }
 
+        /// <summary>
+        /// Delete setting by its id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        /// <exception cref="KeyNotFoundException"></exception>
         public async Task Delete(int id)
         {
             Setting settingFromDb = await _unitOfWork.Settings.GetAsync(x => x.Id == id);
@@ -66,6 +81,12 @@ namespace Backend.Service.Implementation
             await _unitOfWork.SaveAsync();
         }
 
+        /// <summary>
+        /// Get a setting by key
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
         public async Task<SettingDto> GetSettingByKey(string key)
         {
             if (string.IsNullOrWhiteSpace(key))
@@ -92,6 +113,13 @@ namespace Backend.Service.Implementation
             return settingDto;
         }
 
+        /// <summary>
+        /// Update a setting
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="Exception"></exception>
         public async Task Update(SettingDto model)
         {
             if (string.IsNullOrWhiteSpace(model.Type))
@@ -113,7 +141,7 @@ namespace Backend.Service.Implementation
             Setting settingFromDb = await _unitOfWork.Settings.GetAsync(x => x.Key.ToLower() == model.Key.ToLower(), tracked: true);
             if (settingFromDb == null)
             {
-                throw new Exception("Setting doesnt exist");
+                throw new ArgumentException("Setting doesnt exist");
             }
 
             settingFromDb.Key = model.Key;

@@ -3,6 +3,9 @@ using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Backend.Models.DatabaseModels
 {
+    /// <summary>
+    /// Sop Model
+    /// </summary>
     public class Sop : BaseClass
     {
         public int? DepartmentId { get; set; }

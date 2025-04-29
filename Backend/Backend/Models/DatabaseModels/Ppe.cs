@@ -1,7 +1,12 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Backend.Models.DatabaseModels {
-    public class Ppe {
+namespace Backend.Models.DatabaseModels
+{
+    /// <summary>
+    /// PPE Model
+    /// </summary>
+    public class Ppe
+    {
         [Key]
         public int Id { get; set; }
         public string Name { get; set; }
