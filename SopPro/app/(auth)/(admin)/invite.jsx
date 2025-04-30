@@ -17,6 +17,7 @@ const invite = () => {
   const [role, setRole] = useState("user");
   const [emailValidationError, setEmailValidationError] = useState(false);
 
+  // Mutation hook for sending invitation
   const { mutate, isPending } = useMutation({
     mutationFn: inviteUser,
     onSuccess: () => {

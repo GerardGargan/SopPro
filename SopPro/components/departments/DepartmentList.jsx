@@ -11,11 +11,13 @@ import { useRouter } from "expo-router";
 const DepartmentList = () => {
   const router = useRouter();
 
+  // Hook for fetching the departments
   const { data, isFetching, isError, error } = useQuery({
     queryKey: ["departments"],
     queryFn: fetchDepartments,
   });
 
+  // Show loading spinner if fetching data
   if (isFetching) {
     return (
       <View style={styles.loader}>
@@ -24,6 +26,7 @@ const DepartmentList = () => {
     );
   }
 
+  // Show error message if request fails
   if (isError) {
     return (
       <View style={styles.errorContainer}>
@@ -34,6 +37,7 @@ const DepartmentList = () => {
     );
   }
 
+  // Render list of departments using FlatList
   return (
     <FlatList
       data={data}
