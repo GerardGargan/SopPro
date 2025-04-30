@@ -9,6 +9,7 @@ import CustomTextInput from "../../../components/UI/form/CustomTextInput";
 import CustomButton from "../../../components/UI/form/CustomButton";
 
 const ChangePassword = () => {
+  // Set up state
   const [oldPassword, setCurrentPassword] = useState("");
   const [isOldPasswordVisible, setIsOldPasswordVisible] = useState(false);
 
@@ -19,6 +20,7 @@ const ChangePassword = () => {
   const [isConfirmNewPasswordVisible, setIsConfirmNewPasswordVisible] =
     useState(false);
 
+  // Mutation for updating the users password
   const { mutate } = useMutation({
     mutationFn: changePasswordRequest,
     onSuccess: () => {
@@ -38,6 +40,8 @@ const ChangePassword = () => {
     },
   });
 
+  // Function triggered when the user presses submit on the form
+  // Validate fields and trigger mutation
   function handlePasswordChange() {
     const errors = [];
 

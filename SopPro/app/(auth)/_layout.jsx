@@ -27,6 +27,9 @@ export default function RootLayout() {
   const dispatch = useDispatch();
   const [authChecked, setAuthChecked] = useState(false);
   // Access the redux store to check if the user is logged in
+  // This is where we handle authentication
+  // This file and code is ran when any screen inside the auth folder is mounted
+  // Therefore this code will prevent any screens inside the auth folder from being rendered if the user is not logged in, instead they will be redirected
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
   const [loaded, error] = useFonts({
     SpaceMono: require("../../assets/fonts/SpaceMono-Regular.ttf"),
@@ -84,6 +87,8 @@ export default function RootLayout() {
     return null;
   }
 
+  // User is logged in and no errors - safe to render screens.
+  // Set up navigation stack with screens
   return (
     <Stack>
       <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
