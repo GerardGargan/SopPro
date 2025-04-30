@@ -11,6 +11,7 @@ function TabBarIcon({ Icon, ...props }) {
 const _layout = () => {
   const theme = useTheme();
 
+  // Set up navigation tabs and screens
   return (
     <>
       <SafeAreaHeader />

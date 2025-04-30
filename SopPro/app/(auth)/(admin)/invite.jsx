@@ -37,6 +37,7 @@ const invite = () => {
     },
   });
 
+  // Handle button press - validate field and trigger mutation
   function handlePress() {
     setEmailValidationError(false);
 
@@ -49,10 +50,12 @@ const invite = () => {
     mutate({ email, role });
   }
 
+  // handle updating role state
   function handleUpdateRole(value) {
     setRole(value);
   }
 
+  // Reset form fields
   function resetForm() {
     setEmail("");
     setRole("user");

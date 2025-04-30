@@ -22,6 +22,7 @@ import { useRef } from "react";
 const APPBAR_HEIGHT = 50;
 
 const Sops = () => {
+  // Set up state
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [selectedIds, setSelectedIds] = useState([]);
@@ -34,11 +35,14 @@ const Sops = () => {
   const [showStatusDropdown, setShowStatusDropdown] = useState(false);
   const statusFilter = 1;
 
+  // Hooks
   const isFocused = useIsFocused();
   const queryClient = useQueryClient();
   const bottomSheetModalRef = useRef();
 
   const dropdownAnimation = useRef(new Animated.Value(0)).current;
+
+  // Define statuses coresponding to enum values in the API
   const statuses = [
     { status: "all", val: null },
     { status: "Draft", val: 1 },
@@ -47,6 +51,7 @@ const Sops = () => {
     { status: "Rejected", val: 4 },
   ];
 
+  // Toggles the dropdown either showing it or hiding it
   const toggleDropdown = () => {
     const toValue = showStatusDropdown ? 0 : 1;
     setShowStatusDropdown(!showStatusDropdown);
@@ -100,6 +105,7 @@ const Sops = () => {
     );
   };
 
+  // Hook for deleting sops
   const { mutate: mutateDelete } = useMutation({
     mutationFn: deleteSops,
     onSuccess: () => {
@@ -119,51 +125,60 @@ const Sops = () => {
     },
   });
 
+  // Debounce user input into search input
   useEffect(() => {
     const handler = setTimeout(() => setDebouncedSearchQuery(searchQuery), 500);
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
+  // reset selected ids when search query changes as some could be filtered out but still selected - could have caused unexpected behaviour or deletions
   useEffect(() => {
-    // reset selected ids when search query changes
     resetSelected();
   }, [debouncedSearchQuery, selectedStatus]);
 
+  // Select an SOP
   function selectSop(id) {
     setSelectedIds((prevState) => {
       return [...prevState, id];
     });
   }
 
+  // Deselect an SOP
   function deselectSop(id) {
     setSelectedIds((prevState) => {
       return prevState.filter((sopId) => sopId !== id);
     });
   }
 
+  // Reset selected SOPs
   function resetSelected() {
     setSelectedIds([]);
   }
 
+  // Show delete warning prompt
   function onDeleteWarning() {
     setShowDeleteWarning(true);
   }
 
+  // Close delete warning prompt
   function closeDeleteWarning() {
     setShowDeleteWarning(false);
   }
 
+  // Trigger a delete request via mutation hook and reset selected state
   function deleteSelected() {
     mutateDelete(selectedIds);
     setShowDeleteWarning(false);
     resetSelected();
   }
 
+  // Handle displaying the bottom sheet for a selected SOP
   const handlePresentModalPress = useCallback((sop) => {
     setBottomSheetSelectedSop(sop);
     bottomSheetModalRef.current?.present();
   }, []);
 
+  // Render backdrop if the status dropdown is opened, which if pressed will toggle the dropdown closing it
   const renderOverlay = () => {
     if (!showStatusDropdown) return null;
 

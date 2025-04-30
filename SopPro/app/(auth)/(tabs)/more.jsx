@@ -14,8 +14,10 @@ import MenuSection from "../../../components/UI/MenuSection";
 
 const More = () => {
   const router = useRouter();
+  // Get the users role from the redux store
   const role = useSelector((state) => state.auth.role);
 
+  // Set up admin menu options
   const adminMenuOptions = [
     {
       key: 1,
@@ -43,6 +45,7 @@ const More = () => {
     },
   ];
 
+  // Set up user menu options
   const userMenuOptions = [
     {
       key: 1,
@@ -58,6 +61,7 @@ const More = () => {
     },
   ];
 
+  // Render the menu options, conditionally based on role
   return (
     <ScrollView style={styles.container}>
       <View style={styles.content}>
