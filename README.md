@@ -112,3 +112,10 @@ The app uses **Azure Blob Storage** for storing and retrieving images associated
    cd Backend
    dotnet run
    ```
+
+### Running Automated Unit Tests
+
+```bash
+   cd Backend
+   dotnet test
+```
