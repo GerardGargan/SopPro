@@ -11,9 +11,11 @@ import CustomTextInput from "../components/UI/form/CustomTextInput";
 import CustomButton from "../components/UI/form/CustomButton";
 
 const forgot = () => {
+  // Set up state
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState(false);
 
+  // Mutation for sending the request with the users email
   const { mutate, isPending } = useMutation({
     mutationFn: forgotPassword,
     onSuccess: () => {
@@ -32,6 +34,7 @@ const forgot = () => {
     },
   });
 
+  // Triggers validation and mutation
   function handlePress() {
     setEmailError(false);
 
