@@ -93,13 +93,47 @@ The app uses **Azure Blob Storage** for storing and retrieving images associated
    ```
 3. Add a.env file in the SopPro folder with the ip address of your backend .NET API
    ```bash
-   EXPO_PUBLIC_API_URL=http://192.168.1.47:5000/api
+   EXPO_PUBLIC_API_URL=http://{apiURL}:5000/api
    ```
 4. Run the expo app
    ```bash
    npx expo start
    ```
-5. Amend appsettings.json with a connection string to your SQL database, you will also need to update and provide values and tokens for Postmark (email) service, OpenAI and Azure Blob Storage.
+5. In the Backend folder, create a file named appsettings.json, paste in the below JSON. Update the relevant values, and update the connection string to your SQL database, you will also need to update and provide values and tokens for Postmark (email) service, OpenAI and Azure Blob Storage.
+
+```json
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*",
+  "ConnectionStrings": {
+    "DefaultConnection": "Server={server},1433;Database={databaseName};User Id={userId};Password={passwordHere};Encrypt=False;MultipleActiveResultSets=true;TrustServerCertificate=True",
+    "AzureBlobStorage": "DefaultEndpointsProtocol=https;AccountName={accountName};AccountKey={accountKey};EndpointSuffix=core.windows.net"
+  },
+  "ApplicationSettings": {
+    "BaseUrl": "http://{apiUrl}:5000",
+    "JwtSecret": "{Secret Key Goes Here}",
+    "JwtIssuer": "http://{apiUrl}:5000",
+    "JwtAudience": "SopPro",
+    "JwtInviteExpireHours": ,
+    "JwtAuthExpireDays":  ,
+    "JwtAuthRefreshEpireDays": ,
+    "PostmarkFromEmail": "{addEmail}",
+    "PostmarkApiToken": "{addPostMarkToken}",
+    "AzureBlobStorageContainer": "{addContainer}"
+  },
+  "OpenAi": {
+    "Model": "{configureModel}",
+    "ApiKey": "{AddApiKey}"
+  }
+
+}
+```
+
 6. Ensure your SQL server is running (via docker on Mac or via SQL server on windows)
    For security reasons, the actual values used for appsettings in this project have been git ignored.
 7. In the root of the Backend folder, run the following command to generate the database in SQL server
