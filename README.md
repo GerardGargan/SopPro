@@ -115,6 +115,8 @@ The app uses **Azure Blob Storage** for storing and retrieving images associated
 
 ## Running Automated Tests
 
+1. Run the following command to run the unit tests
+
 ```bash
    cd Backend
    dotnet test
