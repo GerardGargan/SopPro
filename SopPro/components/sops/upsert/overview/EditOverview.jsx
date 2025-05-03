@@ -3,7 +3,9 @@ import { Chip } from "react-native-paper";
 import Header from "../../../UI/Header";
 import SopForm from "./SopForm";
 import HazardSection from "./HazardSection";
+import { ScrollView } from "react-native-gesture-handler";
 
+// Helper function to transform the Enum to a text description for Status
 function getStatus(identifier) {
   switch (identifier) {
     case 1:
@@ -21,6 +23,7 @@ function getStatus(identifier) {
   }
 }
 
+// Shows the overview form for a blank or existing SOP
 const EditOverview = ({
   title,
   description,
@@ -59,10 +62,14 @@ const EditOverview = ({
 
   return (
     <>
-      <View style={styles.chipContainer}>
+      <ScrollView
+        contentContainerStyle={styles.chipContainer}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+      >
         {statusChip}
         {isApproved ? newVersionChip : versionChip}
-      </View>
+      </ScrollView>
       <SopForm
         selectedDepartment={selectedDepartment}
         departments={departments}
@@ -91,8 +98,10 @@ export default EditOverview;
 const styles = StyleSheet.create({
   chipContainer: {
     flexDirection: "row",
-    justifyContent: "flex-end",
+    paddingHorizontal: 10,
     gap: 10,
     marginBottom: 10,
+    justifyContent: "flex-end",
+    minWidth: "100%",
   },
 });
