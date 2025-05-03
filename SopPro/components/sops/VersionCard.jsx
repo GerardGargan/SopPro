@@ -8,6 +8,7 @@ import {
 import React from "react";
 import { getStatus, getStatusColour } from "../../util/statusHelper";
 
+// Card representing a version which triggers a function when selected
 const VersionCard = ({
   id,
   versionNumber,

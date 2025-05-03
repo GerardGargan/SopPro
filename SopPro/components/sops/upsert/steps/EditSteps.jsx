@@ -5,10 +5,12 @@ import { Button, FAB, IconButton, Portal } from "react-native-paper";
 import { useState } from "react";
 import EditStep from "./EditStep";
 
+// Displays a list of step cards which actions can be performed on
 const EditSteps = ({ steps, setSteps, ppeList, handleEditStepPpe }) => {
   const [selectedItem, setSelectedItem] = useState(null);
   const [editItem, setEditItem] = useState(null);
 
+  // Handles deleting a step
   function handleDeleteStep(key) {
     setEditItem(null);
     setSteps((prevState) => {
@@ -20,6 +22,7 @@ const EditSteps = ({ steps, setSteps, ppeList, handleEditStepPpe }) => {
     });
   }
 
+  // Handles updating a step
   function handleEditStep(key, identifier, value) {
     setSteps((prevState) => {
       const index = prevState.findIndex((step) => step.key === key);
@@ -29,6 +32,7 @@ const EditSteps = ({ steps, setSteps, ppeList, handleEditStepPpe }) => {
     });
   }
 
+  // Handles setting url once an image is uploaded
   function handleSetImageUrl(key, imageUrl) {
     setSteps((prevState) => {
       const index = prevState.findIndex((step) => step.key === key);
@@ -38,6 +42,7 @@ const EditSteps = ({ steps, setSteps, ppeList, handleEditStepPpe }) => {
     });
   }
 
+  // Adds a new blank step
   function handleAddStep() {
     setSteps((prevState) => {
       const maxKey =
@@ -61,6 +66,7 @@ const EditSteps = ({ steps, setSteps, ppeList, handleEditStepPpe }) => {
     });
   }
 
+  // Handles moving the position of a selected step either up or down in the list
   function handlePositionMove(direction) {
     setSteps((prevState) => {
       const index = prevState.findIndex((step) => step.key === selectedItem);
@@ -91,6 +97,7 @@ const EditSteps = ({ steps, setSteps, ppeList, handleEditStepPpe }) => {
     });
   }
 
+  // Section showing options for reordering a step
   const ReorderSection = () => {
     return (
       <View style={{ flexDirection: "row", justifyContent: "space-between" }}>

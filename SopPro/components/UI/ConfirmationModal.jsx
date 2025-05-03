@@ -2,6 +2,7 @@ import React from "react";
 import { View } from "react-native";
 import { Modal, Portal, Text, Button, Card } from "react-native-paper";
 
+// Reusable confirmation prompt modal
 const ConfirmationModal = ({
   visible,
   title,

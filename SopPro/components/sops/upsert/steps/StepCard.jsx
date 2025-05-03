@@ -3,6 +3,7 @@ import React from "react";
 import { Icon, RadioButton } from "react-native-paper";
 import { Ionicons } from "@expo/vector-icons";
 
+// Card representing a step
 const StepCard = ({
   title,
   text,

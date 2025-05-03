@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { View, Animated, StyleSheet, Dimensions } from "react-native";
 
+// Animated skeleton loader used as a placeholder when fetching data
 const SkeletonLoader = ({
   width = Dimensions.get("window").width,
   height = 20,

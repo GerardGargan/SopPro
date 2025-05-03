@@ -1,6 +1,7 @@
 import { StyleSheet, Text, TouchableOpacity } from "react-native";
 import React from "react";
 
+// Reusable menu card for menu options
 const MenuCard = ({ Icon, title, onPress }) => {
   return (
     <TouchableOpacity style={styles.rootContainer} onPress={onPress}>

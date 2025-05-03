@@ -8,6 +8,7 @@ import EntityCard from "../UI/EntityCard";
 import { User } from "lucide-react-native";
 import { useRouter } from "expo-router";
 
+// Displays a list of users which can be selected
 const UserList = () => {
   const router = useRouter();
 

@@ -4,6 +4,7 @@ import { RadioButton } from "react-native-paper";
 import SopStatusChip from "./SopStatusChip";
 import { Star, Camera } from "lucide-react-native";
 
+// Card which represents an SOP
 const SopCard = ({
   sop,
   toggleSelect,
@@ -11,6 +12,7 @@ const SopCard = ({
   isSelectedItems,
   openBottomSheet,
 }) => {
+  // Handle displying the bottom sheet for the selected SOP
   function onPress() {
     if (selected || isSelectedItems) {
       return toggleSelect(sop.id);

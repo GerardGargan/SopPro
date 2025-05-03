@@ -2,6 +2,7 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
 import { Pencil } from "lucide-react-native";
 
+// Displays a hazard card with its details and a button to edit it
 const HazardItem = ({ hazard, onEdit }) => {
   return (
     <View style={styles.hazardItem}>

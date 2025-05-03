@@ -8,6 +8,7 @@ import ErrorBlock from "../UI/ErrorBlock";
 
 const PAGE_SIZE = 20;
 
+// Displays a list of SOPs, and searching/filtering components
 const SopList = ({
   debouncedSearchQuery,
   statusFilter,
@@ -17,6 +18,7 @@ const SopList = ({
   deselectSop,
   openBottomSheet,
 }) => {
+  // Mutation which facilitates pagintation. More records are fetched each time the user reaches the end of the list
   const {
     data,
     fetchNextPage,
@@ -45,6 +47,7 @@ const SopList = ({
     cacheTime: 10 * 60 * 1000, // 10 minutes
   });
 
+  // Handles toggling selection of an SOP
   function toggleSelect(id) {
     if (selectedIds.includes(id)) {
       deselectSop(id);
@@ -56,12 +59,14 @@ const SopList = ({
   // Flatten the pages array into a single array of items
   const flattenedData = data?.pages.flatMap((page) => page) ?? [];
 
+  // Handles fetching more SOPs if there are more
   const loadMore = () => {
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage();
     }
   };
 
+  // Loading spinner which is shown if the mutation is fetching the next page
   const renderFooter = () => {
     if (!isFetchingNextPage) return null;
     return (
@@ -71,6 +76,7 @@ const SopList = ({
     );
   };
 
+  // Show loading spinner during initial fetch
   if (isPending) {
     return (
       <View style={styles.centered}>
@@ -79,6 +85,7 @@ const SopList = ({
     );
   }
 
+  // Show if there is an error
   if (isError) {
     return (
       <View style={styles.centered}>

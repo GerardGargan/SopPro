@@ -3,6 +3,8 @@ import { Image, View, StyleSheet } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { Icon, Button, useTheme } from "react-native-paper";
 
+// Reusable image picker component
+// Displays a preview of imageUrl and allows a new Image to be uploaded from the filesystem, or taken from the camera
 export default function ImagePickerComponent({
   imageUrl,
   onSelect,
@@ -12,10 +14,12 @@ export default function ImagePickerComponent({
   const theme = useTheme();
   const [image, setImage] = useState(imageUrl);
 
+  // Set the imageUrl if an existing image is provided from the parent component
   useEffect(() => {
     setImage(imageUrl);
   }, [imageUrl]);
 
+  // Handle picking an image
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images"],
@@ -30,6 +34,7 @@ export default function ImagePickerComponent({
     }
   };
 
+  // Handle taking a picture with the camera
   const takePhoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
     if (status === "granted") {

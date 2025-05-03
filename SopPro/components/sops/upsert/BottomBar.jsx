@@ -5,6 +5,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const BOTTOM_APPBAR_HEIGHT = 60;
 
+// Navigation tabs to switch between sop overview and editing steps
 const BottomBar = ({ selectedScreen, onSelectScreen }) => {
   const { bottom } = useSafeAreaInsets();
   const theme = useTheme();

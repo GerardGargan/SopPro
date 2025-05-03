@@ -3,6 +3,7 @@ import { Button, useTheme } from "react-native-paper";
 
 import React from "react";
 
+// Custom button which implements custom styling and some additional props
 const CustomButton = ({
   mode = "contained",
   height,
