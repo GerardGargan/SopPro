@@ -1,6 +1,7 @@
 import { StyleSheet, Text, View } from "react-native";
 import MenuCard from "../UI/MenuCard";
 
+// Reusable component for displaying a list of MenuCards with functions to run on selection
 const MenuSection = ({ title, options }) => (
   <View style={styles.section}>
     <View style={styles.sectionHeader}>

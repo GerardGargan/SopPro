@@ -165,7 +165,7 @@ namespace Backend.Tests
 
             // Assert
             Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+            Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.Created));
             Assert.That(result.SuccessMessage, Is.EqualTo("Organisation and user created successfully"));
 
             // Verify interactions
@@ -207,7 +207,7 @@ namespace Backend.Tests
             await _dbContext.SaveChangesAsync();
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<Exception>(async () =>
+            var exception = Assert.ThrowsAsync<ArgumentException>(async () =>
                 await _authService.SignupOrganisation(request, _modelState));
 
             Assert.That(exception.Message, Is.EqualTo("User already exists"));
@@ -235,7 +235,7 @@ namespace Backend.Tests
                 .ReturnsAsync(new Organisation { Name = request.OrganisationName });
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<Exception>(async () =>
+            var exception = Assert.ThrowsAsync<ArgumentException>(async () =>
                 await _authService.SignupOrganisation(request, _modelState));
 
             Assert.That(exception.Message, Is.EqualTo("Organisation already exists"));
@@ -249,7 +249,7 @@ namespace Backend.Tests
             _modelState.AddModelError("Email", "Email is required");
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<Exception>(async () =>
+            var exception = Assert.ThrowsAsync<ArgumentException>(async () =>
                 await _authService.SignupOrganisation(request, _modelState));
 
             Assert.That(exception.Message, Is.EqualTo("Email is required"));
@@ -274,7 +274,7 @@ namespace Backend.Tests
             };
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<Exception>(async () => await _authService.SignupOrganisation(request, _modelState));
+            var exception = Assert.ThrowsAsync<ArgumentException>(async () => await _authService.SignupOrganisation(request, _modelState));
             Assert.That(exception.Message, Is.EqualTo("Password does not meet minimum requirements"));
 
         }
@@ -345,7 +345,7 @@ namespace Backend.Tests
                 .ReturnsAsync((ApplicationUser)null);
 
             // Act & Assert
-            var exception = Assert.ThrowsAsync<Exception>(async () => await _authService.Login(loginRequest, _modelState));
+            var exception = Assert.ThrowsAsync<ArgumentException>(async () => await _authService.Login(loginRequest, _modelState));
             Assert.That(exception.Message, Is.EqualTo("Email or password is incorrect"));
         }
 
@@ -374,7 +374,7 @@ namespace Backend.Tests
 
             // Act & Assert
 
-            var exception = Assert.ThrowsAsync<Exception>(async () => await _authService.Login(loginRequest, _modelState));
+            var exception = Assert.ThrowsAsync<ArgumentException>(async () => await _authService.Login(loginRequest, _modelState));
             Assert.That(exception.Message, Is.EqualTo("Email or password is incorrect"));
 
         }

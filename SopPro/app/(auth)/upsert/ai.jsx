@@ -23,6 +23,9 @@ const ai = () => {
 
   const isFocusedRef = React.useRef(true);
 
+  // If the user leaves the screen set isFocusedRef to false
+  // This is being used to flag if the user leaves the screen. If they do we dont automatically redirect them to the SOP when its finished
+  // If the user remains on the screen they will be redirected to the SOP when its ready based on the flag
   useFocusEffect(
     React.useCallback(() => {
       isFocusedRef.current = true;
@@ -32,6 +35,7 @@ const ai = () => {
     }, [])
   );
 
+  // Mutation for generating SOP with AI
   const { mutate, isPending, isError } = useMutation({
     mutationFn: generateAiSop,
     onSuccess: (data) => {
@@ -70,6 +74,7 @@ const ai = () => {
     },
   });
 
+  // Handle submission of the form - validate fields and trigger mutation
   function handleSubmit() {
     resetErrors();
 
@@ -101,6 +106,7 @@ const ai = () => {
     setKeyRisksError(null);
   }
 
+  // Show loading spinner if pending
   if (isPending) {
     return (
       <View style={styles.centered}>

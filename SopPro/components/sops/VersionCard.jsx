@@ -8,6 +8,7 @@ import {
 import React from "react";
 import { getStatus, getStatusColour } from "../../util/statusHelper";
 
+// Card representing a version which triggers a function when selected
 const VersionCard = ({
   id,
   versionNumber,
@@ -20,7 +21,9 @@ const VersionCard = ({
   return (
     <TouchableOpacity
       style={styles.versionCard}
-      onPress={() => handleVersionSelect({ id, versionNumber, title })}
+      onPress={() =>
+        handleVersionSelect({ id, reference: versionNumber, title })
+      }
     >
       <View style={styles.versionInfo}>
         <Text style={styles.versionTitle}>Version {versionNumber}</Text>

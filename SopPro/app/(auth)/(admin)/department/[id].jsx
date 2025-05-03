@@ -28,14 +28,17 @@ const Upsert = () => {
   const [nameError, setNameError] = useState(null);
   const [modalVisible, setModalVisisble] = useState(false);
 
+  // Set title based on create or update
   useLayoutEffect(() => {
     navigation.setOptions({
       title: isCreate ? "Create Department" : "Update Department",
     });
   });
 
+  // use correct mutation function based on create or update
   const mutationFunction = isCreate ? createDepartment : updateDepartment;
 
+  // Mutation hook for updating/creating
   const { mutate, isPending: isPendingMutate } = useMutation({
     mutationFn: mutationFunction,
     onSuccess: () => {
@@ -46,6 +49,7 @@ const Upsert = () => {
         visibilityTime: 5000,
       });
       queryClient.invalidateQueries("departments");
+      router.back();
     },
     onError: (error) => {
       Toast.show({
@@ -57,6 +61,7 @@ const Upsert = () => {
     },
   });
 
+  // Mutation hook for deleting
   const { mutate: mutateDelete, isPending: isDeleting } = useMutation({
     mutationFn: deleteDepartment,
     onSuccess: () => {
@@ -79,12 +84,15 @@ const Upsert = () => {
       });
     },
   });
+
+  // Fetch department
   const { data, isPending, isError, error } = useQuery({
     enabled: isCreate == false,
     queryKey: ["departments", id],
     queryFn: () => fetchDepartment(id),
   });
 
+  // Set up state if data is loaded
   useEffect(() => {
     if (data) {
       setName(data.name);
@@ -106,19 +114,23 @@ const Upsert = () => {
     }
   }
 
+  // Function which shows the delete confirmation prompt
   function handleShowDeletePrompt() {
     setModalVisisble(true);
   }
 
+  // Function which handles a deletion and dismisses the modal
   function handleDeletion() {
     mutateDelete({ id });
     dismissModal();
   }
 
+  // Function which closes the modal
   function dismissModal() {
     setModalVisisble(false);
   }
 
+  // Show loading spinner if a department is being fetched
   if (!isCreate && isPending) {
     return (
       <View style={styles.loader}>
@@ -127,6 +139,7 @@ const Upsert = () => {
     );
   }
 
+  // Show error message if the request returns an error
   if (isError) {
     return (
       <View style={styles.errorContainer}>

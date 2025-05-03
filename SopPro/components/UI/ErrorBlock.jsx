@@ -2,6 +2,7 @@ import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
 
+// Displays an error block
 const ErrorBlock = ({ children }) => {
   return (
     <View style={styles.container}>

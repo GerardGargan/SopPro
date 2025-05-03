@@ -39,6 +39,7 @@ const Upsert = () => {
 
   const [modalVisible, setModalVisisble] = useState(false);
 
+  // Hook for updating a user
   const { mutate: mutateUpdate, isPending: isPendingUpdate } = useMutation({
     mutationFn: () => updateUser(id, user),
     onSuccess: () => {
@@ -60,6 +61,7 @@ const Upsert = () => {
     },
   });
 
+  // Hook for deleting a user
   const { mutate: mutateDelete, isPending: isDeleting } = useMutation({
     mutationFn: deleteUser,
     onSuccess: () => {
@@ -83,17 +85,20 @@ const Upsert = () => {
     },
   });
 
+  // Hook for fetching the user
   const { data, isPending, isError, error } = useQuery({
     queryKey: ["users", id],
     queryFn: () => fetchUser({ id }),
   });
 
+  // Once user is loaded update the state
   useEffect(() => {
     if (data) {
       setUser(data);
     }
   }, [data]);
 
+  // Function which updates the state for the specified field (identifier) and reset validation errors for that field
   function handleInput(identifier, value) {
     setUser((prevState) => {
       return { ...prevState, [identifier]: value };
@@ -104,6 +109,7 @@ const Upsert = () => {
     });
   }
 
+  // Function which resets any errors on specific fields
   function resetErrors() {
     setFieldError({
       forename: null,
@@ -113,6 +119,7 @@ const Upsert = () => {
     });
   }
 
+  // Triggers validation and submission to update the user
   function handleSubmit() {
     resetErrors();
     // validate fields
@@ -132,6 +139,7 @@ const Upsert = () => {
       isError = true;
     }
 
+    // If an error was encountered return so that the request is not sent to the server
     if (isError) {
       return;
     }
@@ -140,19 +148,23 @@ const Upsert = () => {
     mutateUpdate(id, user);
   }
 
+  // Function which shows the delete confirmation prompt
   function handleShowDeletePrompt() {
     setModalVisisble(true);
   }
 
+  // Function to trigger delete request and close modal
   function handleDeletion() {
     mutateDelete({ id });
     dismissModal();
   }
 
+  // Function to dismiss modal
   function dismissModal() {
     setModalVisisble(false);
   }
 
+  // Show error if request fails
   if (isError) {
     return (
       <View style={styles.errorContainer}>
@@ -163,6 +175,7 @@ const Upsert = () => {
     );
   }
 
+  // Show loading spinner
   if (isPending) {
     return (
       <View style={styles.loader}>

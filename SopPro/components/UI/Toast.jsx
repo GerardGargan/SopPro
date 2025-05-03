@@ -2,6 +2,7 @@ import Toast, { BaseToast, ErrorToast } from "react-native-toast-message";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "react-native-paper";
 
+// Toast component configuration for displaying success and error notifications
 export default function ToastWithInsets() {
   const insets = useSafeAreaInsets();
   const theme = useTheme();

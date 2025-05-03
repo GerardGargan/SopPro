@@ -16,11 +16,13 @@ const index = () => {
   const [imageUrl, setImageUrl] = useState(null);
   const isCreate = imageUrl === null;
 
+  // Fetch existing logo
   const { data, isPending, isError, error } = useQuery({
     queryKey: ["setting", "logo"],
     queryFn: () => getSettingByKey("logo"),
   });
 
+  // Set state when data is fetched
   useEffect(() => {
     if (data) {
       setImageUrl(data.result.value);
@@ -29,6 +31,7 @@ const index = () => {
     }
   }, [data]);
 
+  // Mutation hook for uploading image/logo and triggering mutation to add/update the setting
   const { mutate: mutateUpload } = useMutation({
     mutationFn: uploadImage,
     onSuccess: (data) => {
@@ -44,6 +47,7 @@ const index = () => {
     },
   });
 
+  // Hook for updating/creating the setting
   const { mutate: mutateSetting } = useMutation({
     mutationFn: isCreate ? createSetting : updateSetting,
     onSuccess: () => {
@@ -64,6 +68,7 @@ const index = () => {
     },
   });
 
+  // Function to upload the image
   function handleImageUpload(imageUri) {
     const formData = new FormData();
     formData.append("file", {
@@ -75,14 +80,17 @@ const index = () => {
     mutateUpload(formData);
   }
 
+  // Show loading spinner if fetching data
   if (isPending) {
     return <ActivityIndicator animating={true} />;
   }
 
+  // Show error message if an error exists
   if (isError) {
     return <ErrorBlock>{error.message}</ErrorBlock>;
   }
 
+  // Render the screen with the image picker
   return (
     <View style={styles.rootContainer}>
       <Text style={styles.title}>Upload a custom logo</Text>

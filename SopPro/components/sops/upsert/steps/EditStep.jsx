@@ -23,6 +23,7 @@ const EditStep = ({
   handleEditStepPpe,
 }) => {
   const [showDeleteWarning, setShowDeleteWarning] = useState(false);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const { mutate: uploadMutate, data: imageData } = useMutation({
     mutationFn: ({ formData, key }) => {
@@ -33,6 +34,7 @@ const EditStep = ({
         console.log("step key is null");
       }
       handleSetImageUrl(data.key, data.result);
+      setIsUploadingImage(false);
     },
     onError: (error) => {
       Toast.show({
@@ -49,6 +51,7 @@ const EditStep = ({
   }
 
   function handleImageUpload(imageUri, key) {
+    setIsUploadingImage(true);
     const formData = new FormData();
     formData.append("file", {
       uri: imageUri,
@@ -117,8 +120,13 @@ const EditStep = ({
           />
 
           <View style={{ alignItems: "center" }}>
-            <CustomButton onPress={handleClose} style={{ width: "80%" }}>
-              Save
+            <CustomButton
+              onPress={handleClose}
+              style={{ width: "80%" }}
+              loading={isUploadingImage}
+              disabled={isUploadingImage}
+            >
+              {isUploadingImage ? "Please wait..." : "Save"}
             </CustomButton>
           </View>
         </ScrollView>

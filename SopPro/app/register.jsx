@@ -15,12 +15,14 @@ import ErrorBlock from "../components/UI/ErrorBlock";
 import Header from "../components/UI/Header";
 
 const register = () => {
+  // use custom hook for automatically logging in users, will automatically log in and redirect users once successfully registered
   const {
     mutate: loginMutate,
     isPending: isPendingLogin,
     isError: isLoginError,
   } = useLogin();
 
+  // Mutation for registering company
   const { mutate, isPending, isError, error } = useMutation({
     mutationFn: registerCompany,
     onSuccess: (responseData, variables) => {
@@ -29,6 +31,7 @@ const register = () => {
     },
   });
 
+  // Function to format data and trigger mutation
   function handleRegister(formData) {
     const data = { ...formData, organisationName: formData.company };
     delete data.company;

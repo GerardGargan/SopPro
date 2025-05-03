@@ -2,6 +2,7 @@ import { StyleSheet } from "react-native";
 import React from "react";
 import { TextInput, useTheme } from "react-native-paper";
 
+// Custom text input which inherits the themes styling
 const CustomTextInput = ({ ...props }) => {
   const theme = useTheme();
 

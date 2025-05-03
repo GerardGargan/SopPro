@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 const _layout = () => {
   const role = useSelector((state) => state.auth.role);
 
+  // If the user is not an admin, dont render any admin screens - redirect to the home screen
   if (role !== "admin") {
     return <Redirect href="(auth)" />;
   }

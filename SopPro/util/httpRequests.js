@@ -1,5 +1,7 @@
-import { version } from "react";
 import api from "../api/axiosApi";
+
+// This file contains exported functions for performing Http requests to API endpoints and handles formatting of errors
+// These functions are plugged in to the Tanstack Query and Mutation hooks in the app to manage data fetching and caching
 
 export async function registerCompany(data) {
   try {

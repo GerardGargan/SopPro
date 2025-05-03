@@ -2,6 +2,7 @@ import { StyleSheet, Text, View } from "react-native";
 import React from "react";
 import { useTheme } from "react-native-paper";
 
+// Reusable chip component
 const CustomChip = ({ children, style }) => {
   const theme = useTheme();
   return <View style={[styles.chip, style && style]}>{children}</View>;

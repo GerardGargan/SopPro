@@ -1,6 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
+// Create slice for managing global authentication state for the user
+// Initially default to null (represents no logged in user)
+// Reducers are used to perform actions in order to update the state
+// Actions are exported which can be used with the useDispatch hook in any screen to trigger reducers
 const authSlice = createSlice({
   name: "authSlice",
   initialState: {

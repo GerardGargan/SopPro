@@ -16,6 +16,7 @@ import Toast from "react-native-toast-message";
 const screenWidth = Dimensions.get("window").width;
 
 const Analytics = () => {
+  // Fetch analytics from API
   const { data, isPending, isError, error } = useQuery({
     queryKey: ["analytics", "sops"],
     queryFn: getAnalytics,
@@ -23,6 +24,7 @@ const Analytics = () => {
     cacheTime: 10 * 60 * 1000, // 10 minutes
   });
 
+  // Show error or Skeleton loader if loading
   if (isPending || isError) {
     if (isError) {
       Toast.show({

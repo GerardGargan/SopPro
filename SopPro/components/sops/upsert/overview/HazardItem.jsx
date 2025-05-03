@@ -1,8 +1,8 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
-import { IconButton } from "react-native-paper";
 import { Pencil } from "lucide-react-native";
 
+// Displays a hazard card with its details and a button to edit it
 const HazardItem = ({ hazard, onEdit }) => {
   return (
     <View style={styles.hazardItem}>
@@ -33,7 +33,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     padding: 16,
     marginVertical: 8,
-    backgroundColor: "#f5f5f5",
+    backgroundColor: "white",
     borderRadius: 8,
     elevation: 2,
   },

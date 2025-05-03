@@ -2,6 +2,7 @@ import * as React from "react";
 import { FAB, Portal } from "react-native-paper";
 import { useRouter } from "expo-router";
 
+// Floating action button component for creating SOPs
 const Fab = () => {
   const [state, setState] = React.useState({ open: false });
 

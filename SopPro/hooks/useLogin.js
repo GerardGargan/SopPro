@@ -4,6 +4,8 @@ import { useDispatch } from "react-redux";
 import { authActions } from "../store/authSlice";
 import { login } from "../util/httpRequests";
 
+// Custom hook which logs in a user and automatically signs them in
+// It handles updating the redux store with tokens and user info
 const useLogin = () => {
   const router = useRouter();
   const dispatch = useDispatch();

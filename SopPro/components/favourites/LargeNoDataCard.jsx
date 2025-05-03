@@ -1,6 +1,5 @@
 import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import { Bookmark } from "lucide-react-native";
 import { useRouter } from "expo-router";
 
 const LargeNoDataCard = ({
@@ -12,6 +11,8 @@ const LargeNoDataCard = ({
 }) => {
   const router = useRouter();
 
+  // Component card is used as a placeholder for where there is no data.
+  // It displays an icon, title, description and a button with a callback to navigate to a specified screen
   return (
     <View style={styles.container}>
       <View style={styles.card}>

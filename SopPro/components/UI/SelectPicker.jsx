@@ -3,6 +3,7 @@ import { Picker } from "@react-native-picker/picker";
 import { useTheme } from "react-native-paper/src/core/theming";
 import { View } from "react-native";
 
+// Select picker which inherits from the custom theme
 const SelectPicker = ({ children, ...props }) => {
   const theme = useTheme();
   return (

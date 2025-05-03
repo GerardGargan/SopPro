@@ -4,6 +4,8 @@ import { useTheme } from "react-native-paper";
 
 import React from "react";
 
+// Reusable component for selecting multiple items from a list
+// Inherits from the theme
 const MultiSelectPicker = ({ data, value, onChange }) => {
   const theme = useTheme();
   return (

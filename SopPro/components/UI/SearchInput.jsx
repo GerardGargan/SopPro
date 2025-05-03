@@ -2,6 +2,7 @@ import React from "react";
 import { StyleSheet } from "react-native";
 import { Searchbar } from "react-native-paper";
 
+// Search input component
 const SearchInput = ({ value, onChangeText, ...props }) => {
   return (
     <Searchbar

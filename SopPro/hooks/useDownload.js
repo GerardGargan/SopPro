@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { downloadSopVersion } from "../util/downloadHelper";
 
+// Hook which handles the downloading of a SOP PDF when exported
 export default downloadSop = () => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isSuccessful, setIsSuccessful] = useState(false);

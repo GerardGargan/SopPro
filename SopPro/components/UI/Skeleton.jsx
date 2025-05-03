@@ -1,12 +1,14 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { View, Animated, StyleSheet, Dimensions } from "react-native";
 
+// Animated skeleton loader used as a placeholder when fetching data
 const SkeletonLoader = ({
   width = Dimensions.get("window").width,
   height = 20,
   style,
 }) => {
-  const animatedValue = new Animated.Value(1);
+  // Use useRef to persist the value across renders
+  const animatedValue = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     const shimmer = Animated.loop(
@@ -26,6 +28,7 @@ const SkeletonLoader = ({
 
     shimmer.start();
 
+    // Clean up and stop the loop when the component is unmounted
     return () => shimmer.stop();
   }, []);
 

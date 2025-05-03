@@ -12,6 +12,7 @@ const RevertModal = ({ sopVersions, visible, setVisibility }) => {
     useState(false);
   const [selectedId, setSelectedId] = useState(null);
 
+  // Mutation function for handling the request
   const { mutate, isSuccess, isPending, isError } = useMutation({
     mutationFn: revertSopVersion,
     onSuccess: () => {
@@ -35,11 +36,13 @@ const RevertModal = ({ sopVersions, visible, setVisibility }) => {
     },
   });
 
+  // Displays the confirmation modal and updates the state to track the selected id
   function handleRevert({ id }) {
     setIsConfirmationModalVisible(true);
     setSelectedId(id);
   }
 
+  // Function to run to revert the SOP, triggers the mutation and resets the state
   function handleConfirmRevert() {
     mutate({ versionId: selectedId });
     setIsConfirmationModalVisible(false);

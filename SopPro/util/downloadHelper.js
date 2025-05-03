@@ -3,10 +3,14 @@ import * as Sharing from "expo-sharing";
 import store from "../store";
 import { Platform } from "react-native";
 
+// Handles download an SOP Version
 export async function downloadSopVersion(versionId, version, title) {
+  // Give it a unique name including the date
   const fileName = `${title}-V${version}-` + Date.now();
 
+  // Get the auth token to send in the authorization header
   const token = store.getState().auth.token;
+  // Send the request
   try {
     const result = await FileSystem.downloadAsync(
       `${process.env.EXPO_PUBLIC_API_URL}/sop/${versionId}/pdf`,
@@ -29,6 +33,7 @@ export async function downloadSopVersion(versionId, version, title) {
   }
 }
 
+// Saves the document to the devices file system
 const save = async (uri, fileName, mimetype) => {
   if (Platform.OS === "android") {
     const permissions =

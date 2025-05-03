@@ -9,6 +9,7 @@ import React, { useState } from "react";
 import { ChevronRight } from "lucide-react-native";
 import { useRouter } from "expo-router";
 
+// Reusable card for displaying entities in a list and performing an action on them
 const EntityCard = ({ Icon, name, onPress }) => {
   const router = useRouter();
   const [scaleValue] = useState(new Animated.Value(1));

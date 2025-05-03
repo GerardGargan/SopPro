@@ -3,6 +3,7 @@ import React from "react";
 import SopCardLargeSkeleton from "../skeletons/SopCardLargeSkeleton";
 import SopCardLarge from "./SopCardLarge";
 
+// Displays a horizontal list of large Sop Cards. Displays Skeleton loaders during fetching
 const SopHorizontalList = ({
   isFetched,
   data,

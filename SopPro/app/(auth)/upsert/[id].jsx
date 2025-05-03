@@ -19,6 +19,7 @@ import Toast from "react-native-toast-message";
 const Upsert = () => {
   const { id } = useLocalSearchParams();
 
+  // State to manage
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [hazards, setHazards] = useState([]);
@@ -31,12 +32,15 @@ const Upsert = () => {
   const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [ppeList, setPpeList] = useState([]);
 
+  // If the id is -1 we are creating an SOP, otherwise we are editing an existing SOP
   const isCreate = id === "-1";
 
+  // Hooks
   const router = useRouter();
   const navigation = useNavigation();
   const queryClient = useQueryClient();
 
+  // Set screen title based on isCreate or Update
   useLayoutEffect(() => {
     navigation.setOptions({
       title: isCreate ? "Create SOP" : "Edit SOP",
@@ -48,22 +52,26 @@ const Upsert = () => {
     });
   }, [navigation, handleSave, isError, isFetched]);
 
+  // Fetch existing sop if we are editing an existing SOP
   const { data, isError, isFetching, isFetched, error } = useQuery({
     enabled: !isCreate,
     queryKey: ["sop", id],
     queryFn: () => fetchSop(id),
   });
 
+  // Fetch departments for dropdown
   const { data: departmentsData } = useQuery({
     queryKey: ["departments"],
     queryFn: fetchDepartments,
   });
 
+  // Fetch PPE for dropdown
   const { data: ppeData } = useQuery({
     queryKey: ["ppe"],
     queryFn: fetchPpe,
   });
 
+  // Mutation for updating an SOP
   const {
     mutate: mutateUpdate,
     isPending: isPendingPut,
@@ -89,6 +97,7 @@ const Upsert = () => {
     },
   });
 
+  // Mutation for creating an SOP
   const {
     mutate: mutateCreate,
     isPending: isPendingPost,
@@ -114,6 +123,7 @@ const Upsert = () => {
     },
   });
 
+  // Once data is loaded populate the state we will work with
   useEffect(() => {
     if (data) {
       setTitle(data?.title || "");
@@ -149,14 +159,17 @@ const Upsert = () => {
     }
   }, [ppeData]);
 
+  // Update title state when the title is changed
   function handleTitleChange(text) {
     setTitle(text);
   }
 
+  // Update description state when the title is changed
   function handleDescriptionChange(text) {
     setDescription(text);
   }
 
+  // Save the SOP after performing validation
   function handleSave() {
     const errors = [];
     console.log("title", title);
@@ -178,6 +191,7 @@ const Upsert = () => {
       return;
     }
 
+    // Set up SOP data model expected by the API
     const sop = {
       title: title,
       description: description,
@@ -197,10 +211,12 @@ const Upsert = () => {
     }
   }
 
+  // Handle selecting a hazard
   function handleSelectHazard(id) {
     setSelectedHazard(id);
   }
 
+  // Function for adding a new hazard to the state
   function handleAddHazard(hazard) {
     setHazards((prevState) => {
       const maxKey =
@@ -218,6 +234,7 @@ const Upsert = () => {
     });
   }
 
+  // Handle updating an existing hazard in state
   function handleUpdateHazard(key, identifier, value) {
     setHazards((prevState) => {
       const hazards = [...prevState];
@@ -227,6 +244,7 @@ const Upsert = () => {
     });
   }
 
+  // Handle deleting a hazard in state
   function handleRemoveHazard(key) {
     setHazards((prevState) => {
       return prevState.filter((hazard) => hazard.key !== key);
@@ -234,6 +252,7 @@ const Upsert = () => {
     setSelectedHazard(null);
   }
 
+  // Handle selecting a department and updating the state
   function handleSelectDepartment(departmentId) {
     if (departmentId === -1) {
       setSelectedDepartment(null);
@@ -242,6 +261,7 @@ const Upsert = () => {
     }
   }
 
+  // Handle selecting which screen the user is on (Overview or Tabs)
   function selectScreen(screen) {
     setScreen(screen);
   }
@@ -252,6 +272,7 @@ const Upsert = () => {
     return null;
   }
 
+  // Handle editing a steps PPE
   function handleEditStepPpe(stepKey, ppe) {
     setSteps((prevState) => {
       const index = prevState.findIndex((step) => step.key === stepKey);
@@ -263,6 +284,7 @@ const Upsert = () => {
 
   const errorMessage = getUpdateErrorMessage();
 
+  // Show loading spinner if query is pending
   if (isFetching || isPendingPut || isPendingPost) {
     return (
       <View style={styles.centered}>
@@ -271,6 +293,7 @@ const Upsert = () => {
     );
   }
 
+  // Show error if request fails
   if (isError) {
     return (
       <View style={styles.centered}>
@@ -279,6 +302,7 @@ const Upsert = () => {
     );
   }
 
+  // Render selected screen and pass down state to child components
   return (
     <>
       <ScrollView style={styles.rootContainer}>

@@ -50,6 +50,8 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
   const { handleSheetPositionChange } = useBottomSheetBackHandler(ref);
   const [exportModalVisibile, setExportModalVisible] = useState(false);
   const [revertModalVisible, setRevertModalVisible] = useState(false);
+
+  // State used to show confirmation modal, which will run specific functions based on the state
   const [confirmationModal, setConfirmationModal] = useState({
     visible: false,
     title: "",
@@ -58,10 +60,12 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     onConfirm: () => {},
   });
 
+  // Handles closing the bottom sheet
   function closeSheet() {
     ref.current?.close();
   }
 
+  // Displays a backdrop behind the sheet, which closes it if pressed
   const renderBackdrop = useCallback(
     (props) => (
       <BottomSheetBackdrop
@@ -73,6 +77,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     []
   );
 
+  // Mutation function for adding an SOP to favourites
   const { mutate: addFavouriteMutation } = useMutation({
     mutationFn: addSopToFavourites,
     onSuccess: () => {
@@ -92,6 +97,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     },
   });
 
+  // Mutation for removing an SOP from favourites
   const { mutate: removeFavouriteMutation } = useMutation({
     mutationFn: removeSopFromFavourites,
     onSuccess: () => {
@@ -111,6 +117,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     },
   });
 
+  // Mutation for deleting SOPs
   const { mutate: deleteSopsMutation } = useMutation({
     mutationFn: deleteSops,
     onSuccess: () => {
@@ -130,6 +137,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     },
   });
 
+  // Mutation for approving an SOP
   const { mutate: mutateApproveSop } = useMutation({
     mutationFn: approveSop,
     onSuccess: () => {
@@ -149,6 +157,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     },
   });
 
+  // Mutation for rejecting an SOP
   const { mutate: mutateReject } = useMutation({
     mutationFn: rejectSop,
     onSuccess: () => {
@@ -168,6 +177,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     },
   });
 
+  // Mutation for requesting approval for an SOP
   const { mutate: mutateRequestApproval } = useMutation({
     mutationFn: requestApproval,
     onSuccess: () => {
@@ -187,6 +197,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     },
   });
 
+  // Handles opening a confirmation modal which passes the function to call if the user presses ok
   function openConfirmationModal(title, subtitle, callback) {
     setConfirmationModal({
       visible: true,
@@ -197,6 +208,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     });
   }
 
+  // Dismisses the confirmation modal, resets the state
   function dismissConfirmationModal() {
     setConfirmationModal({
       visible: false,
@@ -207,6 +219,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     });
   }
 
+  // Handles navigating to the Edit screen for a specific SOP
   function handleEditPress() {
     closeSheet();
     router.push({
@@ -217,6 +230,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     });
   }
 
+  // Handles displaying the confirmation prompt for Approving an SOP and passes the function to run on confirmation
   function handleApproval() {
     closeSheet();
     openConfirmationModal(
@@ -229,16 +243,19 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     );
   }
 
+  // Handles adding an SOP to favourites and closes the sheet
   function handleAddToFavouritesPress() {
     closeSheet();
     addFavouriteMutation(sop.id);
   }
 
+  // Handles removing an SOP from favourites and closes the sheet
   function handleRemoveFromFavouritesPress() {
     closeSheet();
     removeFavouriteMutation(sop.id);
   }
 
+  // Handles showing a deletion prompt and passes the function to delete the SOP if a user confirms
   function handleDeletePress() {
     closeSheet();
     openConfirmationModal(
@@ -251,6 +268,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     );
   }
 
+  // Handles showing confirmation prompt and passes the function to run on confirming approval
   function handleRequestApproval() {
     closeSheet();
     openConfirmationModal(
@@ -263,6 +281,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     );
   }
 
+  // Handles showing confirmation prompt and passes the function to run on confirming rejection
   function handleRejectPress() {
     closeSheet();
     openConfirmationModal(
@@ -275,11 +294,13 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     );
   }
 
+  // Handles opening the export modal and closes the sheet
   function handleExportPress() {
     closeSheet();
     setExportModalVisible(true);
   }
 
+  // Handles opening the revert modal and closes the sheet
   function handleRevertPress() {
     closeSheet();
     setRevertModalVisible(true);
@@ -287,6 +308,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
 
   function handleRevert({ id, version }) {}
 
+  // All options to display to basic users
   const userOptions = [
     {
       key: 1,
@@ -325,6 +347,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
     },
   ];
 
+  // Options to only show to administrators
   const adminOptions = [
     {
       key: 1,
@@ -390,6 +413,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
           </ScrollView>
           <Divider style={styles.divider} />
           <ScrollView style={{ width: "100%" }}>
+            {/* Show basic user options */}
             {userOptions.map((option) => {
               return (
                 option.visible && (
@@ -403,6 +427,7 @@ const CustomBottomSheetModal = forwardRef((props, ref) => {
               );
             })}
 
+            {/* Show admin only options if the user is an Admin */}
             {isAdmin &&
               adminOptions.map((option) => {
                 return (

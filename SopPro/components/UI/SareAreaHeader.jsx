@@ -5,6 +5,7 @@ import { FontAwesome6 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
 import { Avatar } from "react-native-paper";
 
+// Header component which shows the avatar icon
 const SareAreaHeader = () => {
   const router = useRouter();
   return (

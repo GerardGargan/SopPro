@@ -4,6 +4,7 @@ import { ActivityIndicator, Button, Modal, Portal } from "react-native-paper";
 import VersionCard from "../VersionCard";
 import ErrorBlock from "../../UI/ErrorBlock";
 
+// Reusable component (Modal) which displays a list of SOP versions which a user can select, triggering a function which is passed in from the parent
 const VersionPickerModal = ({
   sopVersions,
   title,

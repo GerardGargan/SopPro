@@ -26,6 +26,7 @@ const registerinvite = () => {
   const [forenameError, setForenameError] = useState(null);
   const [surnameError, setSurnameError] = useState(null);
 
+  // Mutation function for completing registration
   const { mutate, isPending } = useMutation({
     mutationFn: completeRegistration,
     onSuccess: () => {
@@ -45,6 +46,7 @@ const registerinvite = () => {
     },
   });
 
+  // Validate inputs and send the request
   function handlePress() {
     resetErrors();
 

@@ -17,6 +17,7 @@ const invite = () => {
   const [role, setRole] = useState("user");
   const [emailValidationError, setEmailValidationError] = useState(false);
 
+  // Mutation hook for sending invitation
   const { mutate, isPending } = useMutation({
     mutationFn: inviteUser,
     onSuccess: () => {
@@ -36,6 +37,7 @@ const invite = () => {
     },
   });
 
+  // Handle button press - validate field and trigger mutation
   function handlePress() {
     setEmailValidationError(false);
 
@@ -48,10 +50,12 @@ const invite = () => {
     mutate({ email, role });
   }
 
+  // handle updating role state
   function handleUpdateRole(value) {
     setRole(value);
   }
 
+  // Reset form fields
   function resetForm() {
     setEmail("");
     setRole("user");

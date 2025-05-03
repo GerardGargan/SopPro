@@ -8,6 +8,7 @@ import { useTheme } from "react-native-paper";
 import CustomTextInput from "../../../UI/form/CustomTextInput";
 import CustomButton from "../../../UI/form/CustomButton";
 
+// Displays a list of hazard cards
 const HazardSection = ({
   hazards,
   selectedHazard,
@@ -21,6 +22,7 @@ const HazardSection = ({
 
   const theme = useTheme();
 
+  // Handles removing a hazard
   function deleteHazard() {
     handleRemoveHazard(selectedHazard);
     setShowDeleteWarning(false);
