@@ -21,7 +21,9 @@ const VersionCard = ({
   return (
     <TouchableOpacity
       style={styles.versionCard}
-      onPress={() => handleVersionSelect({ id, versionNumber, title })}
+      onPress={() =>
+        handleVersionSelect({ id, reference: versionNumber, title })
+      }
     >
       <View style={styles.versionInfo}>
         <Text style={styles.versionTitle}>Version {versionNumber}</Text>
