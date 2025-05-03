@@ -24,8 +24,8 @@ const ai = () => {
   const isFocusedRef = React.useRef(true);
 
   // If the user leaves the screen set isFocusedRef to false
-  // This is being used so that if the user leaves the screen we dont automatically redirect them to the SOP when its finished
-  // If the user remains on the screen they will be redirected to the SOP when its ready
+  // This is being used to flag if the user leaves the screen. If they do we dont automatically redirect them to the SOP when its finished
+  // If the user remains on the screen they will be redirected to the SOP when its ready based on the flag
   useFocusEffect(
     React.useCallback(() => {
       isFocusedRef.current = true;

@@ -37,6 +37,10 @@ const DepartmentList = () => {
     );
   }
 
+  if (data.length === 0) {
+    return <Text style={styles.noItemsText}>No departments found</Text>;
+  }
+
   // Render list of departments using FlatList
   return (
     <FlatList
@@ -64,5 +68,10 @@ const styles = StyleSheet.create({
   },
   errorContainer: {
     marginHorizontal: 20,
+  },
+  noItemsText: {
+    marginTop: 10,
+    textAlign: "center",
+    fontSize: 20,
   },
 });

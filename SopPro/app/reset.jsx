@@ -16,8 +16,10 @@ const reset = () => {
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [passwordError, setPasswordError] = useState(false);
 
+  // Replace any spaces with a +
   const formattedToken = token.replace(/ /g, "+");
 
+  // Mutation for reseting password
   const { mutate, isPending } = useMutation({
     mutationFn: resetPassword,
     onSuccess: () => {
@@ -36,6 +38,7 @@ const reset = () => {
     },
   });
 
+  // Perform validation and trigger request/mutation
   function handlePress() {
     setPasswordError(false);
     const passwordValidator = validatePassword(password);

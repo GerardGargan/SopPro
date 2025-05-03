@@ -234,7 +234,7 @@ const Upsert = () => {
     });
   }
 
-  // Handle updating an existing hazard
+  // Handle updating an existing hazard in state
   function handleUpdateHazard(key, identifier, value) {
     setHazards((prevState) => {
       const hazards = [...prevState];
@@ -244,7 +244,7 @@ const Upsert = () => {
     });
   }
 
-  // Handle deleting a hazard
+  // Handle deleting a hazard in state
   function handleRemoveHazard(key) {
     setHazards((prevState) => {
       return prevState.filter((hazard) => hazard.key !== key);

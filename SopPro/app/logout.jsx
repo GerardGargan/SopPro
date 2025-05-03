@@ -10,6 +10,8 @@ import { useQueryClient } from "@tanstack/react-query";
 const logout = () => {
   const dispatch = useDispatch();
   const query = useQueryClient();
+
+  // Clear the cache when logging out
   useEffect(() => {
     query.clear();
     dispatch(authActions.logout());
