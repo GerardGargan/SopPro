@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { View, Animated, StyleSheet, Dimensions } from "react-native";
 
 const SkeletonLoader = ({
@@ -6,7 +6,7 @@ const SkeletonLoader = ({
   height = 20,
   style,
 }) => {
-  const animatedValue = new Animated.Value(1);
+  const animatedValue = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
     const shimmer = Animated.loop(
