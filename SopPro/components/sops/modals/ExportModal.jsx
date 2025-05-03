@@ -4,6 +4,7 @@ import VersionPickerModal from "./VersionPickerModal";
 import useDownload from "../../../hooks/useDownload";
 
 const ExportModal = ({ sopVersions, visible, setVisibility }) => {
+  // Custom hook for handling downloading files to the phones File System
   const {
     isDownloading,
     isSuccessful: isDownloadSuccessful,

@@ -6,6 +6,7 @@ const SkeletonLoader = ({
   height = 20,
   style,
 }) => {
+  // Use useRef to persist the value across renders
   const animatedValue = useRef(new Animated.Value(1)).current;
 
   useEffect(() => {
@@ -26,6 +27,7 @@ const SkeletonLoader = ({
 
     shimmer.start();
 
+    // Clean up and stop the loop when the component is unmounted
     return () => shimmer.stop();
   }, []);
 

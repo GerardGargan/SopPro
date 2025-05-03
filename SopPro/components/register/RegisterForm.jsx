@@ -36,6 +36,7 @@ const RegisterForm = ({ onSubmit, isPendingRegistration, isPendingLogin }) => {
     password: "",
   });
 
+  // Function triggered on each input change to update state and validate it
   function handleInput(identifier, value) {
     setFormData((prevState) => {
       return { ...prevState, [identifier]: value };
@@ -77,11 +78,13 @@ const RegisterForm = ({ onSubmit, isPendingRegistration, isPendingLogin }) => {
       password: passwordValidation.message,
     });
 
+    // If request is not already in process and data is valid, call outside function to send the request
     if (!isPendingRegistration && allValid) {
       onSubmit(formData);
     }
   }
 
+  // Function which validates input fields, allows for different validation functions to be passed in
   function validateField(identifier, validateFn) {
     const { isFieldValid, message } = validateFn(
       formData[identifier],

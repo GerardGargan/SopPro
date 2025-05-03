@@ -12,6 +12,7 @@ import { SkeletonLoader } from "../UI/Skeleton";
 const screenWidth = Dimensions.get("window").width;
 
 const AnalyticsSkeleton = () => {
+  // Generate an empty array used to loop to create skeleton cards
   const summaryCards = Array(4).fill(null);
 
   const SummaryCardSkeleton = () => (

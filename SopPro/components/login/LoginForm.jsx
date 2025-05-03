@@ -14,10 +14,12 @@ const LoginForm = ({ onSubmit, isPending, isError, error }) => {
   const [password, setPassword] = useState("");
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
+  // Trigger outside function for submitting the form with the data
   function handlePress() {
     onSubmit({ email, password });
   }
 
+  // Function to navigate to the forgot password screen
   function handleForgotPasswordPress() {
     router.navigate("forgot");
   }
